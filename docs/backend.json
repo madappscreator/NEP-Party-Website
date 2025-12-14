@@ -1,0 +1,323 @@
+{
+  "entities": {
+    "Member": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Member",
+      "type": "object",
+      "description": "Represents a member of the National Ex Servicemen Party.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Member entity."
+        },
+        "mobileNumber": {
+          "type": "string",
+          "description": "Member's mobile number, used for OTP authentication."
+        },
+        "name": {
+          "type": "string",
+          "description": "Member's full name."
+        },
+        "fatherName": {
+          "type": "string",
+          "description": "Member's father's name."
+        },
+        "gender": {
+          "type": "string",
+          "description": "Member's gender.",
+          "format": "string"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "Member's date of birth.",
+          "format": "date"
+        },
+        "occupation": {
+          "type": "string",
+          "description": "Member's occupation."
+        },
+        "educationalQualification": {
+          "type": "string",
+          "description": "Member's educational qualification."
+        },
+        "email": {
+          "type": "string",
+          "description": "Member's email address.",
+          "format": "email"
+        },
+        "residentialAddress": {
+          "type": "string",
+          "description": "Member's residential address."
+        },
+        "stateId": {
+          "type": "string",
+          "description": "Reference to State. (Relationship: State 1:N Member)"
+        },
+        "districtId": {
+          "type": "string",
+          "description": "Reference to District. (Relationship: District 1:N Member)"
+        },
+        "constituencyId": {
+          "type": "string",
+          "description": "Reference to Constituency. (Relationship: Constituency 1:N Member)"
+        },
+        "membershipAmount": {
+          "type": "number",
+          "description": "Amount paid for membership."
+        },
+        "declarationAccepted": {
+          "type": "boolean",
+          "description": "Indicates if the member accepted the declaration."
+        },
+        "ppoCopyUrl": {
+          "type": "string",
+          "description": "URL of the PPO copy document.",
+          "format": "uri"
+        },
+        "aadharCardUrl": {
+          "type": "string",
+          "description": "URL of the Aadhar card document.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "mobileNumber",
+        "name",
+        "fatherName",
+        "gender",
+        "dateOfBirth",
+        "residentialAddress",
+        "stateId",
+        "districtId",
+        "constituencyId",
+        "declarationAccepted"
+      ]
+    },
+    "State": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "State",
+      "type": "object",
+      "description": "Represents a state.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the State entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the state."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "District": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "District",
+      "type": "object",
+      "description": "Represents a district.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the District entity."
+        },
+        "stateId": {
+          "type": "string",
+          "description": "Reference to State. (Relationship: State 1:N District)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the district."
+        }
+      },
+      "required": [
+        "id",
+        "stateId",
+        "name"
+      ]
+    },
+    "Constituency": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Constituency",
+      "type": "object",
+      "description": "Represents a constituency.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Constituency entity."
+        },
+        "districtId": {
+          "type": "string",
+          "description": "Reference to District. (Relationship: District 1:N Constituency)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the constituency."
+        }
+      },
+      "required": [
+        "id",
+        "districtId",
+        "name"
+      ]
+    },
+    "Payment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Payment",
+      "type": "object",
+      "description": "Represents a payment made by a member.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Payment entity."
+        },
+        "memberId": {
+          "type": "string",
+          "description": "Reference to Member. (Relationship: Member 1:N Payment)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount paid in the payment."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Payment method used (e.g., UPI, QR code)."
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "Transaction ID of the payment."
+        },
+        "paymentScreenshotUrl": {
+          "type": "string",
+          "description": "URL of the payment screenshot.",
+          "format": "uri"
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Indicates if the payment has been verified by an admin."
+        }
+      },
+      "required": [
+        "id",
+        "memberId",
+        "amount",
+        "paymentMethod",
+        "transactionId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/members/{memberId}",
+        "definition": {
+          "entityName": "Member",
+          "schema": {
+            "$ref": "#/backend/entities/Member"
+          },
+          "description": "Stores member information. Includes denormalized stateId, districtId, and constituencyId for efficient querying.",
+          "params": [
+            {
+              "name": "memberId",
+              "description": "The unique identifier for the member."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/members/{memberId}/payments/{paymentId}",
+        "definition": {
+          "entityName": "Payment",
+          "schema": {
+            "$ref": "#/backend/entities/Payment"
+          },
+          "description": "Stores payment information for a member.",
+          "params": [
+            {
+              "name": "memberId",
+              "description": "The unique identifier for the member."
+            },
+            {
+              "name": "paymentId",
+              "description": "The unique identifier for the payment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/states/{stateId}",
+        "definition": {
+          "entityName": "State",
+          "schema": {
+            "$ref": "#/backend/entities/State"
+          },
+          "description": "Stores state information.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "The unique identifier for the state."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/districts/{districtId}",
+        "definition": {
+          "entityName": "District",
+          "schema": {
+            "$ref": "#/backend/entities/District"
+          },
+          "description": "Stores district information.",
+          "params": [
+            {
+              "name": "districtId",
+              "description": "The unique identifier for the district."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/constituencies/{constituencyId}",
+        "definition": {
+          "entityName": "Constituency",
+          "schema": {
+            "$ref": "#/backend/entities/Constituency"
+          },
+          "description": "Stores constituency information.",
+          "params": [
+            {
+              "name": "constituencyId",
+              "description": "The unique identifier for the constituency."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/admins/{adminId}",
+        "definition": {
+          "entityName": "Admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores admin user IDs. Existence of a document grants admin privileges.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique identifier for the admin user."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the member registration and management process for the National Ex Servicemen Party. It emphasizes authorization independence by denormalizing relevant data and segregating collections based on security needs. The structure facilitates secure `list` operations and adheres to the principle that rules are not filters.\n\n**Authorization Independence:**\n\n*   Membership data is stored under `/members/{memberId}`. The core member data contains all of the information needed for the application.\n*   Payments are stored in a subcollection `/members/{memberId}/payments/{paymentId}` to allow the payments to be associated with the members. No member data is copied to payments as this is unnecessary for security rules.\n\n**Structural Segregation:**\n\n*   States, Districts, and Constituencies are stored in their respective root collections (`/states`, `/districts`, `/constituencies`). This segregation simplifies security rules as each collection has distinct access requirements. Admins will be able to modify states, districts and constituencies, while the general public should not have access to these top level nodes.\n\n**Access Modeling:**\n\n*   Private Data: Member data is stored under `/members/{memberId}`. Security rules will ensure that only the authenticated user (or an admin) can access this data.\n*   Collaborative Data: This is not applicable in the current design.\n*   Global Roles (DBAC): An `admins` collection will store a list of admin UIDs. Security rules will check for the existence of a document in this collection to grant admin privileges.\n\n**QAPs (Rules are not Filters):**\n\nThe structure enables secure `list` operations. Listing members needs filtering based on `stateId`, `districtId`, and `constituencyId`. By storing these IDs directly within the `/members/{memberId}` document, we can create secure rules that allow listing members based on these criteria without requiring `get()` calls or complex filtering logic in the rules. The listing will be done with queries against a collection group `members`.\n\n**Other Considerations:**\n\n*   Email notifications will be triggered by backend functions (e.g., Cloud Functions) based on Firestore document changes (e.g., member registration, payment approval).\n*   Admin panel functionality for report generation and data export will be implemented using server-side code that interacts with Firestore, reading from the collections and generating the necessary reports. The front end admin panel will query a backend service (cloud function) to do this."
+  }
+}

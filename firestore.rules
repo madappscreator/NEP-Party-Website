@@ -1,0 +1,186 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * Core Philosophy:
+     * This ruleset enforces a two-tiered security model. The primary model is strict
+     * user ownership, where members can only access their own data. The secondary
+     * model is a global admin role, which grants privileged read/write access
+     * across the database for administrative purposes.
+     *
+     * Data Structure:
+     * - /members/{memberId}: A member's private profile and data. The {memberId} is
+     *   the user's Authentication UID.
+     * - /members/{memberId}/payments/{paymentId}: A subcollection containing a
+     *   member's payment history, inheriting ownership from its parent.
+     * - /states, /districts, /constituencies: Top-level collections for geographical
+     *   data. This data is publicly readable to populate UI elements but is only
+     *   writable by administrators.
+     * - /admins/{adminId}: A special collection used as a lookup table for roles. The
+     *   existence of a document with an ID matching a user's UID grants them
+     *   admin privileges.
+     *
+     * Key Security Decisions:
+     * - User data is private: A user can only access the document tree under
+     *   /members/{their_own_uid}. Listing all members is restricted to admins.
+     * - Admin role: An 'admins' collection provides a secure and performant way
+     *   to manage global administrators without embedding roles in JWTs.
+     * - Public data separation: Geographical data is separated into its own
+     *   collections to allow for public read access without exposing private user
+     *   information.
+     * - Writes to the 'admins' collection are disabled from the client to prevent
+     *   privilege escalation. Admin roles must be managed from the Firebase Console
+     *   or a trusted server environment.
+     */
+
+    // --------------------------------------------------------------------------
+    // Helper Functions
+    // --------------------------------------------------------------------------
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * This is the foundation of the user ownership model.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the currently authenticated user has admin privileges.
+     * Admin status is granted if a document with the user's UID exists in the /admins collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    /**
+     * A combined check to see if the user is either the owner of the resource
+     * or an administrator.
+     */
+    function isOwnerOrAdmin(userId) {
+      return isOwner(userId) || isAdmin();
+    }
+
+    /**
+     * Checks if the document being accessed already exists.
+     * CRITICAL for all update and delete operations to prevent unintended writes.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    /**
+     * A combined check for update/delete operations on user-owned documents.
+     * Verifies that the document exists AND the user is either the owner or an admin.
+     */
+    function isExistingOwnerOrAdmin(userId) {
+      return isOwnerOrAdmin(userId) && isExistingDoc();
+    }
+
+
+    // --------------------------------------------------------------------------
+    // Collection Rules
+    // --------------------------------------------------------------------------
+
+    /**
+     * @description A member's profile data. Only the member themselves or an admin can access it.
+     * @path /members/{memberId}
+     * @allow (create) An authenticated user creating their own member profile (e.g., /members/USER_123).
+     * @deny (get) A user trying to read another member's profile (e.g., USER_ABC reading /members/USER_XYZ).
+     * @deny (list) A non-admin user trying to list all members.
+     * @principle Restricts access to a user's own data tree and grants admins oversight.
+     */
+    match /members/{memberId} {
+      allow get: if isOwnerOrAdmin(memberId);
+      allow list: if isAdmin();
+      allow create: if isOwner(memberId) && request.resource.data.id == memberId;
+      allow update: if isExistingOwnerOrAdmin(memberId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwnerOrAdmin(memberId);
+
+      /**
+       * @description A member's payment records, nested under their profile.
+       * @path /members/{memberId}/payments/{paymentId}
+       * @allow (get) The member viewing their own payment history.
+       * @allow (update) An admin verifying a member's payment.
+       * @deny (create) A user trying to create a payment record for another member.
+       * @principle Enforces inherited ownership from the parent document for subcollection access.
+       */
+      match /payments/{paymentId} {
+        allow get: if isOwnerOrAdmin(memberId);
+        allow list: if isOwnerOrAdmin(memberId);
+        allow create: if isOwner(memberId) && request.resource.data.memberId == memberId;
+        allow update: if isExistingOwnerOrAdmin(memberId) && request.resource.data.memberId == resource.data.memberId;
+        allow delete: if isExistingOwnerOrAdmin(memberId);
+      }
+    }
+
+    /**
+     * @description State data, used for populating dropdowns in the registration form.
+     * @path /states/{stateId}
+     * @allow (list) Any client (authenticated or not) can list all states for the UI.
+     * @deny (create) A regular user attempting to add a new state.
+     * @principle Allows public read access for application data while restricting writes to admins.
+     */
+    match /states/{stateId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description District data, used for populating dropdowns in the registration form.
+     * @path /districts/{districtId}
+     * @allow (get) Any client can read a district's details.
+     * @deny (update) A non-admin attempting to rename a district.
+     * @principle Allows public read access for application data while restricting writes to admins.
+     */
+    match /districts/{districtId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Constituency data, used for populating dropdowns in the registration form.
+     * @path /constituencies/{constituencyId}
+     * @allow (list) Any client can list constituencies for the UI.
+     * @deny (delete) A regular user attempting to delete a constituency.
+     * @principle Allows public read access for application data while restricting writes to admins.
+     */
+    match /constituencies/{constituencyId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Defines which users have admin privileges. This collection is read-only from clients.
+     * @path /admins/{adminId}
+     * @allow (get) An admin checking if another user is also an admin.
+     * @deny (create) Any user attempting to grant themselves admin rights.
+     * @deny (delete) An admin attempting to revoke their own or another's admin rights.
+     * @principle Prevents client-side privilege escalation. Admin roles must be managed via the Firebase Console or a trusted backend.
+     */
+    match /admins/{adminId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
