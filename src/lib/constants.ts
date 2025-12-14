@@ -9,7 +9,6 @@ export const NAV_LINKS: NavItem[] = [
   { href: '/news', label: 'News' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/contact', label: 'Contact' },
-  { href: '/design-card', label: 'Member Card' },
 ];
 
 export const LANGUAGES: Language[] = [
