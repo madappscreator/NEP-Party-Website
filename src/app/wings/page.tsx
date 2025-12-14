@@ -31,19 +31,22 @@ export default function WingsPage() {
       <section className="py-12 md:py-24 bg-background">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {WINGS_DATA.map((wing) => (
+            {WINGS_DATA.map((wing) => {
+              const nameKey = `wings_${wing.name.toLowerCase().replace(/ /g, '_').replace(/-/g, '_')}_name`;
+              const descriptionKey = `wings_${wing.name.toLowerCase().replace(/ /g, '_').replace(/-/g, '_')}_description`;
+              return (
               <Card key={wing.name} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow">
                 <CardHeader>
                   <div className="flex items-center gap-4">
                     <div className="bg-primary/10 p-3 rounded-full">
                       {renderIcon(wing.icon)}
                     </div>
-                    <CardTitle className="text-xl">{t(`wings_${wing.name.toLowerCase().replace(/ /g, '_')}_name`)}</CardTitle>
+                    <CardTitle className="text-xl">{t(nameKey)}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <CardDescription className="text-base text-muted-foreground">
-                    {t(`wings_${wing.name.toLowerCase().replace(/ /g, '_').replace(/-/g, '_')}_description`)}
+                    {t(descriptionKey)}
                   </CardDescription>
                 </CardContent>
                 <div className="p-6 pt-0">
@@ -52,7 +55,7 @@ export default function WingsPage() {
                   </Button>
                 </div>
               </Card>
-            ))}
+            )})}
           </div>
         </div>
       </section>
