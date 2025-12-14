@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { UserPlus, ShieldCheck, Upload } from 'lucide-react';
+import { UserPlus, ShieldCheck, Upload, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import {
   RecaptchaVerifier,
@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Image from 'next/image';
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -38,6 +39,8 @@ type FormData = {
   membershipAmount: number;
   declarationAccepted: boolean;
   photoUrl: string;
+  transactionId: string;
+  paymentScreenshot: File | null;
 };
 
 const initialFormData: FormData = {
@@ -56,7 +59,11 @@ const initialFormData: FormData = {
     membershipAmount: 10,
     declarationAccepted: false,
     photoUrl: '',
+    transactionId: '',
+    paymentScreenshot: null,
 };
+
+const donationAmounts = [10, 100, 1000, 2000];
 
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('details');
@@ -70,6 +77,8 @@ export default function RegisterPage() {
 
   const [districts, setDistricts] = React.useState<District[]>([]);
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
+  const [customAmount, setCustomAmount] = React.useState('');
+
 
   const { auth } = useFirebase();
   const { toast } = useToast();
@@ -147,6 +156,29 @@ const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     }
 };
 
+const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        setFormData(prev => ({...prev, paymentScreenshot: e.target.files![0]}));
+    }
+};
+
+const handleAmountSelect = (amount: number) => {
+    setFormData(prev => ({...prev, membershipAmount: amount}));
+    setCustomAmount('');
+}
+
+const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomAmount(value);
+    const amountAsNumber = Number(value);
+    if (!isNaN(amountAsNumber) && amountAsNumber > 0) {
+        setFormData(prev => ({...prev, membershipAmount: amountAsNumber}));
+    } else {
+        // if user clears custom amount, default to 10
+        setFormData(prev => ({...prev, membershipAmount: 10}));
+    }
+}
+
 
 const handleSelectChange = (id: string, value: string) => {
     setFormData(prev => ({...prev, [id]: value}));
@@ -169,6 +201,11 @@ const handleSelectChange = (id: string, value: string) => {
     if (step === 'otp') handleVerifyOtp();
     if (step === 'details') setStep('declaration');
     if (step === 'declaration') setStep('payment');
+    if (step === 'payment') {
+        // TODO: Handle form submission to Firebase
+        toast({title: "Registration Submitted", description: "Your membership is pending approval."});
+        setStep('confirm');
+    }
   };
 
   const renderStep = () => {
@@ -346,6 +383,25 @@ const handleSelectChange = (id: string, value: string) => {
                            <li>I undertake to abide by the Constitution, Rules Discipline of the Party.</li>
                         </ul>
                     </div>
+                     <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Tri-Service Personnel should send a copy of their PPO and Aadhar Card Photo to the Office address or attach here below.</p>
+                        <div className="grid grid-cols-2 gap-4">
+                             <Button asChild variant="outline">
+                                <Label htmlFor="ppo" className="cursor-pointer">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload PPO
+                                    <Input id="ppo" type="file" className="sr-only" />
+                                </Label>
+                            </Button>
+                             <Button asChild variant="outline">
+                                <Label htmlFor="aadhar" className="cursor-pointer">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload Aadhar
+                                    <Input id="aadhar" type="file" className="sr-only" />
+                                </Label>
+                            </Button>
+                        </div>
+                    </div>
                     <div className="flex items-center space-x-2">
                         <Checkbox id="declarationAccepted" checked={formData.declarationAccepted} onCheckedChange={(checked) => setFormData(prev => ({...prev, declarationAccepted: !!checked}))} />
                         <label
@@ -363,12 +419,53 @@ const handleSelectChange = (id: string, value: string) => {
             return (
                 <>
                 <CardHeader>
-                    <CardTitle>Payment</CardTitle>
-                    <CardDescription>Complete your registration by paying the membership fee.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Wallet/>Membership Payment</CardTitle>
+                    <CardDescription>Complete your registration by paying the membership fee. The minimum amount is ₹10.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <p>Payment functionality coming soon...</p>
-                    <Button onClick={() => setStep('confirm')} className="w-full mt-4">Simulate Payment & Finish</Button>
+                <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                        <Label>Select Amount</Label>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            {donationAmounts.map(amount => (
+                                <Button 
+                                    key={amount} 
+                                    variant={formData.membershipAmount === amount && customAmount === '' ? 'default' : 'outline'}
+                                    onClick={() => handleAmountSelect(amount)}
+                                >
+                                    ₹{amount}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="customAmount">Or Enter Custom Amount</Label>
+                        <Input id="customAmount" type="number" placeholder="e.g. 501" value={customAmount} onChange={handleCustomAmountChange}/>
+                    </div>
+
+                    <div className="text-center font-bold text-lg">
+                        Total Amount: ₹{formData.membershipAmount}
+                    </div>
+
+                    <div className="flex flex-col items-center gap-4 bg-muted p-4 rounded-lg">
+                        <p className="font-semibold">Pay using UPI</p>
+                        <Image src="/upi-qr.png" alt="UPI QR Code" width={200} height={200} className="rounded-md border-2 border-primary" />
+                        <p className="text-sm">or pay to UPI ID:</p>
+                        <p className="font-mono text-primary font-bold">nexsptn@indianbk</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="transactionId">Transaction ID *</Label>
+                            <Input id="transactionId" placeholder="Enter the UPI transaction ID" value={formData.transactionId} onChange={handleInputChange} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="paymentScreenshot">Upload Payment Screenshot *</Label>
+                            <Input id="paymentScreenshot" type="file" accept="image/*" onChange={handleScreenshotChange} />
+                            {formData.paymentScreenshot && <p className="text-xs text-muted-foreground">File selected: {formData.paymentScreenshot.name}</p>}
+                        </div>
+                    </div>
+                    
+                    <Button onClick={handleNextStep} className="w-full">Submit Application</Button>
                 </CardContent>
                 </>
             );
@@ -381,9 +478,9 @@ const handleSelectChange = (id: string, value: string) => {
               <CardDescription>Welcome to the National Ex-Servicemen Party. Your membership is pending approval.</CardDescription>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <p>You can now design your personalized digital membership card.</p>
+              <p>You will be notified once your payment is verified and membership is approved. You can then design your personalized digital membership card.</p>
               <Button asChild>
-                <Link href="/design-card">Design Your Card</Link>
+                <Link href="/">Back to Home</Link>
               </Button>
             </CardContent>
           </>
@@ -400,3 +497,4 @@ const handleSelectChange = (id: string, value: string) => {
     </div>
   );
 }
+
