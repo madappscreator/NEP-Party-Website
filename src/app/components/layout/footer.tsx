@@ -35,7 +35,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-lg mb-4">{t('footer_quick_links')}</h3>
+            <h3 className="font-semibold text-lg mb-4 text-white">{t('footer_quick_links')}</h3>
             <ul className="space-y-2">
               {quickLinks.map(link => (
                 <li key={link.href}><Link href={link.href} className="text-sm hover:text-primary transition-colors">{t(`nav_${link.label.toLowerCase().replace(/ /g, '_')}`)}</Link></li>
@@ -45,7 +45,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-lg mb-4">{t('footer_more_links')}</h3>
+            <h3 className="font-semibold text-lg mb-4 text-white">{t('footer_more_links')}</h3>
              <ul className="space-y-2">
               {moreLinks.map(link => (
                 <li key={link.href}><Link href={link.href} className="text-sm hover:text-primary transition-colors">{t(`nav_${link.label.toLowerCase().replace(/ /g, '_')}`)}</Link></li>
@@ -55,7 +55,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-lg mb-4">{t('footer_contact_info')}</h3>
+            <h3 className="font-semibold text-lg mb-4 text-white">{t('footer_contact_info')}</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <Phone className="h-5 w-5 mt-1 text-primary" />
