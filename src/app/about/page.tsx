@@ -1,6 +1,9 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/context/language-context';
 import { InfinityIcon, Star, Target, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,14 +22,15 @@ export default function AboutPage() {
 }
 
 function AboutHero() {
+  const { t } = useLanguage();
   return (
     <section className="bg-gradient-to-r from-primary to-secondary text-white py-20 md:py-32">
       <div className="container text-center">
         <h1 className="text-4xl font-headline font-bold md:text-5xl lg:text-6xl">
-          About Us
+          {t('about_title')}
         </h1>
         <p className="mt-4 text-lg md:text-xl text-primary-foreground/80">
-          National Ex Servicemen Party
+          {t('about_subtitle')}
         </p>
       </div>
     </section>
@@ -34,11 +38,12 @@ function AboutHero() {
 }
 
 function FounderSection() {
+  const { t } = useLanguage();
   return (
     <section className="py-12 md:py-24 bg-background">
       <div className="container">
         <div className="text-center mb-12">
-            <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">Founder President</h2>
+            <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">{t('founder_title')}</h2>
         </div>
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center">
@@ -51,20 +56,20 @@ function FounderSection() {
                     className="rounded-lg object-cover shadow-xl"
                     data-ai-hint="portrait man leader"
                 />
-                <Badge className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-lg px-4 py-2">National President</Badge>
+                <Badge className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-lg px-4 py-2">{t('founder_badge')}</Badge>
             </div>
           </div>
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold">Lion. Dr. Suresh Babu</h3>
+            <h3 className="text-2xl font-bold">{t('founder_name')}</h3>
             <p className="text-muted-foreground text-lg">
-                Born and raised in Ranipet district of Tamil Nadu, with patriotism flowing in his blood, he formulated his own unique ideology and joined the Indian Army as a warrior.
+                {t('founder_bio1')}
             </p>
             <p className="text-muted-foreground text-lg">
-                 Through rigorous training, discipline, and hard work, he served the nation with distinction across various departments, including DRDO. In 2017, he founded the Ex-Servicemen Association in Kanchipuram. In 2019, he expanded the movement by forming the state-level federation named “Indian Ex-Tri Services and Paramilitary Forces Welfare Federation, Tamil Nadu.”
+                 {t('founder_bio2')}
             </p>
             <div className="border-l-4 border-primary pl-4 py-2 mt-6">
                 <p className="text-xl font-medium italic text-foreground">
-                    He is committed to voicing the rights of all sections of society beyond caste and religion, and resolved to unite farmers, workers, general public, and ex-servicemen under one national movement.
+                    {t('founder_quote')}
                 </p>
             </div>
           </div>
@@ -76,6 +81,7 @@ function FounderSection() {
 
 
 function OurStory() {
+    const { t } = useLanguage();
     return (
         <section className="py-12 md:py-24 bg-muted">
             <div className="container grid md:grid-cols-2 gap-12 items-center">
@@ -90,18 +96,18 @@ function OurStory() {
                     />
                 </div>
                  <div className="space-y-6">
-                    <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">Our Story</h2>
+                    <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">{t('story_title')}</h2>
                     <p className="text-muted-foreground md:text-lg">
-                        For the first time in Indian history, a political party was founded in Tamil Nadu by ex-servicemen under the name National Ex-Servicemen Party (NEP).
+                        {t('story_p1')}
                     </p>
                      <p className="text-muted-foreground md:text-lg">
-                        NEP is not only for ex-servicemen, but for the entire general public. The party welcomes every citizen who wishes to serve the nation with discipline, integrity, and commitment.
+                        {t('story_p2')}
                     </p>
                      <p className="text-muted-foreground md:text-lg">
-                        The first official introduction of the party was held on 14 December 2023 at the Chepauk Journalists Association, marking the beginning of a new people-centric political movement.
+                        {t('story_p3')}
                     </p>
                     <Button asChild size="lg" style={{backgroundColor: '#FF7A00'}}>
-                        <Link href="/register">Join Party</Link>
+                        <Link href="/register">{t('join_party')}</Link>
                     </Button>
                 </div>
             </div>
@@ -110,26 +116,27 @@ function OurStory() {
 }
 
 function VisionMission() {
+    const { t } = useLanguage();
     return (
         <section className="py-12 md:py-24 bg-background">
             <div className="container grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <Card className="shadow-lg">
                     <CardHeader>
-                        <CardTitle className="text-2xl">Our Vision</CardTitle>
+                        <CardTitle className="text-2xl">{t('vision_title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-muted-foreground text-lg">
-                            To build an India where every citizen enjoys equal rights, equal opportunities, and a dignified life. We envision a society governed by those who have already proven their dedication to the nation through service and sacrifice.
+                            {t('vision_desc')}
                         </p>
                     </CardContent>
                 </Card>
                 <Card className="shadow-lg">
                     <CardHeader>
-                        <CardTitle className="text-2xl">Our Mission</CardTitle>
+                        <CardTitle className="text-2xl">{t('mission_title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-muted-foreground text-lg">
-                            To bring discipline, integrity, and service-oriented governance into Indian politics. NEP aims to unite all sections of society under one banner to fight for justice, inclusive development, and national prosperity.
+                            {t('mission_desc')}
                         </p>
                     </CardContent>
                 </Card>
@@ -139,17 +146,18 @@ function VisionMission() {
 }
 
 function CoreValues() {
+    const { t } = useLanguage();
     const values = [
-        { title: 'Discipline', description: 'Military-grade discipline in governance and public administration.' },
-        { title: 'Integrity', description: 'Honest, transparent, and accountable leadership at all levels.' },
-        { title: 'Equality', description: 'Equal rights, justice, and dignity for every citizen of India.' },
-        { title: 'Service', description: 'Dedicated service to the people and the nation above personal interest.' },
+        { title: t('values_discipline_title'), description: t('values_discipline_desc') },
+        { title: t('values_integrity_title'), description: t('values_integrity_desc') },
+        { title: t('values_equality_title'), description: t('values_equality_desc') },
+        { title: t('values_service_title'), description: t('values_service_desc') },
     ];
     return (
         <section className="py-12 md:py-24 bg-muted">
             <div className="container">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">Our Core Values</h2>
+                    <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">{t('values_title')}</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     {values.map(value => (
@@ -167,11 +175,12 @@ function CoreValues() {
 }
 
 function StatsStrip() {
+    const { t } = useLanguage();
     const stats = [
-        { value: '22', label: 'Wings', icon: <Users/> },
-        { value: '37', label: 'Districts', icon: <Target/> },
-        { value: '2024', label: 'Founded', icon: <Star/> },
-        { value: '∞', label: 'Dedication', icon: <InfinityIcon/> }
+        { value: '22', label: t('stats_strip_wings'), icon: <Users/> },
+        { value: '37', label: t('stats_strip_districts'), icon: <Target/> },
+        { value: '2024', label: t('stats_strip_founded'), icon: <Star/> },
+        { value: '∞', label: t('stats_strip_dedication'), icon: <InfinityIcon/> }
     ];
     return (
         <section className="py-20 bg-gradient-to-r from-primary to-secondary text-white">

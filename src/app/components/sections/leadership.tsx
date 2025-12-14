@@ -1,7 +1,11 @@
+'use client';
+
+import { useLanguage } from "@/context/language-context";
 import Image from "next/image";
 import { Quote } from "lucide-react";
 
 export function Leadership() {
+    const { t } = useLanguage();
     const founderImage = "/NEP President.jpg";
     return (
         <section id="leadership" className="bg-muted py-12 md:py-24">
@@ -17,14 +21,14 @@ export function Leadership() {
                     />
                 </div>
                 <div className="space-y-4">
-                    <h3 className="text-2xl font-bold text-primary">Founder President — Lion. Dr. Suresh Babu K</h3>
+                    <h3 className="text-2xl font-bold text-primary">{t('leadership_title')}</h3>
                     <p className="text-muted-foreground text-lg">
-                        Born and raised in Ranipet district of Tamil Nadu, with patriotism flowing in his blood, he reformulated his own unique policy and joined the Indian Army as a warrior. Through rigorous training and hard work, he served in various departments including DRDO.
+                        {t('leadership_bio')}
                     </p>
                     <div className="border-l-4 border-primary pl-4 py-2 space-y-2">
                         <Quote className="h-8 w-8 text-primary/50" />
                          <p className="text-xl font-medium italic text-foreground">
-                            “I have decided to voice the rights of all sections of society beyond caste and religion. He resolved to unite farmers, general public, workers along with ex-servicemen.”
+                           {t('leadership_quote')}
                         </p>
                     </div>
                 </div>

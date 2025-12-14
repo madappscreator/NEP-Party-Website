@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Heart, Menu } from 'lucide-react';
 import { NAV_LINKS } from '@/lib/constants';
 import { Logo } from './logo';
+import { useLanguage } from '@/context/language-context';
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { t } = useLanguage();
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -33,18 +35,18 @@ export function MobileNav() {
                 onClick={() => setIsOpen(false)}
                 className="text-lg font-medium"
               >
-                {link.label}
+                {t(`nav_${link.label.toLowerCase().replace(/ /g, '_')}`)}
               </Link>
             ))}
           </div>
           <div className="mt-auto flex flex-col gap-4 py-4">
              <Button asChild className="w-full" variant="outline">
                 <Link href="/donate" onClick={() => setIsOpen(false)}>
-                    <Heart className="mr-2 h-4 w-4" />Donate Now
+                    <Heart className="mr-2 h-4 w-4" />{t('nav_donate_now')}
                 </Link>
             </Button>
             <Button asChild className="w-full" style={{backgroundColor: '#FF7A00'}}>
-                <Link href="/register" onClick={() => setIsOpen(false)}>Join Party</Link>
+                <Link href="/register" onClick={() => setIsOpen(false)}>{t('join_party')}</Link>
             </Button>
           </div>
         </div>

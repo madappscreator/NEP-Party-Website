@@ -1,12 +1,16 @@
+'use client';
+
+import { useLanguage } from "@/context/language-context";
 import { Phone, Mail } from "lucide-react";
 
 export function ContactStrip() {
+    const { t } = useLanguage();
     return (
         <section id="contact-strip" className="py-12 bg-background">
             <div className="container">
                 <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 text-center mb-8">
                     <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">
-                        Contact Us
+                        {t('contact_strip_title')}
                     </h2>
                 </div>
                 <div className="flex flex-col md:flex-row justify-center items-center gap-8">

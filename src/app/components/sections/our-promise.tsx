@@ -1,8 +1,12 @@
+'use client';
+
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useLanguage } from "@/context/language-context";
 import { OUR_PROMISE_POINTS } from "@/lib/constants";
 import * as Icons from "lucide-react";
 
 export function OurPromise() {
+    const { t } = useLanguage();
 
     const renderIcon = (name: keyof typeof Icons) => {
         const Icon = Icons[name] as React.ElementType;
@@ -14,10 +18,10 @@ export function OurPromise() {
     <section id="promise" className="container py-12 md:py-24">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 text-center mb-12">
         <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">
-          Our Promise
+          {t('our_promise_title')}
         </h2>
         <p className="max-w-3xl text-muted-foreground md:text-xl/relaxed">
-          Focused, practical policies to strengthen communities and empower veterans.
+          {t('our_promise_subtitle')}
         </p>
       </div>
 
@@ -29,9 +33,9 @@ export function OurPromise() {
                 {renderIcon(point.icon)}
               </div>
               <div>
-                <CardTitle>{point.title}</CardTitle>
+                <CardTitle>{t(`promise_${point.title.toLowerCase().replace(/ /g, '_')}_title`)}</CardTitle>
                 <CardDescription className="mt-2 text-base">
-                  {point.description}
+                  {t(`promise_${point.title.toLowerCase().replace(/ /g, '_')}_desc`)}
                 </CardDescription>
               </div>
             </CardHeader>
