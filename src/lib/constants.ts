@@ -21,6 +21,65 @@ export const ADMIN_NAV_LINKS: NavItem[] = [
     { href: '/admin/dashboard/donations', label: 'Donations', icon: 'Heart' },
 ];
 
+export const MANIFESTO_POINTS: ManifestoPoint[] = [
+  {
+    title: 'Education for All',
+    description: 'Every Indian must have completed at least 12th grade education. No government benefits including driving license will be provided to those who are not educated.',
+    icon: 'GraduationCap',
+  },
+  {
+    title: 'Free Education & Healthcare',
+    description: 'Education and healthcare are human rights, not just words. All schools and hospitals in the country will be nationalized. World-class education and healthcare will be provided 100% free and with quality.',
+    icon: 'HeartPulse',
+  },
+  {
+    title: 'Fast-Track Justice',
+    description: 'Any case going to court will be resolved within a maximum of 3 years.',
+    icon: 'Scale',
+  },
+  {
+    title: 'Environment Protection',
+    description: 'Strict legal action will be taken against those who violate forest, mountain, mineral resources, and wildlife protection laws.',
+    icon: 'Leaf',
+  },
+  {
+    title: 'Modern Farming',
+    description: 'All farmers will be trained with modern agricultural machinery and converted to organic farming, making them government employees.',
+    icon: 'Wheat',
+  },
+  {
+    title: 'Full Employment',
+    description: 'Due to agricultural labor shortage, 100-day work will be converted to full-time employment, making everyone government employees.',
+    icon: 'Briefcase',
+  },
+  {
+    title: 'Water Conservation',
+    description: 'Lost lakes, ponds, and canals will be recovered and protected using giant machinery for de-silting.',
+    icon: 'Droplets',
+  },
+  {
+    title: 'Agniveer Priority',
+    description: 'All Agniveers who complete 4 years of service will be given priority for police department jobs, reducing state government training costs.',
+    icon: 'Award',
+  },
+  {
+    title: 'Veterans Employment',
+    description: 'All armed forces and paramilitary personnel will be guaranteed government or private employment based on qualification until age 60 after retirement.',
+    icon: 'ShieldCheck',
+  },
+  {
+    title: 'Swift Criminal Justice',
+    description: 'For crimes like sexual assault and murder, investigation will be completed within 30 days and death penalty will be given to the guilty.',
+    icon: 'Hammer',
+  },
+  {
+    title: 'Quality Roads',
+    description: 'Quality roads will be built throughout the country, preventing spinal problems, neck pain, vehicle accidents, deaths, and vehicle repair issues for all taxpaying citizens.',
+    icon: 'Route',
+  },
+];
+
+
 export const OUR_PROMISE_POINTS: ManifestoPoint[] = [
     {
       title: 'Veteran Welfare',

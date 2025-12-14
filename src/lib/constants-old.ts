@@ -68,7 +68,7 @@ export const DUMMY_DONATIONS: Donation[] = [
     { id: 'DON004', donorName: 'M. Anand', amount: 10000, date: '2024-07-26', status: 'Verified' },
 ];
 
-export const MANIFESTO_POINTS: ManifestoPoint[] = [
+export const MANIFESTO_POINTS_OLD: ManifestoPoint[] = [
     {
       title: 'National Security',
       description: 'Strengthening our armed forces with modern technology and ensuring the welfare of our soldiers, veterans, and their families.',
