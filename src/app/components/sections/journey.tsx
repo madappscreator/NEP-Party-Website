@@ -12,10 +12,10 @@ import Image from 'next/image';
 import Autoplay from "embla-carousel-autoplay"
 
 const journeyImages = [
-    {id: 'journey-1', alt: 'Campaign vehicle', hint: 'political campaign', url: 'https://picsum.photos/seed/journey1/800/450'},
-    {id: 'journey-2', alt: 'Public outreach', hint: 'community meeting', url: 'https://picsum.photos/seed/journey2/800/450'},
-    {id: 'journey-3', alt: 'Party meeting', hint: 'political discussion', url: 'https://picsum.photos/seed/journey3/800/450'},
-    {id: 'journey-4', alt: 'Campaign rally', hint: 'political rally', url: 'https://picsum.photos/seed/journey4/800/450'},
+    {id: 'caravan-1', alt: 'NEP Caravan', hint: 'political campaign vehicle', url: '/caravan/caravan1.jpg'},
+    {id: 'caravan-2', alt: 'NEP Campaign Vehicle', hint: 'political campaign vehicle', url: '/caravan/caravan2.jpg'},
+    {id: 'caravan-3', alt: 'NEP Campaign Truck', hint: 'political campaign vehicle', url: '/caravan/caravan3.jpg'},
+    {id: 'caravan-4', alt: 'NEP Vehicle on road', hint: 'political campaign vehicle', url: '/caravan/caravan4.jpg'},
 ];
 
 export function Journey() {
