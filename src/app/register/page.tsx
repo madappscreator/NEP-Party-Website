@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, ShieldCheck, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 
-type Step = 'mobile' | 'details' | 'confirm';
+type Step = 'mobile' | 'otp' | 'details' | 'confirm';
 
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
@@ -16,7 +16,8 @@ export default function RegisterPage() {
   const [otp, setOtp] = React.useState('');
 
   const handleNextStep = () => {
-    if (step === 'mobile') setStep('details');
+    if (step === 'mobile') setStep('otp');
+    if (step === 'otp') setStep('details');
     if (step === 'details') setStep('confirm');
   };
 
@@ -38,6 +39,23 @@ export default function RegisterPage() {
             </CardContent>
           </>
         );
+        case 'otp':
+            return (
+              <>
+                <CardHeader>
+                  <CardTitle>Verify Mobile Number</CardTitle>
+                  <CardDescription>Enter the 6-digit OTP sent to {mobileNumber}.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                   <div className="space-y-2">
+                    <Label htmlFor="otp">Enter OTP</Label>
+                    <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                  </div>
+                  <Button onClick={handleNextStep} className="w-full">Verify OTP</Button>
+                   <Button variant="link" size="sm" className="w-full" onClick={() => setStep('mobile')}>Change Number</Button>
+                </CardContent>
+              </>
+            );
       case 'details':
         return (
           <>
@@ -46,10 +64,6 @@ export default function RegisterPage() {
               <CardDescription>Please fill in your information. All fields are required.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-               <div className="space-y-2">
-                <Label htmlFor="otp">Enter OTP</Label>
-                <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} />
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input id="name" placeholder="Rajesh Kumar" />

@@ -43,7 +43,7 @@ export default function WingsPage() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <CardDescription className="text-base text-muted-foreground">
-                    {t(`wings_${wing.name.toLowerCase().replace(/ /g, '_')}_description`)}
+                    {t(`wings_${wing.name.toLowerCase().replace(/ /g, '_').replace(/-/g, '_')}_description`)}
                   </CardDescription>
                 </CardContent>
                 <div className="p-6 pt-0">
