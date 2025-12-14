@@ -1,4 +1,5 @@
-import type { NavItem, Language, ManifestoPoint, Member, Donation } from './types';
+
+import type { NavItem, Language, ManifestoPoint, Member, Donation, Album } from './types';
 
 export const NAV_LINKS: NavItem[] = [
   { href: '/', label: 'Home' },
@@ -143,4 +144,42 @@ export const DUMMY_DONATIONS: Donation[] = [
     { id: 'DON002', donorName: 'Anonymous', amount: 1000, date: '2024-07-28', status: 'Pending' },
     { id: 'DON003', donorName: 'Sunita Williams', amount: 2500, date: '2024-07-27', status: 'Verified' },
     { id: 'DON004', donorName: 'M. Anand', amount: 10000, date: '2024-07-26', status: 'Verified' },
+];
+
+export const GALLERY_ALBUMS: Album[] = [
+  {
+    id: 'public-rallies',
+    name: 'Public Rallies',
+    description: 'Snapshots from our public meetings and rallies across various states.',
+    coverImage: 'https://picsum.photos/seed/rally1/600/400',
+    coverImageHint: 'political rally',
+    images: [
+      { url: 'https://picsum.photos/seed/rally1/1280/720', alt: 'A large crowd at a public rally', hint: 'public rally' },
+      { url: 'https://picsum.photos/seed/rally2/1280/720', alt: 'Party leader addressing the public', hint: 'political speech' },
+      { url: 'https://picsum.photos/seed/rally3/1280/720', alt: 'Supporters waving party flags', hint: 'political supporters' },
+    ]
+  },
+  {
+    id: 'community-outreach',
+    name: 'Community Outreach',
+    description: 'Engaging with local communities and understanding their needs.',
+    coverImage: 'https://picsum.photos/seed/community1/600/400',
+    coverImageHint: 'community meeting',
+    images: [
+      { url: 'https://picsum.photos/seed/community1/1280/720', alt: 'Meeting with village elders', hint: 'village meeting' },
+      { url: 'https://picsum.photos/seed/community2/1280/720', alt: 'Distributing aid materials', hint: 'social work' },
+    ]
+  },
+  {
+    id: 'party-meetings',
+    name: 'Party Meetings',
+    description: 'Internal meetings and strategy sessions with party members.',
+    coverImage: 'https://picsum.photos/seed/meeting1/600/400',
+    coverImageHint: 'office meeting',
+    images: [
+      { url: 'https://picsum.photos/seed/meeting1/1280/720', alt: 'Party officials in a discussion', hint: 'board meeting' },
+      { url: 'https://picsum.photos/seed/meeting2/1280/720', alt: 'Planning session with youth wing', hint: 'planning session' },
+      { url: 'https://picsum.photos/seed/meeting3/1280/720', alt: 'President addressing party workers', hint: 'internal meeting' },
+    ]
+  }
 ];

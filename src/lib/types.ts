@@ -41,3 +41,18 @@ export type ManifestoPoint = {
     description: string;
     icon: keyof typeof import('lucide-react')['icons'];
 };
+
+export type AlbumImage = {
+  url: string;
+  alt: string;
+  hint: string;
+};
+
+export type Album = {
+  id: string;
+  name: string;
+  description: string;
+  coverImage: string;
+  coverImageHint: string;
+  images: AlbumImage[];
+};
