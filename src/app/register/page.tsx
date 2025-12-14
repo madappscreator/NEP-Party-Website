@@ -5,18 +5,53 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, ShieldCheck, UserPlus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { UserPlus, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
 } from 'firebase/auth';
-import { useFirebase } from '@/firebase'; 
+import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
-type Step = 'mobile' | 'otp' | 'details' | 'confirm';
+type FormData = {
+  name: string;
+  fatherName: string;
+  gender: string;
+  dateOfBirth: string;
+  occupation: string;
+  mobileNumber: string;
+  educationalQualification: string;
+  email: string;
+  residentialAddress: string;
+  state: string;
+  district: string;
+  constituency: string;
+  membershipAmount: number;
+  declarationAccepted: boolean;
+};
+
+const initialFormData: FormData = {
+    name: '',
+    fatherName: '',
+    gender: '',
+    dateOfBirth: '',
+    occupation: '',
+    mobileNumber: '',
+    educationalQualification: '',
+    email: '',
+    residentialAddress: '',
+    state: '',
+    district: '',
+    constituency: '',
+    membershipAmount: 10,
+    declarationAccepted: false,
+};
 
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
@@ -25,6 +60,7 @@ export default function RegisterPage() {
   const [confirmationResult, setConfirmationResult] = React.useState<ConfirmationResult | null>(null);
   const [isOtpSending, setIsOtpSending] = React.useState(false);
   const [isOtpVerifying, setIsOtpVerifying] = React.useState(false);
+  const [formData, setFormData] = React.useState<FormData>(initialFormData);
 
   const { auth } = useFirebase();
   const { toast } = useToast();
@@ -56,6 +92,7 @@ export default function RegisterPage() {
         const appVerifier = (window as any).recaptchaVerifier;
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
+        setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
         setStep('otp');
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error) {
@@ -84,11 +121,20 @@ export default function RegisterPage() {
     }
 };
 
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({...prev, [id]: value}));
+}
+const handleSelectChange = (id: string, value: string) => {
+    setFormData(prev => ({...prev, [id]: value}));
+}
+
 
   const handleNextStep = () => {
     if (step === 'mobile') handleSendOtp();
     if (step === 'otp') handleVerifyOtp();
-    if (step === 'details') setStep('confirm');
+    if (step === 'details') setStep('declaration');
+    if (step === 'declaration') setStep('payment');
   };
 
   const renderStep = () => {
@@ -130,32 +176,132 @@ export default function RegisterPage() {
         return (
           <>
             <CardHeader>
-              <CardTitle>Personal Details</CardTitle>
-              <CardDescription>Please fill in your information. All fields are required.</CardDescription>
+              <CardTitle>Membership Form</CardTitle>
+              <CardDescription>Please fill in your information. Fields marked with * are required.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="Rajesh Kumar" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="name">Name *</Label>
+                    <Input id="name" value={formData.name} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="fatherName">Father Name *</Label>
+                    <Input id="fatherName" value={formData.fatherName} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="gender">Gender *</Label>
+                     <Select onValueChange={(value) => handleSelectChange('gender', value)} value={formData.gender}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                    <Input id="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleInputChange} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="occupation">Occupation</Label>
+                    <Input id="occupation" value={formData.occupation} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="mobileNumber">Contact Number</Label>
+                    <Input id="mobileNumber" value={formData.mobileNumber} readOnly disabled />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="educationalQualification">Educational Qualification</Label>
+                    <Input id="educationalQualification" value={formData.educationalQualification} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" value={formData.email} onChange={handleInputChange} />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
-                <Input id="state" placeholder="Punjab" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="constituency">Constituency</Label>
-                <Input id="constituency" placeholder="Amritsar" />
-              </div>
-              <Button onClick={handleNextStep} className="w-full">Complete Registration</Button>
+                <div className="space-y-2">
+                    <Label htmlFor="residentialAddress">Residential Address *</Label>
+                    <Input id="residentialAddress" value={formData.residentialAddress} onChange={handleInputChange} />
+                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="state">State *</Label>
+                        <Input id="state" value={formData.state} onChange={handleInputChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="district">District *</Label>
+                        <Input id="district" value={formData.district} onChange={handleInputChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="constituency">Constituency *</Label>
+                        <Input id="constituency" value={formData.constituency} onChange={handleInputChange} />
+                    </div>
+                 </div>
+
+              <Button onClick={handleNextStep} className="w-full">Proceed to Declaration</Button>
             </CardContent>
           </>
         );
+      case 'declaration':
+        return (
+            <>
+                <CardHeader>
+                    <CardTitle>Declaration and Pledge</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div>
+                        <h3 className="font-semibold">DECLARATION</h3>
+                        <p className="text-sm text-muted-foreground">I do hereby declare that the contribution is from my personal fund and voluntary by nature.</p>
+                    </div>
+                    <div>
+                        <h3 className="font-semibold">PLEDGE</h3>
+                        <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
+                           <li>I believe in integral Humanism which is the basic philosophy of NATIONAL EX SERVICEMEN PARTY.</li>
+                           <li>I am committed to Nationalism and national Integration, Democracy, ‘Gandhian approach to saocio-economic issues leading to the establishment of an egalitarian society free from exploitation, Positive Secularism, (May you be united with all religions) and value-based politics.</li>
+                           <li>I subscribe to the concept of the Secular State and Nation not based on religion.</li>
+                           <li>I firmly believe that this task can be achieved by peaceful means alone.</li>
+                           <li>I do not Believe in discrimination based on caste, sex or religion.</li>
+                           <li>I do not observe or recognize untouchability in any shape or form.</li>
+                           <li>I am not a member of any other political party.</li>
+                           <li>I undertake to abide by the Constitution, Rules Discipline of the Party.</li>
+                        </ul>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="declarationAccepted" checked={formData.declarationAccepted} onCheckedChange={(checked) => setFormData(prev => ({...prev, declarationAccepted: !!checked}))} />
+                        <label
+                            htmlFor="declarationAccepted"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            I accept the declaration and pledge.
+                        </label>
+                    </div>
+                    <Button onClick={handleNextStep} className="w-full" disabled={!formData.declarationAccepted}>Proceed to Payment</Button>
+                </CardContent>
+            </>
+        );
+        case 'payment':
+            return (
+                <>
+                <CardHeader>
+                    <CardTitle>Payment</CardTitle>
+                    <CardDescription>Complete your registration by paying the membership fee.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p>Payment functionality coming soon...</p>
+                    <Button onClick={() => setStep('confirm')} className="w-full mt-4">Simulate Payment & Finish</Button>
+                </CardContent>
+                </>
+            );
       case 'confirm':
         return (
           <>
             <CardHeader className="items-center text-center">
               <ShieldCheck className="h-16 w-16 text-green-500" />
-              <CardTitle className="text-2xl">Registration Successful!</CardTitle>
+              <CardTitle className="text-2xl">Registration Submitted!</CardTitle>
               <CardDescription>Welcome to the National Ex-Servicemen Party. Your membership is pending approval.</CardDescription>
             </CardHeader>
             <CardContent className="text-center space-y-4">
@@ -172,11 +318,9 @@ export default function RegisterPage() {
   return (
     <div className="container flex items-center justify-center min-h-[80vh] py-12">
       <div id="recaptcha-container"></div>
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="w-full max-w-2xl shadow-lg">
         {renderStep()}
       </Card>
     </div>
   );
 }
-
-    
