@@ -1,12 +1,12 @@
 'use client';
 import * as React from 'react';
 import { Button } from "@/components/ui/button";
-import { OUR_WINGS } from "@/lib/constants";
+import { OUR_WINGS_PREVIEW } from "@/lib/constants";
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
 export function OurWings() {
-    const [activeWing, setActiveWing] = React.useState(OUR_WINGS[0]);
+    const [activeWing, setActiveWing] = React.useState(OUR_WINGS_PREVIEW[0]);
 
     return (
         <section id="our-wings" className="bg-muted py-12 md:py-24">
@@ -21,7 +21,7 @@ export function OurWings() {
                 </div>
                 
                 <div className="flex flex-wrap justify-center gap-3">
-                    {OUR_WINGS.map(wing => (
+                    {OUR_WINGS_PREVIEW.map(wing => (
                         <Badge 
                             key={wing}
                             onClick={() => setActiveWing(wing)}

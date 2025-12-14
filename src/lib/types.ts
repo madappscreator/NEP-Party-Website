@@ -57,3 +57,9 @@ export type Album = {
   coverImageHint: string;
   media: AlbumMedia[];
 };
+
+export type Wing = {
+  name: string;
+  description: string;
+  icon: keyof typeof import('lucide-react')['icons'];
+};

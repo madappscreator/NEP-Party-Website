@@ -1,11 +1,12 @@
 
 
-import type { NavItem, Language, ManifestoPoint, Member, Donation, Album } from './types';
+import type { NavItem, Language, ManifestoPoint, Member, Donation, Album, Wing } from './types';
 
 export const NAV_LINKS: NavItem[] = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About Us' },
   { href: '/manifesto', label: 'Manifesto' },
+  { href: '/wings', label: 'Our Wings'},
   { href: '/news', label: 'News' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/contact', label: 'Contact' },
@@ -126,7 +127,7 @@ export const OUR_PROMISE_POINTS: ManifestoPoint[] = [
     },
   ];
 
-  export const OUR_WINGS = [
+  export const OUR_WINGS_PREVIEW = [
     'Ex-Servicemen Wing',
     'Youth Wing',
     'Women’s Wing',
@@ -196,4 +197,117 @@ export const GALLERY_ALBUMS: Album[] = [
       { type: 'image', url: '/gallery/party-meetings/image2.jpg', alt: 'Planning session with youth wing', hint: 'planning session' },
     ]
   }
+];
+
+export const WINGS_DATA: Wing[] = [
+  {
+    name: 'Lawyers Wing',
+    description: 'Supports legal awareness, justice delivery, and constitutional rights. Works towards legal reforms and free legal guidance for citizens.',
+    icon: 'Gavel',
+  },
+  {
+    name: 'Farmers Wing',
+    description: 'Represents farmers’ welfare, fair pricing, and agricultural sustainability. Focuses on rural development and food security.',
+    icon: 'Tractor',
+  },
+  {
+    name: 'Auto Drivers Wing',
+    description: 'Advocates for auto drivers’ rights, safety, and economic stability. Addresses licensing, welfare schemes, and daily operational challenges.',
+    icon: 'Car',
+  },
+  {
+    name: 'Industry Wing',
+    description: 'Engages industrialists and entrepreneurs for economic growth. Promotes job creation, innovation, and responsible industrial development.',
+    icon: 'Factory',
+  },
+  {
+    name: 'Social Harmony Council',
+    description: 'Works to promote unity, peace, and social equality. Acts against discrimination based on caste, religion, or community.',
+    icon: 'Handshake',
+  },
+  {
+    name: 'Doctors Wing',
+    description: 'Supports healthcare reforms and public health awareness. Encourages accessible and ethical medical services for all.',
+    icon: 'Stethoscope',
+  },
+  {
+    name: 'Ex-Servicemen Wing',
+    description: 'Represents veterans of the armed forces and their families. Focuses on welfare, re-employment, and dignity for retired personnel.',
+    icon: 'ShieldCheck',
+  },
+  {
+    name: 'Sanitation Workers Wing',
+    description: 'Advocates dignity, safety, and rights of sanitation workers. Supports improved working conditions and social recognition.',
+    icon: 'Broom',
+  },
+  {
+    name: 'IT Wing',
+    description: 'Drives digital transformation and technology-led governance. Supports cybersecurity, innovation, and digital inclusion.',
+    icon: 'Computer',
+  },
+  {
+    name: 'Workers Wing',
+    description: 'Represents workers across sectors and industries. Focuses on fair wages, safety, and labor rights.',
+    icon: 'HardHat',
+  },
+  {
+    name: 'Motor Vehicle Drivers Wing',
+    description: 'Supports drivers of buses, lorries, taxis, and transport services. Addresses road safety, welfare schemes, and regulatory concerns.',
+    icon: 'Truck',
+  },
+  {
+    name: 'Paramilitary Wing',
+    description: 'Represents personnel from paramilitary and allied forces. Works for welfare, recognition, and post-service opportunities.',
+    icon: 'Shield',
+  },
+  {
+    name: 'Retired Central Government Employees Wing',
+    description: 'Supports pensioners and retired central government staff. Focuses on benefits, healthcare, and policy representation.',
+    icon: 'Building',
+  },
+  {
+    name: 'Retired State Government Employees Wing',
+    description: 'Represents retired state government employees. Advocates for pension rights and social security.',
+    icon: 'Landmark',
+  },
+  {
+    name: 'Private Security Wing',
+    description: 'Represents private security professionals. Focuses on training standards, job security, and welfare.',
+    icon: 'UserCheck',
+  },
+  {
+    name: 'Traders Wing',
+    description: 'Supports small and medium traders and business owners. Promotes fair trade policies and economic stability.',
+    icon: 'Store',
+  },
+  {
+    name: 'Electrical Engineering Wing',
+    description: 'Represents electrical engineers and technical professionals. Supports infrastructure development and technical innovation.',
+    icon: 'Zap',
+  },
+  {
+    name: 'Students Wing',
+    description: 'Empowers students to participate in nation-building. Focuses on education quality, skills, and leadership development.',
+    icon: 'GraduationCap',
+  },
+  {
+    name: 'Teachers Wing',
+    description: 'Represents educators at all levels. Promotes educational reforms and respect for the teaching profession.',
+    icon: 'BookUser',
+  },
+  {
+    name: 'Transgender Wing',
+    description: 'Advocates equality, dignity, and inclusion for transgender persons. Supports social justice, safety, and equal opportunities.',
+    icon: 'VenetianMask',
+  },
+  {
+    name: 'Women Wing',
+    description: 'Empowers women in leadership, governance, and society. Works towards safety, equality, and economic independence.',
+    icon: 'PersonStanding',
+  },
+  {
+    name: 'Youth Wing',
+    description: 'Engages young citizens in politics and public service. Focuses on leadership, employment, and nation-building initiatives.',
+    icon: 'Users',
+  },
 ];
