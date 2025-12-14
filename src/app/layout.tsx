@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -5,6 +6,7 @@ import { Header } from '@/app/components/layout/header';
 import { Footer } from '@/app/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { TopBar } from './components/layout/top-bar';
+import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
   title: 'NEP Digital Platform | National Ex-Servicemen Party',
@@ -39,13 +41,15 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased'
         )}
       >
-        <div className="relative flex min-h-dvh flex-col bg-background">
-          <TopBar />
-          <Header />
-          <main className="flex-1 pt-10">{children}</main>
-          <Footer />
-        </div>
-        <Toaster />
+        <LanguageProvider>
+          <div className="relative flex min-h-dvh flex-col bg-background">
+            <TopBar />
+            <Header />
+            <main className="flex-1 pt-10">{children}</main>
+            <Footer />
+          </div>
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );

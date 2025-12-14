@@ -9,8 +9,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Globe } from 'lucide-react';
 import { LANGUAGES } from '@/lib/constants';
+import { useLanguage } from '@/context/language-context';
 
 export function LanguageSwitcher() {
+  const { setLanguage } = useLanguage();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,7 +24,7 @@ export function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {LANGUAGES.map((lang) => (
-          <DropdownMenuItem key={lang.code}>
+          <DropdownMenuItem key={lang.code} onSelect={() => setLanguage(lang.code)}>
             {lang.name}
           </DropdownMenuItem>
         ))}
