@@ -22,7 +22,7 @@ export type NewsArticle = {
 
 export type Member = {
     id: string;
-    name: string;
+    name:string;
     state: string;
     constituency: string;
     status: 'Approved' | 'Pending';
@@ -42,7 +42,8 @@ export type ManifestoPoint = {
     icon: keyof typeof import('lucide-react')['icons'];
 };
 
-export type AlbumImage = {
+export type AlbumMedia = {
+  type: 'image' | 'video';
   url: string;
   alt: string;
   hint: string;
@@ -54,5 +55,5 @@ export type Album = {
   description: string;
   coverImage: string;
   coverImageHint: string;
-  images: AlbumImage[];
+  media: AlbumMedia[];
 };

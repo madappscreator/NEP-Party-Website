@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -19,11 +19,17 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { GALLERY_ALBUMS } from '@/lib/constants';
-import type { Album, AlbumImage } from '@/lib/types';
-import { ImageIcon } from 'lucide-react';
+import type { Album, AlbumMedia } from '@/lib/types';
+import { Film, ImageIcon } from 'lucide-react';
 
 export default function GalleryPage() {
   const [selectedAlbum, setSelectedAlbum] = React.useState<Album | null>(null);
+
+  const getMediaCounts = (album: Album) => {
+    const imageCount = album.media.filter(m => m.type === 'image').length;
+    const videoCount = album.media.filter(m => m.type === 'video').length;
+    return { imageCount, videoCount };
+  };
 
   return (
     <>
@@ -40,28 +46,34 @@ export default function GalleryPage() {
 
       <section className="container py-12 md:py-24">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {GALLERY_ALBUMS.map((album) => (
-            <Card 
-              key={album.id} 
-              className="group cursor-pointer overflow-hidden transition-all hover:shadow-xl"
-              onClick={() => setSelectedAlbum(album)}
-            >
-              <CardContent className="p-0 aspect-video relative">
-                <Image
-                  src={album.coverImage}
-                  alt={album.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  data-ai-hint={album.coverImageHint}
-                />
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors" />
-                <div className="absolute bottom-4 left-4">
-                  <h3 className="text-xl font-bold text-white">{album.name}</h3>
-                  <p className="text-sm text-white/80 flex items-center gap-2"><ImageIcon className="h-4 w-4"/> {album.images.length} photos</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {GALLERY_ALBUMS.map((album) => {
+            const { imageCount, videoCount } = getMediaCounts(album);
+            return (
+              <Card 
+                key={album.id} 
+                className="group cursor-pointer overflow-hidden transition-all hover:shadow-xl"
+                onClick={() => setSelectedAlbum(album)}
+              >
+                <CardContent className="p-0 aspect-video relative">
+                  <Image
+                    src={album.coverImage}
+                    alt={album.name}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    data-ai-hint={album.coverImageHint}
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors" />
+                  <div className="absolute bottom-4 left-4">
+                    <h3 className="text-xl font-bold text-white">{album.name}</h3>
+                    <div className="flex items-center gap-4 text-sm text-white/80">
+                      {imageCount > 0 && <p className="flex items-center gap-1"><ImageIcon className="h-4 w-4"/> {imageCount}</p>}
+                      {videoCount > 0 && <p className="flex items-center gap-1"><Film className="h-4 w-4"/> {videoCount}</p>}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       </section>
 
@@ -93,16 +105,26 @@ function AlbumViewer({ album, isOpen, onClose }: { album: Album; isOpen: boolean
             className="w-full"
           >
             <CarouselContent>
-              {album.images.map((image, index) => (
+              {album.media.map((media, index) => (
                 <CarouselItem key={index}>
-                  <div className="aspect-video relative">
-                    <Image 
-                      src={image.url} 
-                      alt={image.alt} 
-                      fill 
-                      className="object-contain rounded-lg"
-                      data-ai-hint={image.hint}
-                    />
+                  <div className="aspect-video relative bg-black rounded-lg">
+                    {media.type === 'image' ? (
+                      <Image 
+                        src={media.url} 
+                        alt={media.alt} 
+                        fill 
+                        className="object-contain"
+                        data-ai-hint={media.hint}
+                      />
+                    ) : (
+                      <video 
+                        src={media.url} 
+                        controls
+                        className="w-full h-full object-contain"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    )}
                   </div>
                 </CarouselItem>
               ))}
