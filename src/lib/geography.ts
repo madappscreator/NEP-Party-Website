@@ -6459,7 +6459,7 @@ export const indianGeography: State[] = [
           { "name": "Chhanbey (SC)" },
           { "name": "Mirzapur" },
           { "name": "Majhawan" },
-          { "name": a: "Chunar" },
+          { "name": "Chunar" },
           { "name": "Marihan" }
         ]
       },
