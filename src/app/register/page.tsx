@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { UserPlus, ShieldCheck } from 'lucide-react';
+import { UserPlus, ShieldCheck, Upload } from 'lucide-react';
 import Link from 'next/link';
 import {
   RecaptchaVerifier,
@@ -18,6 +18,7 @@ import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -36,6 +37,7 @@ type FormData = {
   constituency: string;
   membershipAmount: number;
   declarationAccepted: boolean;
+  photoUrl: string;
 };
 
 const initialFormData: FormData = {
@@ -53,16 +55,18 @@ const initialFormData: FormData = {
     constituency: '',
     membershipAmount: 10,
     declarationAccepted: false,
+    photoUrl: '',
 };
 
 export default function RegisterPage() {
-  const [step, setStep] = React.useState<Step>('mobile');
-  const [mobileNumber, setMobileNumber] = React.useState('');
+  const [step, setStep] = React.useState<Step>('details');
+  const [mobileNumber, setMobileNumber] = React.useState('9876543210');
   const [otp, setOtp] = React.useState('');
   const [confirmationResult, setConfirmationResult] = React.useState<ConfirmationResult | null>(null);
   const [isOtpSending, setIsOtpSending] = React.useState(false);
   const [isOtpVerifying, setIsOtpVerifying] = React.useState(false);
   const [formData, setFormData] = React.useState<FormData>(initialFormData);
+  const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
 
   const [districts, setDistricts] = React.useState<District[]>([]);
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
@@ -131,6 +135,19 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
     setFormData(prev => ({...prev, [id]: value}));
 }
 
+const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setPhotoPreview(reader.result as string);
+            setFormData(prev => ({...prev, photoUrl: reader.result as string}));
+        }
+        reader.readAsDataURL(file);
+    }
+};
+
+
 const handleSelectChange = (id: string, value: string) => {
     setFormData(prev => ({...prev, [id]: value}));
 
@@ -196,7 +213,22 @@ const handleSelectChange = (id: string, value: string) => {
               <CardTitle>Membership Form</CardTitle>
               <CardDescription>Please fill in your information. Fields marked with * are required.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+                 <div className="flex flex-col items-center gap-4">
+                    <Avatar className="h-24 w-24 border-2 border-dashed">
+                        <AvatarImage src={photoPreview || undefined} alt="Member photo" />
+                        <AvatarFallback className="bg-muted">
+                            <UserPlus className="h-8 w-8 text-muted-foreground" />
+                        </AvatarFallback>
+                    </Avatar>
+                    <Button asChild variant="outline" size="sm">
+                        <Label htmlFor="photo" className="cursor-pointer">
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload Photo
+                            <Input id="photo" type="file" className="sr-only" accept="image/*" onChange={handlePhotoChange}/>
+                        </Label>
+                    </Button>
+                </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="name">Name *</Label>
@@ -229,7 +261,7 @@ const handleSelectChange = (id: string, value: string) => {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="mobileNumber">Contact Number</Label>
-                    <Input id="mobileNumber" value={formData.mobileNumber} readOnly disabled />
+                    <Input id="mobileNumber" value={formData.mobileNumber || mobileNumber} readOnly disabled />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="educationalQualification">Educational Qualification</Label>
