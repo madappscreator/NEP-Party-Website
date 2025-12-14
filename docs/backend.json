@@ -211,8 +211,7 @@
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous"
+      "phone"
     ]
   },
   "firestore": {
@@ -321,3 +320,4 @@
     "reasoning": "The Firestore data structure is designed to support the member registration and management process for the National Ex Servicemen Party. It emphasizes authorization independence by denormalizing relevant data and segregating collections based on security needs. The structure facilitates secure `list` operations and adheres to the principle that rules are not filters.\n\n**Authorization Independence:**\n\n*   Membership data is stored under `/members/{memberId}`. The core member data contains all of the information needed for the application.\n*   Payments are stored in a subcollection `/members/{memberId}/payments/{paymentId}` to allow the payments to be associated with the members. No member data is copied to payments as this is unnecessary for security rules.\n\n**Structural Segregation:**\n\n*   States, Districts, and Constituencies are stored in their respective root collections (`/states`, `/districts`, `/constituencies`). This segregation simplifies security rules as each collection has distinct access requirements. Admins will be able to modify states, districts and constituencies, while the general public should not have access to these top level nodes.\n\n**Access Modeling:**\n\n*   Private Data: Member data is stored under `/members/{memberId}`. Security rules will ensure that only the authenticated user (or an admin) can access this data.\n*   Collaborative Data: This is not applicable in the current design.\n*   Global Roles (DBAC): An `admins` collection will store a list of admin UIDs. Security rules will check for the existence of a document in this collection to grant admin privileges.\n\n**QAPs (Rules are not Filters):**\n\nThe structure enables secure `list` operations. Listing members needs filtering based on `stateId`, `districtId`, and `constituencyId`. By storing these IDs directly within the `/members/{memberId}` document, we can create secure rules that allow listing members based on these criteria without requiring `get()` calls or complex filtering logic in the rules. The listing will be done with queries against a collection group `members`.\n\n**Other Considerations:**\n\n*   Email notifications will be triggered by backend functions (e.g., Cloud Functions) based on Firestore document changes (e.g., member registration, payment approval).\n*   Admin panel functionality for report generation and data export will be implemented using server-side code that interacts with Firestore, reading from the collections and generating the necessary reports. The front end admin panel will query a backend service (cloud function) to do this."
   }
 }
+    

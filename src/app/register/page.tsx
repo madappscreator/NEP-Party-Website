@@ -8,12 +8,11 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, ShieldCheck, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import {
-  getAuth,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
 } from 'firebase/auth';
-import { useFirebase } from '@/firebase'; // Corrected import
+import { useFirebase } from '@/firebase'; 
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -31,8 +30,8 @@ export default function RegisterPage() {
   const { toast } = useToast();
 
   React.useEffect(() => {
-    if (auth && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    if (auth && !(window as any).recaptchaVerifier) {
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': (response: any) => {
           // reCAPTCHA solved, allow signInWithPhoneNumber.
@@ -54,7 +53,7 @@ export default function RegisterPage() {
     setIsOtpSending(true);
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = window.recaptchaVerifier;
+        const appVerifier = (window as any).recaptchaVerifier;
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
         setStep('otp');
@@ -179,3 +178,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+    
