@@ -7,6 +7,7 @@ import { Footer } from '@/app/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { TopBar } from './components/layout/top-bar';
 import { LanguageProvider } from '@/context/language-context';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'NEP Digital Platform | National Ex-Servicemen Party',
@@ -41,15 +42,17 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased'
         )}
       >
-        <LanguageProvider>
-          <div className="relative flex min-h-dvh flex-col bg-background">
-            <TopBar />
-            <Header />
-            <main className="flex-1 pt-10">{children}</main>
-            <Footer />
-          </div>
-          <Toaster />
-        </LanguageProvider>
+        <FirebaseClientProvider>
+          <LanguageProvider>
+            <div className="relative flex min-h-dvh flex-col bg-background">
+              <TopBar />
+              <Header />
+              <main className="flex-1 pt-10">{children}</main>
+              <Footer />
+            </div>
+            <Toaster />
+          </LanguageProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );
