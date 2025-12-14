@@ -39,10 +39,10 @@ export function Journey() {
         plugins={[plugin.current]}
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
-        className="w-full max-w-4xl mx-auto">
+        className="w-full max-w-6xl mx-auto">
         <CarouselContent>
           {journeyImages.map((image) => (
-            <CarouselItem key={image.id} className="md:basis-1/2 lg:basis-1/3">
+            <CarouselItem key={image.id} className="basis-full md:basis-1/2">
               <div className="p-1">
                 <Card>
                   <CardContent className="flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
