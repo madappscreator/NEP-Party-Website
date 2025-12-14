@@ -15,6 +15,10 @@ export const NAV_LINKS: NavItem[] = [
 export const LANGUAGES: Language[] = [
   { code: 'en', name: 'English' },
   { code: 'ta', name: 'Tamil' },
+  { code: 'hi', name: 'Hindi' },
+  { code: 'te', name: 'Telugu' },
+  { code: 'ml', name: 'Malayalam' },
+  { code: 'kn', name: 'Kannada' },
 ];
 
 export const ADMIN_NAV_LINKS: NavItem[] = [

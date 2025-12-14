@@ -21,7 +21,7 @@ export function Hero() {
                         <Button asChild size="lg" style={{backgroundColor: '#FF7A00'}}>
                             <Link href="/register">Join Now</Link>
                         </Button>
-                        <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary">
+                        <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-secondary">
                             <Link href="/manifesto">Manifesto</Link>
                         </Button>
                     </div>
