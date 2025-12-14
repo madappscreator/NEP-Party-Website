@@ -24,7 +24,7 @@ export function Hero() {
                         <Button asChild size="lg" style={{backgroundColor: '#FF7A00'}}>
                             <Link href="/register">{t('join_now')}</Link>
                         </Button>
-                        <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-secondary">
+                        <Button asChild size="lg" style={{backgroundColor: '#FF7A00'}}>
                             <Link href="/manifesto">{t('manifesto')}</Link>
                         </Button>
                     </div>
