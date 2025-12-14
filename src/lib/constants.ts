@@ -1,4 +1,5 @@
 
+
 import type { NavItem, Language, ManifestoPoint, Member, Donation, Album } from './types';
 
 export const NAV_LINKS: NavItem[] = [
