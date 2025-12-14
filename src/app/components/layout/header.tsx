@@ -11,7 +11,7 @@ import { Heart } from 'lucide-react';
 export function Header() {
   return (
     <header className="sticky top-10 z-40 w-full border-b border-secondary/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-20 max-w-screen-2xl items-center">
+      <div className="container flex h-20 items-center">
         <Logo />
         <nav className="hidden md:flex md:items-center md:gap-6 text-sm ml-6">
           {NAV_LINKS.map((link) => (
