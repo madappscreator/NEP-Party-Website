@@ -2,15 +2,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function Hero() {
     const presidentImage = "/NEP President.jpg";
 
     return (
-        <section className="relative bg-gradient-to-r from-primary to-secondary text-white py-20 md:py-32">
-            <div className="container grid md:grid-cols-2 gap-12 items-center">
-                <div className="flex flex-col items-start gap-4 text-left">
+        <section className="relative bg-gradient-to-r from-primary to-secondary text-white">
+            <div className="container grid md:grid-cols-2 gap-12 items-center py-20 md:py-32 min-h-[70vh]">
+                <div className="flex flex-col items-start gap-4 text-left z-10">
                     <Badge variant="secondary" className="bg-white/20 text-white">Serving Those Who Served</Badge>
                     <h1 className="text-4xl font-headline font-bold md:text-5xl lg:text-6xl leading-tight tracking-tighter">
                         National Ex-Servicemen Party
@@ -41,18 +40,16 @@ export function Hero() {
                         </div>
                     </div>
                 </div>
-                <div className="relative flex justify-center">
-                    <div className="text-center">
-                        <Image
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-20">
+                         <Image
                             src={presidentImage}
                             alt="National President"
-                            width={200}
-                            height={200}
-                            className="rounded-full object-cover border-4 border-white shadow-2xl mx-auto"
+                            fill
+                            className="object-cover object-top"
                             priority
                             data-ai-hint="portrait man"
                         />
-                        <p className="mt-4 font-semibold text-lg">National President</p>
                     </div>
                 </div>
             </div>
