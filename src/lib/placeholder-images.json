@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "Indian flag waving in the background with soldiers in the foreground",
+      "imageUrl": "https://images.unsplash.com/photo-1717509793727-d324abb3838b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxJbmRpYW4lMjBzb2xkaWVyc3xlbnwwfHx8fDE3NjU3MjQ3MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian soldiers"
+    },
+    {
+      "id": "news-1",
+      "description": "Politician giving a speech at a rally",
+      "imageUrl": "https://images.unsplash.com/photo-1759605034433-20abf68eda96?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwb2xpdGljYWwlMjByYWxseXxlbnwwfHx8fDE3NjU3MjQ3MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "political rally"
+    },
+    {
+      "id": "news-2",
+      "description": "Close-up of a voter's inked finger",
+      "imageUrl": "https://images.unsplash.com/photo-1723357646143-68b17c10ee0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxJbmRpYW4lMjBlbGVjdGlvbnxlbnwwfHx8fDE3NjU3MjQ3MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian election"
+    },
+    {
+      "id": "news-3",
+      "description": "Indian parliament building",
+      "imageUrl": "https://images.unsplash.com/photo-1760872646642-5c4cde741cfe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxJbmRpYW4lMjBwYXJsaWFtZW50fGVufDB8fHx8MTc2NTcyNDcxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian parliament"
+    },
+    {
+      "id": "news-4",
+      "description": "Group of people reading a newspaper",
+      "imageUrl": "https://images.unsplash.com/photo-1652979775179-d81a2e9748c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyZWFkaW5nJTIwbmV3c3xlbnwwfHx8fDE3NjU2MTYzMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "reading news"
+    },
+    {
+      "id": "manifesto-1",
+      "description": "A farmer working in a field",
+      "imageUrl": "https://images.unsplash.com/photo-1600150806193-cf869bcfee05?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxJbmRpYW4lMjBmYXJtZXJ8ZW58MHx8fHwxNzY1NzI0NzEzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian farmer"
+    },
+    {
+      "id": "manifesto-2",
+      "description": "A doctor attending to a patient",
+      "imageUrl": "https://images.unsplash.com/photo-1698139214389-b14deb76b83e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxoZWFsdGhjYXJlJTIwaW5kaWF8ZW58MHx8fHwxNzY1NzI0NzEzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "healthcare india"
+    },
+    {
+      "id": "manifesto-3",
+      "description": "Students in a classroom",
+      "imageUrl": "https://images.unsplash.com/photo-1707760509703-7f9756ca19bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxlZHVjYXRpb24lMjBpbmRpYXxlbnwwfHx8fDE3NjU3MjQ3MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "education india"
+    }
+  ]
 }
