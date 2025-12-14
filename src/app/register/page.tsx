@@ -66,7 +66,7 @@ const initialFormData: FormData = {
 const donationAmounts = [10, 100, 1000, 2000];
 
 export default function RegisterPage() {
-  const [step, setStep] = React.useState<Step>('details');
+  const [step, setStep] = React.useState<Step>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('9876543210');
   const [otp, setOtp] = React.useState('');
   const [confirmationResult, setConfirmationResult] = React.useState<ConfirmationResult | null>(null);
@@ -497,4 +497,3 @@ const handleSelectChange = (id: string, value: string) => {
     </div>
   );
 }
-
