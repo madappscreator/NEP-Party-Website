@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Shield, BookOpenCheck, Waves, Check } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function About() {
   return (
@@ -36,7 +37,7 @@ export function About() {
         </div>
         <div className="flex justify-center items-center">
             <Card className="p-8 bg-muted/20 flex flex-col items-center justify-center aspect-square w-64 h-64 rounded-full">
-                <Shield className="w-24 h-24 text-primary" />
+                <Image src="/flag.png" alt="NEP Flag" width={96} height={96} className="w-24 h-24" />
                 <p className="text-2xl font-bold mt-2">NEP</p>
                 <p className="text-sm text-muted-foreground text-center">National Ex-Servicemen Party</p>
             </Card>

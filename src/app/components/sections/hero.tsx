@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function Hero() {
-    const presidentImage = "https://picsum.photos/seed/president/200/200";
+    const presidentImage = "/president.jpg";
 
     return (
         <section className="relative bg-gradient-to-r from-primary to-secondary text-white py-20 md:py-32">

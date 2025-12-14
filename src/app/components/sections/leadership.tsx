@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Quote } from "lucide-react";
 
 export function Leadership() {
-    const founderImage = "https://picsum.photos/seed/founder/400/400";
+    const founderImage = "/president.jpg";
     return (
         <section id="leadership" className="bg-muted py-12 md:py-24">
             <div className="container grid md:grid-cols-2 gap-12 items-center">
@@ -17,7 +17,7 @@ export function Leadership() {
                     />
                 </div>
                 <div className="space-y-4">
-                    <h3 className="text-2xl font-bold text-primary">Founder President — Lion. Dr. Suresh Babu</h3>
+                    <h3 className="text-2xl font-bold text-primary">Founder President — Lion. Dr. Suresh Babu K</h3>
                     <p className="text-muted-foreground text-lg">
                         Born and raised in Ranipet district of Tamil Nadu, with patriotism flowing in his blood, he reformulated his own unique policy and joined the Indian Army as a warrior. Through rigorous training and hard work, he served in various departments including DRDO.
                     </p>
