@@ -2,14 +2,14 @@ import Image from "next/image";
 import { Quote } from "lucide-react";
 
 export function Leadership() {
-    const founderImage = "/president.jpg";
+    const founderImage = "/NEP President.jpg";
     return (
         <section id="leadership" className="bg-muted py-12 md:py-24">
             <div className="container grid md:grid-cols-2 gap-12 items-center">
                 <div className="flex justify-center">
                      <Image
                         src={founderImage}
-                        alt="Founder President — Lion. Dr. Suresh Babu"
+                        alt="Founder President — Lion. Dr. Suresh Babu K"
                         width={400}
                         height={400}
                         className="rounded-lg object-cover shadow-xl"

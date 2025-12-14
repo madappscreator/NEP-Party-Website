@@ -37,7 +37,7 @@ export function About() {
         </div>
         <div className="flex justify-center items-center">
             <Card className="p-8 bg-muted/20 flex flex-col items-center justify-center aspect-square w-64 h-64 rounded-full">
-                <Image src="/flag.png" alt="NEP Flag" width={96} height={96} className="w-24 h-24" />
+                <Image src="/NEP Flag.jpg" alt="NEP Flag" width={96} height={96} className="w-24 h-24" />
                 <p className="text-2xl font-bold mt-2">NEP</p>
                 <p className="text-sm text-muted-foreground text-center">National Ex-Servicemen Party</p>
             </Card>
