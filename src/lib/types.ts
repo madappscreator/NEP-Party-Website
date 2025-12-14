@@ -40,5 +40,4 @@ export type ManifestoPoint = {
     title: string;
     description: string;
     icon: keyof typeof import('lucide-react')['icons'];
-    imageId: string;
 };

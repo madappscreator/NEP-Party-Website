@@ -1,18 +1,27 @@
 import { Hero } from './components/sections/hero';
 import { About } from './components/sections/about';
-import { News } from './components/sections/news';
-import { Manifesto } from './components/sections/manifesto';
-import { Separator } from '@/components/ui/separator';
+import { Journey } from './components/sections/journey';
+import { OurPromise } from './components/sections/our-promise';
+import { Leadership } from './components/sections/leadership';
+import { BecomeMember } from './components/sections/become-member';
+import { WhyJoin } from './components/sections/why-join';
+import { OurWings } from './components/sections/our-wings';
+import { FinalCta } from './components/sections/final-cta';
+import { ContactStrip } from './components/sections/contact-strip';
 
 export default function Home() {
   return (
     <div className="flex flex-col">
       <Hero />
+      <Journey />
       <About />
-      <Separator className="my-12 md:my-24" />
-      <News />
-      <Separator className="my-12 md:my-24" />
-      <Manifesto />
+      <OurPromise />
+      <Leadership />
+      <BecomeMember />
+      <WhyJoin />
+      <OurWings />
+      <FinalCta />
+      <ContactStrip />
     </div>
   );
 }

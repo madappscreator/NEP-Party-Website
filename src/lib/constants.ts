@@ -1,21 +1,18 @@
-import type { NavItem, Language, NewsArticle, Member, Donation, ManifestoPoint } from './types';
+import type { NavItem, Language, ManifestoPoint, Member, Donation } from './types';
 
 export const NAV_LINKS: NavItem[] = [
   { href: '/', label: 'Home' },
-  { href: '/#about', label: 'About' },
-  { href: '/#news', label: 'News' },
-  { href: '/#manifesto', label: 'Manifesto' },
-  { href: '/register', label: 'Join Us' },
-  { href: '/donate', label: 'Donate' },
+  { href: '/about', label: 'About Us' },
+  { href: '/manifesto', label: 'Manifesto' },
+  { href: '/news', label: 'News' },
+  { href: '/gallery', label: 'Gallery' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/design-card', label: 'Member Card' },
 ];
 
 export const LANGUAGES: Language[] = [
   { code: 'en', name: 'English' },
   { code: 'ta', name: 'Tamil' },
-  { code: 'hi', name: 'Hindi' },
-  { code: 'te', name: 'Telugu' },
-  { code: 'ml', name: 'Malayalam' },
-  { code: 'kn', name: 'Kannada' },
 ];
 
 export const ADMIN_NAV_LINKS: NavItem[] = [
@@ -24,40 +21,55 @@ export const ADMIN_NAV_LINKS: NavItem[] = [
     { href: '/admin/dashboard/donations', label: 'Donations', icon: 'Heart' },
 ];
 
-export const DUMMY_NEWS_ARTICLES: NewsArticle[] = [
+export const OUR_PROMISE_POINTS: ManifestoPoint[] = [
     {
-        id: '1',
-        title: 'NEP Announces New Initiative for Veterans\' Healthcare',
-        date: '2024-07-28',
-        source: 'The National Times',
-        imageId: 'news-1',
-        content: `The National Ex-Servicemen Party (NEP) today unveiled a comprehensive healthcare plan aimed at providing better medical facilities for retired armed forces personnel and their families. The plan, dubbed 'Operation Heal,' includes provisions for specialized medical centers in every state, subsidized medicines, and mental health support programs. "Our veterans have given their best years to the nation, and it is our solemn duty to ensure they receive the best care in their retirement," said the party president during the announcement. The initiative has been widely welcomed by veterans' associations across the country, who see it as a long-overdue step. However, critics have raised questions about the funding and long-term sustainability of the program. The party has assured that the financial model is robust and will be funded through a combination of government grants and private donations.`
+      title: 'Veteran Welfare',
+      description: 'Priority jobs & welfare for retired defence personnel.',
+      icon: 'Shield',
     },
     {
-        id: '2',
-        title: 'Election Commission Prepares for Upcoming State Elections',
-        date: '2024-07-27',
-        source: 'India Politics Watch',
-        imageId: 'news-2',
-        content: `With state elections just around the corner, the Election Commission of India is in full swing with preparations to ensure a free and fair polling process. This year sees the introduction of new voter-verified paper audit trail (VVPAT) machines across all constituencies. The commission has also launched a massive voter awareness campaign, urging citizens to exercise their democratic right. Political parties, including the NEP, are finalizing their candidate lists and ramping up their campaigns. The NEP has stated it will contest in over 50 constituencies, focusing on its core promise of good governance and national security.`
+      title: 'Free Education',
+      description: 'Ensure 100% free and high-quality public education.',
+      icon: 'GraduationCap',
     },
     {
-        id: '3',
-        title: 'Parliament Monsoon Session to Discuss Key National Security Bills',
-        date: '2024-07-26',
-        source: 'The Parliamentary Post',
-        imageId: 'news-3',
-        content: `The upcoming monsoon session of Parliament is expected to be a stormy one, with several key bills related to national security on the agenda. The government plans to introduce new legislation to strengthen border control and modernize the armed forces. The opposition, while supporting the need for strong national security, has expressed concerns about potential infringements on civil liberties. The NEP has announced that it will critically evaluate the bills and propose amendments to safeguard the interests of both the nation and its citizens. "A balance between security and freedom is essential for a thriving democracy," a party spokesperson said.`
+      title: 'Water & Environment',
+      description: 'Restore water bodies & protect forests and wildlife.',
+      icon: 'Droplets',
+    },
+  ];
+
+  export const WHY_JOIN_POINTS = [
+    {
+      title: 'Ex-Servicemen Led',
+      description: 'Founded and led by honorable ex-servicemen of Indian Armed Forces.',
+      icon: 'Shield',
     },
     {
-        id: '4',
-        title: 'Public sentiment on new economic policies divided',
-        date: '2024-07-25',
-        source: 'Economic Express',
-        imageId: 'news-4',
-        content: `A recent nationwide survey has revealed a sharp divide in public opinion regarding the government's new economic policies. While supporters claim the policies will boost growth and create jobs, opponents argue they will lead to increased inflation and benefit only large corporations. The NEP has called for a more inclusive approach, suggesting measures to support small and medium-sized enterprises (SMEs) and the agricultural sector. The party plans to release its own economic vision document next week, which it says will offer a "pro-people, pro-growth" alternative.`
-    }
-];
+      title: 'For Everyone',
+      description: 'Open to all citizens with 22 different wings for various professions.',
+      icon: 'Users',
+    },
+    {
+      title: 'Clear Vision',
+      description: 'Focused on development, welfare, and good governance.',
+      icon: 'Goal',
+    },
+    {
+      title: 'Service First',
+      description: 'Dedicated to serving the people of the nation.',
+      icon: 'Heart',
+    },
+  ];
+
+  export const OUR_WINGS = [
+    'Ex-Servicemen Wing',
+    'Youth Wing',
+    'Women’s Wing',
+    'Farmers Wing',
+    'Students Wing',
+    'Teachers Wing',
+  ];
 
 export const DUMMY_MEMBERS: Member[] = [
     { id: '1', name: 'Col. Rajesh Kumar', state: 'Punjab', constituency: 'Amritsar', status: 'Approved' },
@@ -73,30 +85,3 @@ export const DUMMY_DONATIONS: Donation[] = [
     { id: 'DON003', donorName: 'Sunita Williams', amount: 2500, date: '2024-07-27', status: 'Verified' },
     { id: 'DON004', donorName: 'M. Anand', amount: 10000, date: '2024-07-26', status: 'Verified' },
 ];
-
-export const MANIFESTO_POINTS: ManifestoPoint[] = [
-    {
-      title: 'National Security',
-      description: 'Strengthening our armed forces with modern technology and ensuring the welfare of our soldiers, veterans, and their families.',
-      icon: 'Shield',
-      imageId: 'hero-1',
-    },
-    {
-      title: 'Economic Prosperity',
-      description: 'Promoting policies that foster job creation, support small businesses, and ensure sustainable agricultural growth for a self-reliant India.',
-      icon: 'TrendingUp',
-      imageId: 'manifesto-1',
-    },
-    {
-      title: 'Healthcare for All',
-      description: 'Building a robust public healthcare system that is accessible and affordable for every citizen, with a focus on rural and underserved areas.',
-      icon: 'HeartPulse',
-      imageId: 'manifesto-2',
-    },
-    {
-      title: 'Quality Education',
-      description: 'Revamping our education system to provide quality learning, skill development, and equal opportunities for all students.',
-      icon: 'GraduationCap',
-      imageId: 'manifesto-3',
-    },
-  ];

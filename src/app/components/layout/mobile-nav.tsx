@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Heart, Menu } from 'lucide-react';
 import { NAV_LINKS } from '@/lib/constants';
 import { Logo } from './logo';
 
@@ -37,9 +37,14 @@ export function MobileNav() {
               </Link>
             ))}
           </div>
-          <div className="mt-auto flex-col gap-4 py-4">
-             <Button asChild className="w-full" variant="secondary" size="lg">
-                <Link href="/donate" onClick={() => setIsOpen(false)}>Donate Now</Link>
+          <div className="mt-auto flex flex-col gap-4 py-4">
+             <Button asChild className="w-full" variant="outline">
+                <Link href="/donate" onClick={() => setIsOpen(false)}>
+                    <Heart className="mr-2 h-4 w-4" />Donate Now
+                </Link>
+            </Button>
+            <Button asChild className="w-full" style={{backgroundColor: '#FF7A00'}}>
+                <Link href="/register" onClick={() => setIsOpen(false)}>Join Party</Link>
             </Button>
           </div>
         </div>

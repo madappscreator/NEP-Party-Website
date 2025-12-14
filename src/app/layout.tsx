@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Header } from '@/app/components/layout/header';
 import { Footer } from '@/app/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
+import { TopBar } from './components/layout/top-bar';
 
 export const metadata: Metadata = {
   title: 'NEP Digital Platform | National Ex-Servicemen Party',
@@ -38,8 +39,9 @@ export default function RootLayout({
         )}
       >
         <div className="relative flex min-h-dvh flex-col bg-background">
+          <TopBar />
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pt-10">{children}</main>
           <Footer />
         </div>
         <Toaster />
