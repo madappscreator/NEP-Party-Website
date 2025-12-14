@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -16,6 +17,7 @@ import {
 import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { indianGeography, State, District, Constituency } from '@/lib/geography';
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -61,6 +63,9 @@ export default function RegisterPage() {
   const [isOtpSending, setIsOtpSending] = React.useState(false);
   const [isOtpVerifying, setIsOtpVerifying] = React.useState(false);
   const [formData, setFormData] = React.useState<FormData>(initialFormData);
+
+  const [districts, setDistricts] = React.useState<District[]>([]);
+  const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
 
   const { auth } = useFirebase();
   const { toast } = useToast();
@@ -125,8 +130,20 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
     const { id, value } = e.target;
     setFormData(prev => ({...prev, [id]: value}));
 }
+
 const handleSelectChange = (id: string, value: string) => {
     setFormData(prev => ({...prev, [id]: value}));
+
+    if (id === 'state') {
+        const selectedState = indianGeography.find(s => s.name === value);
+        setDistricts(selectedState?.districts || []);
+        setFormData(prev => ({...prev, district: '', constituency: ''}));
+        setConstituencies([]);
+    } else if (id === 'district') {
+        const selectedDistrict = districts.find(d => d.name === value);
+        setConstituencies(selectedDistrict?.constituencies || []);
+        setFormData(prev => ({...prev, constituency: ''}));
+    }
 }
 
 
@@ -230,15 +247,42 @@ const handleSelectChange = (id: string, value: string) => {
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                      <div className="space-y-2">
                         <Label htmlFor="state">State *</Label>
-                        <Input id="state" value={formData.state} onChange={handleInputChange} />
+                         <Select onValueChange={(value) => handleSelectChange('state', value)} value={formData.state}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select State" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {indianGeography.map(state => (
+                                    <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="district">District *</Label>
-                        <Input id="district" value={formData.district} onChange={handleInputChange} />
+                        <Select onValueChange={(value) => handleSelectChange('district', value)} value={formData.district} disabled={!formData.state}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select District" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {districts.map(district => (
+                                    <SelectItem key={district.name} value={district.name}>{district.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="constituency">Constituency *</Label>
-                        <Input id="constituency" value={formData.constituency} onChange={handleInputChange} />
+                        <Select onValueChange={(value) => handleSelectChange('constituency', value)} value={formData.constituency} disabled={!formData.district}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Constituency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {constituencies.map(c => (
+                                    <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                  </div>
 
