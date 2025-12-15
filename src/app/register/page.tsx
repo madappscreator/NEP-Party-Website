@@ -154,6 +154,9 @@ export default function RegisterPage() {
     setIsOtpVerifying(true);
     try {
         const userCredential = await confirmationResult.confirm(otp);
+        if (!userCredential.user) {
+            throw new Error("User authentication failed after OTP verification.");
+        }
         const memberId = userCredential.user.uid;
         if (!firestore) {
             throw new Error("Firestore not available");
@@ -177,10 +180,13 @@ export default function RegisterPage() {
 };
 
 const handleFinalSubmit = async () => {
-    if (!auth?.currentUser || !firestore) {
+    // **CRITICAL FIX**: Ensure user is authenticated before any upload attempt.
+    if (!auth?.currentUser) {
         toast({ title: "Authentication Error", description: "User not authenticated. Please restart the process.", variant: "destructive" });
+        setIsSubmitting(false); // Make sure to reset submitting state
         return;
     }
+
     if (!formData.paymentScreenshot) {
         toast({ title: "Missing Proof", description: "Please upload a payment screenshot.", variant: "destructive" });
         return;
@@ -194,7 +200,8 @@ const handleFinalSubmit = async () => {
         const storage = getStorage();
         const memberId = auth.currentUser.uid;
         
-        const uploadFile = async (file: File, path: string) => {
+        // **CRITICAL FIX**: Use uploadBytes from the Firebase SDK
+        const uploadFile = async (file: File, path: string): Promise<string> => {
             if (!file) return '';
             const fileRef = ref(storage, path);
             const uploadResult = await uploadBytes(fileRef, file);
@@ -252,6 +259,9 @@ const handleFinalSubmit = async () => {
         let description = "There was an error submitting your application. Please try again.";
         if (error.code === 'storage/unauthorized') {
             description = "Storage Error: You do not have permission to upload files. Please check security rules.";
+        }
+        if (error.code === 'storage/object-not-found') {
+             description = "Storage Error: File path not found. This might be a permission issue.";
         }
         toast({ title: "Submission Failed", description: description, variant: "destructive" });
     } finally {
@@ -588,7 +598,7 @@ const handleSelectChange = (id: string, value: string) => {
                         </div>
                     </div>
                     
-                    <Button onClick={handleNextStep} className="w-full" disabled={isSubmitting}>
+                    <Button onClick={handleNextStep} className="w-full" disabled={isSubmitting || !auth?.currentUser}>
                         {isSubmitting ? <Loader2 className="animate-spin" /> : 'Submit Application'}
                     </Button>
                 </CardContent>
