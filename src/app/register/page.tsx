@@ -72,6 +72,7 @@ const initialFormData: FormData = {
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
 
+// 1. Declare verifier outside the component to ensure it's a singleton per module.
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 export default function RegisterPage() {
@@ -94,8 +95,10 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
+  // 2. Create an initialization function as per instructions.
   const initRecaptcha = () => {
     if (!auth) return;
+    // Initialize only if it hasn't been created yet.
     if (!recaptchaVerifier) {
         recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
@@ -120,6 +123,7 @@ export default function RegisterPage() {
     setIsOtpSending(true);
 
     try {
+      // 3. Initialize on demand and send OTP.
       initRecaptcha();
       const phoneNumber = `+91${mobileNumber}`;
       const appVerifier = recaptchaVerifier!;
@@ -132,15 +136,18 @@ export default function RegisterPage() {
       toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
+
+        // 4. CRITICAL: Reset the verifier on failure.
         if (recaptchaVerifier) {
             recaptchaVerifier.clear();
             recaptchaVerifier = null;
         }
+
+       let errorMessage = "Could not send OTP. Please try again.";
        if (error.code === 'auth/too-many-requests') {
-          toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
-      } else {
-          toast({ title: "Error sending OTP", description: "Could not send OTP. Please ensure your number is correct and try again.", variant: "destructive" });
+          errorMessage = "You've made too many requests. Please wait a while before trying again.";
       }
+      toast({ title: "Error sending OTP", description: errorMessage, variant: "destructive" });
     } finally {
       setIsOtpSending(false);
     }
@@ -336,7 +343,7 @@ const handleSelectChange = (id: string, value: string) => {
               <div id="recaptcha-container"></div>
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
-                <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} />
+                <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
               </div>
               <Button onClick={handleNextStep} className="w-full" disabled={isOtpSending}>{isOtpSending ? 'Sending...' : 'Send OTP'}</Button>
             </CardContent>
@@ -352,7 +359,7 @@ const handleSelectChange = (id: string, value: string) => {
                 <CardContent className="space-y-4">
                    <div className="space-y-2">
                     <Label htmlFor="otp">Enter OTP</Label>
-                    <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                    <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isOtpVerifying} />
                   </div>
                   <Button onClick={handleNextStep} className="w-full" disabled={isOtpVerifying}>{isOtpVerifying ? 'Verifying...' : 'Verify & Proceed'}</Button>
                    <Button variant="link" size="sm" className="w-full" onClick={() => setStep('mobile')}>Change Number</Button>

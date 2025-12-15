@@ -16,6 +16,7 @@ import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
+// 1. Declare verifier outside the component to ensure it's a singleton per module.
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 export default function LoginPage() {
@@ -30,13 +31,15 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
+  // 2. Create an initialization function as per instructions.
   const initRecaptcha = () => {
     if (!auth) return;
+    // Initialize only if it hasn't been created yet.
     if (!recaptchaVerifier) {
         recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
             'callback': () => {
-              // reCAPTCHA solved
+              // reCAPTCHA solved, automatically triggered on successful sign-in
             },
         });
     }
@@ -56,6 +59,7 @@ export default function LoginPage() {
     setIsOtpSending(true);
 
     try {
+        // 3. Initialize on demand and send OTP.
         initRecaptcha();
         const phoneNumber = `+91${mobileNumber}`;
         const appVerifier = recaptchaVerifier!;
@@ -66,15 +70,18 @@ export default function LoginPage() {
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
+        
+        // 4. CRITICAL: Reset the verifier on failure.
         if (recaptchaVerifier) {
             recaptchaVerifier.clear();
             recaptchaVerifier = null;
         }
+        
+        let errorMessage = "Could not send OTP. Please try again.";
         if (error.code === 'auth/too-many-requests') {
-            toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
-        } else {
-            toast({ title: "Error sending OTP", description: "Could not send OTP. Please ensure your number is correct and try again later.", variant: "destructive" });
+            errorMessage = "You've made too many requests. Please wait a while before trying again.";
         }
+        toast({ title: "Error sending OTP", description: errorMessage, variant: "destructive" });
     } finally {
         setIsOtpSending(false);
     }
@@ -101,6 +108,7 @@ export default function LoginPage() {
 
   return (
     <div className="container flex items-center justify-center min-h-[80vh] py-12">
+      {/* 5. Ensure the container is always in the DOM */}
       <div id="recaptcha-container"></div>
       <Card className="w-full max-w-sm">
         {step === 'mobile' && (
@@ -112,7 +120,7 @@ export default function LoginPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
-                <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} />
+                <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
               </div>
               <Button onClick={handleSendOtp} className="w-full" disabled={isOtpSending}>
                 {isOtpSending ? 'Sending OTP...' : 'Send OTP'}
@@ -130,7 +138,7 @@ export default function LoginPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="otp">Enter OTP</Label>
-                <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isOtpVerifying}/>
               </div>
               <Button onClick={handleVerifyOtp} className="w-full" disabled={isOtpVerifying}>
                 {isOtpVerifying ? 'Verifying...' : 'Login'}
