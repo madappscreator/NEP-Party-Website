@@ -72,13 +72,7 @@ const initialFormData: FormData = {
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
 
-// Make TS aware of the new window property
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    grecaptcha?: any;
-  }
-}
+let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
@@ -100,22 +94,17 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
-   React.useEffect(() => {
+  const initRecaptcha = () => {
     if (!auth) return;
-
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {},
-      });
+    if (!recaptchaVerifier) {
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': () => {
+              // reCAPTCHA solved
+            },
+        });
     }
-
-    return () => {
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-      }
-    };
-  }, [auth]);
+  }
 
   const handleSendOtp = async () => {
     if (!auth) {
@@ -126,11 +115,14 @@ export default function RegisterPage() {
       toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
       return;
     }
+    if (isOtpSending) return;
+
     setIsOtpSending(true);
 
     try {
+      initRecaptcha();
       const phoneNumber = `+91${mobileNumber}`;
-      const appVerifier = window.recaptchaVerifier!;
+      const appVerifier = recaptchaVerifier!;
       
       const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
 
@@ -140,6 +132,10 @@ export default function RegisterPage() {
       toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
+        if (recaptchaVerifier) {
+            recaptchaVerifier.clear();
+            recaptchaVerifier = null;
+        }
        if (error.code === 'auth/too-many-requests') {
           toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
       } else {
@@ -155,6 +151,7 @@ export default function RegisterPage() {
         toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
         return;
     }
+    if(isOtpVerifying) return;
     setIsOtpVerifying(true);
     try {
         const userCredential = await confirmationResult.confirm(otp);
@@ -188,6 +185,7 @@ const handleFinalSubmit = async () => {
         toast({ title: "Missing Proof", description: "Please upload a payment screenshot.", variant: "destructive" });
         return;
     }
+    if(isSubmitting) return;
 
     setIsSubmitting(true);
     toast({ title: "Submitting Application", description: "Please wait, do not close this page." });

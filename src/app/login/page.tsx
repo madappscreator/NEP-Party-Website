@@ -16,13 +16,7 @@ import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
-// Make TS aware of the new window property
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    grecaptcha?: any;
-  }
-}
+let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 export default function LoginPage() {
   const [step, setStep] = React.useState<'mobile' | 'otp'>('mobile');
@@ -36,26 +30,17 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
-  React.useEffect(() => {
+  const initRecaptcha = () => {
     if (!auth) return;
-
-    // Initialize reCAPTCHA verifier once and attach to window
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, allow user to proceed
-        },
-      });
+    if (!recaptchaVerifier) {
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': () => {
+              // reCAPTCHA solved
+            },
+        });
     }
-
-    // Cleanup function to clear the verifier
-    return () => {
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-      }
-    };
-  }, [auth]);
+  }
 
   const handleSendOtp = async () => {
     if (!auth) {
@@ -66,11 +51,14 @@ export default function LoginPage() {
         toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
         return;
     }
+    if(isOtpSending) return;
+
     setIsOtpSending(true);
 
     try {
+        initRecaptcha();
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = window.recaptchaVerifier!;
+        const appVerifier = recaptchaVerifier!;
         
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
@@ -78,6 +66,10 @@ export default function LoginPage() {
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
+        if (recaptchaVerifier) {
+            recaptchaVerifier.clear();
+            recaptchaVerifier = null;
+        }
         if (error.code === 'auth/too-many-requests') {
             toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
         } else {
@@ -93,6 +85,7 @@ export default function LoginPage() {
         toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
         return;
     }
+    if(isOtpVerifying) return;
     setIsOtpVerifying(true);
     try {
         await confirmationResult.confirm(otp);
