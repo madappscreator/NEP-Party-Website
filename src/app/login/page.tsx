@@ -59,7 +59,11 @@ export default function LoginPage() {
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
-        toast({ title: "Error sending OTP", description: "Could not send OTP. Please ensure your number is correct and try again later.", variant: "destructive" });
+        if (error.code === 'auth/too-many-requests') {
+            toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
+        } else {
+            toast({ title: "Error sending OTP", description: "Could not send OTP. Please ensure your number is correct and try again later.", variant: "destructive" });
+        }
     } finally {
         setIsOtpSending(false);
     }
@@ -129,3 +133,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
