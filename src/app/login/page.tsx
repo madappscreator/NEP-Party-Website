@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 declare global {
   interface Window {
     grecaptcha: any;
+    recaptchaWidgetId?: number;
   }
 }
 
@@ -34,22 +35,29 @@ export default function LoginPage() {
   const router = useRouter();
 
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
-  const widgetIdRef = React.useRef<number | null>(null);
+  const recaptchaWidgetIdRef = React.useRef<number | null>(null);
 
-  React.useEffect(() => {
+   React.useEffect(() => {
     if (auth && !recaptchaVerifierRef.current) {
         recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
-            'enterprise': true, 
+            'callback': () => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+            },
+            'expired-callback': () => {
+              // Response expired. Ask user to solve reCAPTCHA again.
+            }
         });
     }
 
+    // Cleanup function to reset the reCAPTCHA widget
     return () => {
-        if (widgetIdRef.current !== null && window.grecaptcha) {
-            window.grecaptcha.reset(widgetIdRef.current);
+        if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
+            window.grecaptcha.reset(recaptchaWidgetIdRef.current);
         }
     };
   }, [auth]);
+
 
   const handleSendOtp = async () => {
     if (!auth || !recaptchaVerifierRef.current) {
@@ -63,9 +71,12 @@ export default function LoginPage() {
     setIsOtpSending(true);
 
     const verifier = recaptchaVerifierRef.current;
-
+    
     try {
         const phoneNumber = `+91${mobileNumber}`;
+        const widgetId = await verifier.render();
+        recaptchaWidgetIdRef.current = widgetId;
+        
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
         setConfirmationResult(confirmation);
         setStep('otp');
@@ -73,8 +84,8 @@ export default function LoginPage() {
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error sending OTP", description: error.message, variant: "destructive" });
-        if (widgetIdRef.current !== null && window.grecaptcha) {
-            window.grecaptcha.reset(widgetIdRef.current);
+        if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
+            window.grecaptcha.reset(recaptchaWidgetIdRef.current);
         }
     } finally {
         setIsOtpSending(false);

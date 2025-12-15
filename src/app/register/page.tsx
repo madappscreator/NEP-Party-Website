@@ -99,20 +99,25 @@ export default function RegisterPage() {
   const { toast } = useToast();
 
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
-  const widgetIdRef = React.useRef<number | null>(null);
+  const recaptchaWidgetIdRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     if (auth && !recaptchaVerifierRef.current) {
         recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
-            'enterprise': true, 
+            'callback': () => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+            },
+            'expired-callback': () => {
+              // Response expired. Ask user to solve reCAPTCHA again.
+            }
         });
     }
 
+    // Cleanup function to reset the reCAPTCHA widget
     return () => {
-        // Cleanup reCAPTCHA when component unmounts
-        if (widgetIdRef.current !== null && window.grecaptcha) {
-            window.grecaptcha.reset(widgetIdRef.current);
+        if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
+            window.grecaptcha.reset(recaptchaWidgetIdRef.current);
         }
     };
   }, [auth]);
@@ -133,6 +138,10 @@ export default function RegisterPage() {
     
     try {
         const phoneNumber = `+91${mobileNumber}`;
+        
+        const widgetId = await verifier.render();
+        recaptchaWidgetIdRef.current = widgetId;
+
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
         setConfirmationResult(confirmation);
         setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
@@ -141,9 +150,8 @@ export default function RegisterPage() {
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error sending OTP", description: error.message, variant: "destructive" });
-        // Reset reCAPTCHA on failure
-        if (widgetIdRef.current !== null && window.grecaptcha) {
-            window.grecaptcha.reset(widgetIdRef.current);
+        if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
+            window.grecaptcha.reset(recaptchaWidgetIdRef.current);
         }
     } finally {
         setIsOtpSending(false);
