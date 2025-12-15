@@ -3,35 +3,47 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * Core Philosophy:
-     * This ruleset enforces a two-tiered security model. The primary model is strict
-     * user ownership, where members can only access their own data. The secondary
-     * model is a global admin role, which grants privileged read/write access
-     * across the database for administrative purposes.
+     * # Firestore Security Rules
      *
-     * Data Structure:
-     * - /members/{memberId}: A member's private profile and data. The {memberId} is
-     *   the user's Authentication UID.
-     * - /members/{memberId}/payments/{paymentId}: A subcollection containing a
-     *   member's payment history, inheriting ownership from its parent.
-     * - /states, /districts, /constituencies: Top-level collections for geographical
-     *   data. This data is publicly readable to populate UI elements but is only
-     *   writable by administrators.
-     * - /admins/{adminId}: A special collection used as a lookup table for roles. The
-     *   existence of a document with an ID matching a user's UID grants them
-     *   admin privileges.
+     * ## Core Philosophy
+     * This ruleset implements a hybrid security model designed for flexibility and security.
+     * The core principles are:
+     * 1.  **User Ownership**: Data directly related to a user, such as their member profile or
+     *     membership card design, is strictly owned and controlled by that user.
+     * 2.  **Role-Based Access Control (RBAC)**: A dedicated `roles_admin` collection grants
+     *     administrative privileges. Admins have broad permissions to manage platform-wide
+     *     data like news articles, receipts, and user roles.
+     * 3.  **Public Access**: Collections intended for public consumption, like news articles,
+     *     are readable by anyone, including unauthenticated users.
      *
-     * Key Security Decisions:
-     * - User data is private: A user can only access the document tree under
-     *   /members/{their_own_uid}. Listing all members is restricted to admins.
-     * - Admin role: An 'admins' collection provides a secure and performant way
-     *   to manage global administrators without embedding roles in JWTs.
-     * - Public data separation: Geographical data is separated into its own
-     *   collections to allow for public read access without exposing private user
-     *   information.
-     * - Writes to the 'admins' collection are disabled from the client to prevent
-     *   privilege escalation. Admin roles must be managed from the Firebase Console
-     *   or a trusted server environment.
+     * ## Data Structure
+     * Data is organized into top-level collections, each representing a distinct entity.
+     * This structural segregation ensures that security rules for one collection do not
+     * impact another. For example, private `/members` data is kept separate from public
+     * `/news_articles`. Administrative roles are managed via document existence checks in
+     * the `/roles_admin` collection, which is a highly performant and secure pattern.
+     *
+     * ## Key Security Decisions
+     * - **Deny by Default**: Access is implicitly denied unless an `allow` rule explicitly grants it.
+     * - **No User Listing**: Listing users from `/members` or `/admins` collections is disabled
+     *   to protect user privacy and prevent data scraping.
+     * - **Donation Workflow**: Any signed-in user can create a donation, but only administrators
+     *   can update (e.g., verify) or delete them, ensuring a secure verification process.
+     * - **Authorization over Validation**: In this prototyping stage, rules focus strictly on
+     *   *who* can access data, not the specific *shape* of the data. Validation is limited
+     *   to fields critical for establishing ownership and relational integrity.
+     *
+     * ## Denormalization for Authorization
+     * To create simple, fast, and secure rules, data required for authorization is denormalized
+     * onto the documents being secured. For example, `Donation` and `MembershipCardDesign`
+     * documents contain a `memberId` field. This allows rules to check for ownership directly on
+     * the document without needing slow and costly `get()` calls to other collections.
+     *
+     * ## Structural Segregation
+     * The data model uses separate collections for data with different security requirements.
+     * For instance, public content (`/news_articles`) is in a different collection from
+     * private user data (`/members`). This prevents accidental data leakage and simplifies
+     * rules for list operations.
      */
 
     // --------------------------------------------------------------------------
@@ -46,85 +58,166 @@ service cloud.firestore {
     }
 
     /**
-     * Checks if the currently authenticated user's UID matches the provided userId.
-     * This is the foundation of the user ownership model.
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the primary function for enforcing document ownership.
      */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * Checks if the currently authenticated user has admin privileges.
-     * Admin status is granted if a document with the user's UID exists in the /admins collection.
+     * Checks if the authenticated user has administrative privileges.
+     * An admin is defined by the existence of a document in the /roles_admin collection
+     * with their UID as the document ID.
      */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
     /**
-     * A combined check to see if the user is either the owner of the resource
-     * or an administrator.
-     */
-    function isOwnerOrAdmin(userId) {
-      return isOwner(userId) || isAdmin();
-    }
-
-    /**
-     * Checks if the document being accessed already exists.
-     * CRITICAL for all update and delete operations to prevent unintended writes.
+     * Ensures that a document being updated or deleted actually exists.
+     * This prevents unauthorized actions on non-existent paths.
      */
     function isExistingDoc() {
       return resource != null;
     }
 
     /**
-     * A combined check for update/delete operations on user-owned documents.
-     * Verifies that the document exists AND the user is either the owner or an admin.
+     * Combines an admin check with an existence check for update/delete operations.
      */
-    function isExistingOwnerOrAdmin(userId) {
-      return isOwnerOrAdmin(userId) && isExistingDoc();
+    function isExistingAdmin() {
+      return isAdmin() && isExistingDoc();
     }
 
+    /**
+     * On create, validates that the new document's owner field matches the creator.
+     */
+    function createdByOwner(ownerField) {
+      return isSignedIn() && request.resource.data[ownerField] == request.auth.uid;
+    }
+
+    /**
+     * On update, ensures an ownership field is not changed.
+     */
+    function ownerIsImmutable(ownerField) {
+      return request.resource.data[ownerField] == resource.data[ownerField];
+    }
 
     // --------------------------------------------------------------------------
-    // Collection Rules (Firestore)
+    // Collection Rules
     // --------------------------------------------------------------------------
 
+    /**
+     * @description Controls access to member profiles.
+     * @path /members/{memberId}
+     * @allow A logged-in user (auth.uid='user123') creating their own profile at `/members/user123`. (create)
+     * @deny A logged-in user (auth.uid='user456') trying to read a profile at `/members/user123`. (get)
+     * @principle Restricts access to a user's own data tree.
+     */
     match /members/{memberId} {
-      allow get: if isOwnerOrAdmin(memberId);
-      allow list: if isAdmin();
+      allow get: if isOwner(memberId);
+      allow list: if false;
       allow create: if isOwner(memberId) && request.resource.data.id == memberId;
-      allow update: if isExistingOwnerOrAdmin(memberId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwnerOrAdmin(memberId);
+      allow update: if isOwner(memberId) && isExistingDoc() && ownerIsImmutable('id');
+      allow delete: if isOwner(memberId) && isExistingDoc();
 
       match /payments/{paymentId} {
-        allow get: if isOwnerOrAdmin(memberId);
-        allow list: if isOwnerOrAdmin(memberId);
+        allow get: if isOwner(memberId) || isAdmin();
+        allow list: if isOwner(memberId) || isAdmin();
         allow create: if isOwner(memberId) && request.resource.data.memberId == memberId;
-        allow update: if isExistingOwnerOrAdmin(memberId) && request.resource.data.memberId == resource.data.memberId;
-        allow delete: if isExistingOwnerOrAdmin(memberId);
+        allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('memberId');
+        allow delete: if (isOwner(memberId) || isAdmin()) && isExistingDoc();
       }
     }
 
-    match /states/{stateId} {
-      allow read, list: if true;
-      allow write: if isAdmin();
+    /**
+     * @description Controls access to donation records.
+     * @path /donations/{donationId}
+     * @allow Any signed-in user creating a new donation with their own `memberId`. (create)
+     * @deny A user trying to update or delete a donation after creation. (update, delete)
+     * @principle Allows public creation but reserves management (update, delete) for administrators.
+     */
+    match /donations/{donationId} {
+      allow get: if (isOwner(resource.data.memberId) || isAdmin());
+      allow list: if false;
+      allow create: if createdByOwner('memberId');
+      allow update: if isExistingAdmin();
+      allow delete: if isExistingAdmin();
     }
 
-    match /districts/{districtId} {
-      allow read, list: if true;
-      allow write: if isAdmin();
-    }
-
-    match /constituencies/{constituencyId} {
-      allow read, list: if true;
-      allow write: if isAdmin();
-    }
-
+    /**
+     * @description Controls access to the list of admins. For internal admin management.
+     * @path /admins/{adminId}
+     * @allow An admin reading another admin's document. (get)
+     * @deny A non-admin user trying to read any document in this collection. (get, list)
+     * @principle Secures administrative data, making it accessible only to other admins.
+     */
     match /admins/{adminId} {
       allow get: if isAdmin();
+      allow list: if false;
+      allow create: if isAdmin();
+      allow update: if isExistingAdmin();
+      allow delete: if isExistingAdmin();
+    }
+
+    /**
+     * @description Controls access to public-facing news articles.
+     * @path /news_articles/{newsArticleId}
+     * @allow Any user, including anonymous ones, reading a news article. (get, list)
+     * @deny A non-admin user trying to create or delete a news article. (create, delete)
+     * @principle Implements a "Public Read with Admin-Only Writes" pattern for content management.
+     */
+    match /news_articles/{newsArticleId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin();
+      allow update: if isExistingAdmin();
+      allow delete: if isExistingAdmin();
+    }
+
+    /**
+     * @description Controls access to user-created membership card designs.
+     * @path /membership_card_designs/{membershipCardDesignId}
+     * @allow A user (auth.uid='user123') creating a design with `memberId: 'user123'`. (create)
+     * @deny Any user attempting to list all available designs. (list)
+     * @principle Enforces document ownership for reads and writes. List is disabled because queries cannot be securely filtered by owner at the rules level for a top-level collection.
+     */
+    match /membership_card_designs/{membershipCardDesignId} {
+      allow get: if isOwner(resource.data.memberId);
+      allow list: if false;
+      allow create: if createdByOwner('memberId');
+      allow update: if isOwner(resource.data.memberId) && isExistingDoc() && ownerIsImmutable('memberId');
+      allow delete: if isOwner(resource.data.memberId) && isExistingDoc();
+    }
+
+    /**
+     * @description Controls access to donation receipts.
+     * @path /receipts/{receiptId}
+     * @allow An admin user reading or creating a receipt. (get, create)
+     * @deny Any non-admin user attempting to access receipts. (get, list, write)
+     * @principle Restricts sensitive financial documents to administrative access only.
+     */
+    match /receipts/{receiptId} {
+      allow get: if isAdmin();
       allow list: if isAdmin();
-      allow create, update, delete: if false; // Managed via Console/backend
+      allow create: if isAdmin();
+      allow update: if isExistingAdmin();
+      allow delete: if isExistingAdmin();
+    }
+
+    /**
+     * @description Manages admin role assignments. The existence of a document here grants admin rights.
+     * @path /roles_admin/{userId}
+     * @allow An admin adding another user ('user456') as an admin by creating `/roles_admin/user456`. (create)
+     * @deny A non-admin trying to grant themselves admin rights. (create, update)
+     * @principle Secures the role management system, ensuring only admins can modify roles.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if isExistingAdmin();
     }
   }
 }
