@@ -69,7 +69,7 @@ export default function DashboardLayout({
             </SidebarMenuItem>
 
              <Collapsible>
-                <CollapsibleTrigger className="w-full">
+                <CollapsibleTrigger asChild className="w-full">
                     <SidebarMenuButton className="w-full" isActive={pathname.startsWith('/admin/dashboard/members')}>
                         <Icons.Users/>
                         <span>Members</span>
@@ -90,7 +90,7 @@ export default function DashboardLayout({
             </Collapsible>
             
              <Collapsible>
-                <CollapsibleTrigger className="w-full">
+                <CollapsibleTrigger asChild className="w-full">
                     <SidebarMenuButton className="w-full" isActive={pathname.startsWith('/admin/dashboard/donations') || pathname.startsWith('/admin/dashboard/payments')}>
                         <Icons.Heart/>
                         <span>Payments</span>
