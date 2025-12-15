@@ -15,7 +15,7 @@ import {
   ConfirmationResult,
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
-import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -95,14 +95,17 @@ export default function RegisterPage() {
   const { toast } = useToast();
   
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
+  const recaptchaWrapperRef = React.useRef<HTMLDivElement>(null);
+
 
   React.useEffect(() => {
-    if (auth && !recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    if (auth && recaptchaWrapperRef.current && !recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaWrapperRef.current, {
             'size': 'invisible',
             'callback': (response: any) => {
               // reCAPTCHA solved, allow signInWithPhoneNumber.
-            }
+            },
+            'enterprise': true, // Use reCAPTCHA Enterprise
         });
     }
     // Cleanup on unmount
@@ -136,6 +139,12 @@ export default function RegisterPage() {
     } catch (error) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
+        // Reset verifier on error
+        recaptchaVerifierRef.current.render().then((widgetId) => {
+            if(auth && recaptchaVerifierRef.current) {
+                grecaptcha.enterprise.reset(recaptchaVerifierRef.current.widgetId);
+            }
+        });
     } finally {
         setIsOtpSending(false);
     }
@@ -148,9 +157,17 @@ export default function RegisterPage() {
     }
     setIsOtpVerifying(true);
     try {
-        await confirmationResult.confirm(otp);
-        setStep('details');
-        toast({ title: "Success", description: "Mobile number verified successfully." });
+        const userCredential = await confirmationResult.confirm(otp);
+        const memberId = userCredential.user.uid;
+        const memberDoc = await getDoc(doc(firestore, 'members', memberId));
+        if (memberDoc.exists()) {
+             toast({ title: "Already Registered", description: "You are already a member. Redirecting to your profile." });
+             // redirect to profile page in next step, for now just show a toast
+        } else {
+            setStep('details');
+            toast({ title: "Success", description: "Mobile number verified successfully." });
+        }
+
     } catch (error) {
         console.error("Error verifying OTP: ", error);
         toast({ title: "Error", description: "Invalid OTP. Please try again.", variant: "destructive" });
@@ -206,6 +223,7 @@ const handleFinalSubmit = async () => {
             declarationAccepted: formData.declarationAccepted,
             photoUrl: photoUrl,
             status: 'pending', // Initial status
+            paymentStatus: 'pending',
             createdAt: serverTimestamp()
         };
 
@@ -333,7 +351,7 @@ const handleSelectChange = (id: string, value: string) => {
                     <Label htmlFor="otp">Enter OTP</Label>
                     <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} />
                   </div>
-                  <Button onClick={handleNextStep} className="w-full" disabled={isOtpVerifying}>{isOtpVerifying ? 'Verifying...' : 'Verify OTP'}</Button>
+                  <Button onClick={handleNextStep} className="w-full" disabled={isOtpVerifying}>{isOtpVerifying ? 'Verifying...' : 'Verify & Proceed'}</Button>
                    <Button variant="link" size="sm" className="w-full" onClick={() => setStep('mobile')}>Change Number</Button>
                 </CardContent>
               </>
@@ -649,7 +667,7 @@ const handleSelectChange = (id: string, value: string) => {
 
   return (
     <div className="container flex items-center justify-center min-h-[80vh] py-12">
-      <div id="recaptcha-container"></div>
+      <div ref={recaptchaWrapperRef} id="recaptcha-container"></div>
       <Card className="w-full max-w-3xl shadow-lg">
         {renderStep()}
       </Card>

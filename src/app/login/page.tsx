@@ -29,14 +29,17 @@ export default function LoginPage() {
   const router = useRouter();
 
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
+  const recaptchaWrapperRef = React.useRef<HTMLDivElement>(null);
+
 
   React.useEffect(() => {
-    if (auth && !recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    if (auth && recaptchaWrapperRef.current && !recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaWrapperRef.current, {
             'size': 'invisible',
             'callback': (response: any) => {
               // reCAPTCHA solved, allow signInWithPhoneNumber.
-            }
+            },
+            'enterprise': true, // Use reCAPTCHA Enterprise
         });
     }
     // Cleanup on unmount
@@ -50,7 +53,7 @@ export default function LoginPage() {
 
   const handleSendOtp = async () => {
     if (!auth || !recaptchaVerifierRef.current) {
-        toast({ title: "Error", description: "Firebase not initialized.", variant: "destructive" });
+        toast({ title: "Error", description: "Firebase not initialized. Please refresh.", variant: "destructive" });
         return;
     }
     if (mobileNumber.length < 10) {
@@ -67,7 +70,13 @@ export default function LoginPage() {
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error) {
         console.error("Error sending OTP: ", error);
-        toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
+        toast({ title: "Error", description: "Failed to send OTP. Please ensure your number is correct and try again.", variant: "destructive" });
+        // Reset verifier on error
+        recaptchaVerifierRef.current.render().then((widgetId) => {
+            if(auth && recaptchaVerifierRef.current) {
+                grecaptcha.enterprise.reset(recaptchaVerifierRef.current.widgetId);
+            }
+        });
     } finally {
         setIsOtpSending(false);
     }
@@ -93,7 +102,7 @@ export default function LoginPage() {
 
   return (
     <div className="container flex items-center justify-center min-h-[80vh] py-12">
-      <div id="recaptcha-container"></div>
+      <div ref={recaptchaWrapperRef} id="recaptcha-container"></div>
       <Card className="w-full max-w-sm">
         {step === 'mobile' && (
           <>
