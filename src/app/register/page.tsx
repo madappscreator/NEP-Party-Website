@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -22,12 +23,6 @@ import { indianGeography, State, District, Constituency } from '@/lib/geography'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
-
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-  }
-}
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -98,23 +93,8 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
-  React.useEffect(() => {
-    if (auth && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': () => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
-          },
-          'expired-callback': () => {
-            // Response expired. Ask user to solve reCAPTCHA again.
-          }
-      });
-    }
-  }, [auth]);
-  
-
   const handleSendOtp = async () => {
-    if (!auth || !window.recaptchaVerifier) {
+    if (!auth) {
         toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
         return;
     }
@@ -126,8 +106,18 @@ export default function RegisterPage() {
     
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = window.recaptchaVerifier;
-
+        
+        // Create a new verifier for every attempt
+        const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': () => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+            },
+            'expired-callback': () => {
+              // Response expired. Ask user to solve reCAPTCHA again.
+            }
+        });
+        
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
         setFormData(prev => ({...prev, mobileNumber: phoneNumber}));

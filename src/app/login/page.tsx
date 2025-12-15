@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -15,12 +16,6 @@ import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-  }
-}
-
 export default function LoginPage() {
   const [step, setStep] = React.useState<'mobile' | 'otp'>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('');
@@ -33,22 +28,8 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
-  React.useEffect(() => {
-    if (auth && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': () => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
-          },
-          'expired-callback': () => {
-            // Response expired. Ask user to solve reCAPTCHA again.
-          }
-      });
-    }
-  }, [auth]);
-
   const handleSendOtp = async () => {
-    if (!auth || !window.recaptchaVerifier) {
+    if (!auth) {
         toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
         return;
     }
@@ -60,7 +41,17 @@ export default function LoginPage() {
 
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = window.recaptchaVerifier;
+        
+        // Create a new verifier for every attempt
+        const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': () => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+            },
+            'expired-callback': () => {
+              // Response expired. Ask user to solve reCAPTCHA again.
+            }
+        });
         
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
