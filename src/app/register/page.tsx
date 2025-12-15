@@ -63,7 +63,7 @@ const initialFormData: FormData = {
     paymentScreenshot: null,
 };
 
-const donationAmounts = [10, 100, 1000, 2000];
+const donationAmounts = [10, 100, 500, 1000, 2000];
 
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
@@ -425,7 +425,7 @@ const handleSelectChange = (id: string, value: string) => {
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <Label>Select Amount</Label>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                             {donationAmounts.map(amount => (
                                 <Button 
                                     key={amount} 
