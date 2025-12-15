@@ -15,6 +15,8 @@ import {
   ConfirmationResult,
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
+import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
@@ -39,9 +41,11 @@ type FormData = {
   constituency: string;
   membershipAmount: number;
   declarationAccepted: boolean;
-  photoUrl: string;
+  photoUrl: string; // Data URL for upload
   transactionId: string;
   paymentScreenshot: File | null;
+  ppoCopy: File | null;
+  aadharCard: File | null;
 };
 
 const initialFormData: FormData = {
@@ -62,6 +66,8 @@ const initialFormData: FormData = {
     photoUrl: '',
     transactionId: '',
     paymentScreenshot: null,
+    ppoCopy: null,
+    aadharCard: null
 };
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
@@ -73,15 +79,19 @@ export default function RegisterPage() {
   const [confirmationResult, setConfirmationResult] = React.useState<ConfirmationResult | null>(null);
   const [isOtpSending, setIsOtpSending] = React.useState(false);
   const [isOtpVerifying, setIsOtpVerifying] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const [formData, setFormData] = React.useState<FormData>(initialFormData);
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = React.useState<string | null>(null);
+
 
   const [districts, setDistricts] = React.useState<District[]>([]);
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
   const [customAmount, setCustomAmount] = React.useState('');
 
 
-  const { auth } = useFirebase();
+  const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
   const setupRecaptcha = React.useCallback(() => {
@@ -102,7 +112,7 @@ export default function RegisterPage() {
         toast({ title: "Error", description: "Firebase not initialized.", variant: "destructive" });
         return;
     }
-    if (mobileNumber.length < 10) {
+    if (mobileNumber.length !== 10) {
         toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
         return;
     }
@@ -145,26 +155,106 @@ export default function RegisterPage() {
     }
 };
 
+const handleFinalSubmit = async () => {
+    if (!user || !firestore) {
+        toast({ title: "Error", description: "Could not submit form. Please refresh and try again.", variant: "destructive" });
+        return;
+    }
+    if (!formData.paymentScreenshot) {
+        toast({ title: "Missing Proof", description: "Please upload a payment screenshot.", variant: "destructive" });
+        return;
+    }
+
+    setIsSubmitting(true);
+    toast({ title: "Submitting Application", description: "Please wait, do not close this page." });
+
+    try {
+        const storage = getStorage();
+        const memberId = user.uid;
+
+        // Upload payment screenshot
+        const screenshotRef = ref(storage, `payment_proofs/${memberId}/${formData.paymentScreenshot.name}`);
+        const screenshotUploadResult = await uploadString(screenshotRef, screenshotPreview!, 'data_url');
+        const screenshotUrl = await getDownloadURL(screenshotUploadResult.ref);
+
+        // Upload profile photo
+        let photoUrl = '';
+        if (formData.photoUrl) {
+            const photoRef = ref(storage, `profile_photos/${memberId}/profile.jpg`);
+            const photoUploadResult = await uploadString(photoRef, formData.photoUrl, 'data_url');
+            photoUrl = await getDownloadURL(photoUploadResult.ref);
+        }
+        
+        // Prepare member data
+        const memberData = {
+            name: formData.name,
+            fatherName: formData.fatherName,
+            gender: formData.gender,
+            dateOfBirth: formData.dateOfBirth,
+            occupation: formData.occupation,
+            mobileNumber: formData.mobileNumber,
+            educationalQualification: formData.educationalQualification,
+            email: formData.email,
+            residentialAddress: formData.residentialAddress,
+            state: formData.state,
+            district: formData.district,
+            constituency: formData.constituency,
+            declarationAccepted: formData.declarationAccepted,
+            photoUrl: photoUrl,
+            status: 'pending', // Initial status
+            createdAt: serverTimestamp()
+        };
+
+        // Prepare payment data
+        const paymentData = {
+            memberId: memberId,
+            amount: formData.membershipAmount,
+            paymentMethod: 'UPI',
+            transactionId: formData.transactionId,
+            paymentScreenshotUrl: screenshotUrl,
+            status: 'pending', // Initial status
+            createdAt: serverTimestamp()
+        };
+        
+        // Save documents to Firestore
+        await setDoc(doc(firestore, 'members', memberId), memberData);
+        await setDoc(doc(firestore, `members/${memberId}/payments`, 'initial-payment'), paymentData);
+
+        setStep('confirm');
+
+    } catch (error) {
+        console.error("Form submission error:", error);
+        toast({ title: "Submission Failed", description: "There was an error submitting your application. Please try again.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
+    }
+}
+
+
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({...prev, [id]: value}));
 }
 
-const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'photo' | 'screenshot' | 'ppo' | 'aadhar') => {
     if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onloadend = () => {
-            setPhotoPreview(reader.result as string);
-            setFormData(prev => ({...prev, photoUrl: reader.result as string}));
+            const dataUrl = reader.result as string;
+            if (fileType === 'photo') {
+                setPhotoPreview(dataUrl);
+                setFormData(prev => ({...prev, photoUrl: dataUrl}));
+            } else if (fileType === 'screenshot') {
+                setScreenshotPreview(dataUrl);
+                setFormData(prev => ({...prev, paymentScreenshot: file}));
+            } else if (fileType === 'ppo') {
+                 setFormData(prev => ({...prev, ppoCopy: file}));
+            } else if (fileType === 'aadhar') {
+                setFormData(prev => ({...prev, aadharCard: file}));
+            }
         }
         reader.readAsDataURL(file);
-    }
-};
-
-const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-        setFormData(prev => ({...prev, paymentScreenshot: e.target.files![0]}));
     }
 };
 
@@ -180,7 +270,6 @@ const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isNaN(amountAsNumber) && amountAsNumber > 0) {
         setFormData(prev => ({...prev, membershipAmount: amountAsNumber}));
     } else {
-        // if user clears custom amount, default to 10
         setFormData(prev => ({...prev, membershipAmount: 10}));
     }
 }
@@ -207,12 +296,7 @@ const handleSelectChange = (id: string, value: string) => {
     if (step === 'otp') handleVerifyOtp();
     if (step === 'details') setStep('declaration');
     if (step === 'declaration') setStep('payment');
-    if (step === 'payment') {
-        // TODO: Handle form submission to Firebase
-        // This is where you would call a function to save data to Firestore and upload images to Storage
-        console.log("Form data submitted:", formData);
-        setStep('confirm');
-    }
+    if (step === 'payment') handleFinalSubmit();
   };
 
   const renderStep = () => {
@@ -269,7 +353,7 @@ const handleSelectChange = (id: string, value: string) => {
                         <Label htmlFor="photo" className="cursor-pointer">
                             <Upload className="mr-2 h-4 w-4" />
                             Upload Photo
-                            <Input id="photo" type="file" className="sr-only" accept="image/*" onChange={handlePhotoChange}/>
+                            <Input id="photo" type="file" className="sr-only" accept="image/*" onChange={(e) => handleFileChange(e, 'photo')}/>
                         </Label>
                     </Button>
                 </div>
@@ -305,7 +389,7 @@ const handleSelectChange = (id: string, value: string) => {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="mobileNumber">Contact Number</Label>
-                    <Input id="mobileNumber" value={formData.mobileNumber || mobileNumber} readOnly disabled />
+                    <Input id="mobileNumber" value={formData.mobileNumber || `+91${mobileNumber}`} readOnly disabled />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="educationalQualification">Educational Qualification</Label>
@@ -396,15 +480,15 @@ const handleSelectChange = (id: string, value: string) => {
                              <Button asChild variant="outline">
                                 <Label htmlFor="ppo" className="cursor-pointer">
                                     <Upload className="mr-2 h-4 w-4" />
-                                    Upload PPO
-                                    <Input id="ppo" type="file" className="sr-only" />
+                                    Upload PPO {formData.ppoCopy && <CheckCircle className="ml-auto h-4 w-4 text-green-500" />}
+                                    <Input id="ppo" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'ppo')}/>
                                 </Label>
                             </Button>
                              <Button asChild variant="outline">
                                 <Label htmlFor="aadhar" className="cursor-pointer">
                                     <Upload className="mr-2 h-4 w-4" />
-                                    Upload Aadhar
-                                    <Input id="aadhar" type="file" className="sr-only" />
+                                    Upload Aadhar {formData.aadharCard && <CheckCircle className="ml-auto h-4 w-4 text-green-500" />}
+                                    <Input id="aadhar" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'aadhar')}/>
                                 </Label>
                             </Button>
                         </div>
@@ -467,12 +551,14 @@ const handleSelectChange = (id: string, value: string) => {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="paymentScreenshot">Upload Payment Screenshot *</Label>
-                            <Input id="paymentScreenshot" type="file" accept="image/*" onChange={handleScreenshotChange} />
+                            <Input id="paymentScreenshot" type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'screenshot')} />
                             {formData.paymentScreenshot && <p className="text-xs text-muted-foreground">File selected: {formData.paymentScreenshot.name}</p>}
                         </div>
                     </div>
                     
-                    <Button onClick={handleNextStep} className="w-full">Submit Application</Button>
+                    <Button onClick={handleNextStep} className="w-full" disabled={isSubmitting}>
+                        {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                    </Button>
                 </CardContent>
                 </>
             );

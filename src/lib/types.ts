@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { Timestamp } from 'firebase/firestore';
 
 export type NavItem = {
   href: string;
@@ -24,30 +25,26 @@ export type Member = {
     id: string;
     name:string;
     state: string;
+    district: string;
     constituency: string;
-    status: 'Approved' | 'Pending';
+    status: 'active' | 'pending' | 'rejected';
+    mobileNumber: string;
+    createdAt: Timestamp;
 };
 
-export type Donation = {
+export type Payment = {
     id: string;
-    donorName: string;
+    memberId: string;
     amount: number;
     date: string;
-    status: 'Verified' | 'Pending';
-};
-
-export type PendingPayment = {
-  id: string;
-  memberId: string;
-  name: string;
-  mobile: string;
-  location: string;
-  amount: number;
-  paymentMode: 'UPI' | 'QR' | 'Bank';
-  transactionRef: string;
-  screenshotUrl: string;
-  status: 'Pending';
-  date: string;
+    status: 'approved' | 'pending' | 'failed';
+    name: string;
+    mobile: string;
+    location: string;
+    paymentMode: 'UPI' | 'QR' | 'Bank';
+    transactionRef: string;
+    screenshotUrl: string;
+    createdAt: Timestamp;
 };
 
 
@@ -77,4 +74,26 @@ export type Wing = {
   name: string;
   description: string;
   icon: keyof typeof import('lucide-react')['icons'];
+};
+
+export type Donation = {
+    id: string;
+    donorName: string;
+    amount: number;
+    date: string;
+    status: 'Verified' | 'Pending';
+};
+
+export type PendingPayment = {
+  id: string;
+  memberId: string;
+  name: string;
+  mobile: string;
+  location: string;
+  amount: number;
+  paymentMode: 'UPI' | 'QR' | 'Bank';
+  transactionRef: string;
+  screenshotUrl: string;
+  status: 'Pending';
+  date: string;
 };
