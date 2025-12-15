@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,6 +12,7 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
+  Auth,
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
 import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -72,6 +72,20 @@ const initialFormData: FormData = {
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
 
+// Keep the verifier instance outside the component to prevent it from being re-created on re-renders.
+let appVerifier: RecaptchaVerifier | null = null;
+
+const getRecaptchaVerifier = (auth: Auth) => {
+    if (!appVerifier) {
+        appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'enterprise': true, // Use enterprise version
+        });
+    }
+    return appVerifier;
+};
+
+
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('');
@@ -94,25 +108,9 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
   
-  const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
-
-  React.useEffect(() => {
-    if (auth && !recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response: any) => {
-              // reCAPTCHA solved, allow signInWithPhoneNumber.
-            },
-            'expired-callback': () => {
-              // Response expired. Ask user to solve reCAPTCHA again.
-            },
-        });
-    }
-  }, [auth]);
-
 
   const handleSendOtp = async () => {
-    if (!auth || !recaptchaVerifierRef.current) {
+    if (!auth) {
         toast({ title: "Error", description: "Firebase not initialized.", variant: "destructive" });
         return;
     }
@@ -124,21 +122,27 @@ export default function RegisterPage() {
     
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = recaptchaVerifierRef.current;
-        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+        const verifier = getRecaptchaVerifier(auth);
+
+        // Explicitly render the reCAPTCHA widget and then reset it.
+        const widgetId = await verifier.render();
+        verifier.reset(widgetId);
+
+        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
         setConfirmationResult(confirmation);
         setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
         setStep('otp');
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error sending OTP: ", error);
-        toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
-        if (recaptchaVerifierRef.current) {
-            recaptchaVerifierRef.current.render().then((widgetId) => {
-                if (auth && recaptchaVerifierRef.current) {
-                  // @ts-ignore
-                  grecaptcha.reset(widgetId);
-                }
+        toast({ title: "Error", description: `Failed to send OTP. ${error.message}`, variant: "destructive" });
+        if (appVerifier) {
+            appVerifier.render().then((widgetId) => {
+              // @ts-ignore
+              if (window.grecaptcha) {
+                // @ts-ignore
+                window.grecaptcha.reset(widgetId);
+              }
             });
         }
     } finally {
