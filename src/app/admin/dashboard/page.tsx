@@ -16,9 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { FileDown, Users, UserCheck, Heart } from 'lucide-react';
+import { FileDown, Users, UserCheck, Wallet, Search } from 'lucide-react';
 import { indianGeography } from '@/lib/geography';
 import * as React from 'react';
+import { Input } from '@/components/ui/input';
 
 const memberDataByState = [
   { name: 'Tamil Nadu', value: 120, fill: 'var(--color-chart-1)' },
@@ -53,16 +54,16 @@ export default function DashboardPage() {
   const districts = selectedState ? indianGeography.find(s => s.name === selectedState)?.districts || [] : [];
   
   return (
-    <div className="flex flex-col gap-8">
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <div className="flex flex-col gap-6">
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Members</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">547</div>
-            <p className="text-xs text-muted-foreground">+57 since last week</p>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">+0 since last week</p>
           </CardContent>
         </Card>
         <Card>
@@ -73,7 +74,7 @@ export default function DashboardPage() {
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">23</div>
+            <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">
               New applicants waiting for verification
             </p>
@@ -82,42 +83,73 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Donations</CardTitle>
-            <Heart className="h-4 w-4 text-muted-foreground" />
+            <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹75,890</div>
+            <div className="text-2xl font-bold">₹0</div>
             <p className="text-xs text-muted-foreground">
-              +₹5,230 this month
+              +₹0 this month
             </p>
           </CardContent>
         </Card>
          <Card>
           <CardHeader>
               <CardTitle className="text-sm font-medium">Download Reports</CardTitle>
-              <CardDescription className="text-xs">Export member data by location.</CardDescription>
+              <CardDescription className="text-xs">Export member or payment data.</CardDescription>
           </CardHeader>
           <CardContent>
                 <Button size="sm" className="w-full">
                     <FileDown className="mr-2 h-4 w-4" />
-                    Download Member Report
+                    Export Data
                 </Button>
           </CardContent>
         </Card>
       </div>
 
         <Card>
-             <CardHeader>
-                <CardTitle>Member Distribution</CardTitle>
+            <CardHeader>
+                <CardTitle>Member Analytics</CardTitle>
                 <CardDescription>Visualize member registrations across different regions.</CardDescription>
             </CardHeader>
-            <CardContent className="grid md:grid-cols-2 gap-8">
-                 <div className="flex flex-col gap-4">
-                     <h3 className="font-semibold text-center">By State</h3>
-                    <DonutChart data={memberDataByState} category="value" index="name" className="h-48" />
-                </div>
-                 <div className="flex flex-col gap-4">
-                     <h3 className="font-semibold text-center">By District (in Tamil Nadu)</h3>
-                    <DonutChart data={memberDataByDistrict} category="value" index="name" className="h-48" />
+            <CardContent className="space-y-6">
+                 <div className="border rounded-lg p-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                        <Select onValueChange={setSelectedState}>
+                            <SelectTrigger className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Select State" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {indianGeography.map(state => (
+                                    <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select onValueChange={setSelectedDistrict} disabled={!selectedState}>
+                            <SelectTrigger className="w-full md:w-[180px]">
+                                <SelectValue placeholder="Select District" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {districts.map(district => (
+                                    <SelectItem key={district.name} value={district.name}>{district.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <div className="relative flex-1 min-w-[200px]">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                            <Input placeholder="Search name or mobile..." className="pl-9"/>
+                        </div>
+                        <Button variant="outline">Reset</Button>
+                    </div>
+                 </div>
+                 <div className="grid md:grid-cols-2 gap-8 pt-4">
+                    <div className="flex flex-col gap-4">
+                        <h3 className="font-semibold text-center">By State</h3>
+                        <DonutChart data={memberDataByState} category="value" index="name" className="h-48" />
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        <h3 className="font-semibold text-center">By District (in Tamil Nadu)</h3>
+                        <DonutChart data={memberDataByDistrict} category="value" index="name" className="h-48" />
+                    </div>
                 </div>
             </CardContent>
         </Card>

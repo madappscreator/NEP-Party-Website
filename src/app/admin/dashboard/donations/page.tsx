@@ -18,8 +18,8 @@ export default function DonationsPage() {
     <Card>
       <CardHeader className="flex flex-row justify-between items-center">
         <div>
-            <CardTitle>Donations</CardTitle>
-            <CardDescription>View and verify incoming donations.</CardDescription>
+            <CardTitle>Approved Payments</CardTitle>
+            <CardDescription>View all verified member payments and donations.</CardDescription>
         </div>
         <Button size="sm" variant="outline">
             <FileDown className="h-4 w-4 mr-2" />
@@ -73,7 +73,7 @@ export default function DonationsPage() {
       </CardContent>
       <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Showing <strong>1-{DUMMY_DONATIONS.length}</strong> of <strong>{DUMMY_DONATIONS.length}</strong> donations
+            Showing <strong>1-{DUMMY_DONATIONS.length}</strong> of <strong>{DUMMY_DONATIONS.length}</strong> payments
           </div>
       </CardFooter>
     </Card>

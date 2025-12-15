@@ -18,8 +18,8 @@ export default function MembersPage() {
     <Card>
       <CardHeader className="flex flex-row justify-between items-center">
         <div>
-            <CardTitle>Members</CardTitle>
-            <CardDescription>Manage party members and approve new registrations.</CardDescription>
+            <CardTitle>All Members</CardTitle>
+            <CardDescription>Manage party members and view their details.</CardDescription>
         </div>
         <Button size="sm" variant="outline">
             <FileDown className="h-4 w-4 mr-2" />

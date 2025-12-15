@@ -14,10 +14,6 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,12 +25,44 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Logo } from '@/app/components/layout/logo';
-import { ADMIN_NAV_LINKS } from '@/lib/constants';
 import * as Icons from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut } from 'lucide-react';
+import { LogOut, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronRight } from 'lucide-react';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+
+const AdminBreadcrumb = () => {
+    const pathname = usePathname();
+    const pathParts = pathname.split('/').filter(part => part);
+
+    return (
+        <Breadcrumb>
+            <BreadcrumbList>
+                {pathParts.map((part, index) => {
+                    const href = '/' + pathParts.slice(0, index + 1).join('/');
+                    const isLast = index === pathParts.length - 1;
+                    const decodedPart = decodeURIComponent(part);
+                    const linkText = decodedPart.charAt(0).toUpperCase() + decodedPart.slice(1).replace(/-/g, ' ');
+
+                    return (
+                        <React.Fragment key={href}>
+                            <BreadcrumbItem>
+                                {isLast ? (
+                                    <BreadcrumbPage>{linkText}</BreadcrumbPage>
+                                ) : (
+                                    <BreadcrumbLink asChild>
+                                        <Link href={href}>{linkText}</Link>
+                                    </BreadcrumbLink>
+                                )}
+                            </BreadcrumbItem>
+                            {!isLast && <BreadcrumbSeparator />}
+                        </React.Fragment>
+                    );
+                })}
+            </BreadcrumbList>
+        </Breadcrumb>
+    )
+}
 
 
 export default function DashboardLayout({
@@ -44,14 +72,9 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
 
-  const renderIcon = (name: keyof typeof Icons) => {
-    const Icon = Icons[name] as React.ElementType;
-    if (!Icon) return null;
-    return <Icon />;
-  };
-
-  const isLinkActive = (href: string) => {
-    return pathname === href;
+  const isLinkActive = (href: string, exact: boolean = true) => {
+    if (exact) return pathname === href;
+    return pathname.startsWith(href);
   }
 
   return (
@@ -68,9 +91,9 @@ export default function DashboardLayout({
                 </SidebarMenuButton>
             </SidebarMenuItem>
 
-             <Collapsible>
-                <CollapsibleTrigger asChild className="w-full">
-                    <SidebarMenuButton className="w-full" isActive={pathname.startsWith('/admin/dashboard/members')}>
+             <Collapsible defaultOpen={isLinkActive('/admin/dashboard/members', false)}>
+                <CollapsibleTrigger asChild>
+                     <SidebarMenuButton className="w-full">
                         <Icons.Users/>
                         <span>Members</span>
                         <ChevronRight className="h-4 w-4 ml-auto transition-transform [&[data-state=open]]:rotate-90" />
@@ -89,10 +112,10 @@ export default function DashboardLayout({
                 </CollapsibleContent>
             </Collapsible>
             
-             <Collapsible>
-                <CollapsibleTrigger asChild className="w-full">
-                    <SidebarMenuButton className="w-full" isActive={pathname.startsWith('/admin/dashboard/donations') || pathname.startsWith('/admin/dashboard/payments')}>
-                        <Icons.Heart/>
+             <Collapsible defaultOpen={isLinkActive('/admin/dashboard/payments', false)}>
+                <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="w-full">
+                        <Icons.Wallet/>
                         <span>Payments</span>
                         <ChevronRight className="h-4 w-4 ml-auto transition-transform [&[data-state=open]]:rotate-90" />
                     </SidebarMenuButton>
@@ -128,7 +151,7 @@ export default function DashboardLayout({
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="w-full flex-1">
-            {/* Can add breadcrumbs or search here */}
+            <AdminBreadcrumb />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -154,7 +177,7 @@ export default function DashboardLayout({
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 bg-muted/40">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
