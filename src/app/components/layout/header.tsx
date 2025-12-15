@@ -6,7 +6,7 @@ import { NAV_LINKS } from '@/lib/constants';
 import { Logo } from './logo';
 import { LanguageSwitcher } from '../shared/language-switcher';
 import { MobileNav } from './mobile-nav';
-import { Heart } from 'lucide-react';
+import { Heart, User } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 
 export function Header() {
@@ -29,6 +29,9 @@ export function Header() {
         <div className="flex flex-1 items-center justify-end gap-2">
           <div className="hidden md:flex items-center gap-2">
             <LanguageSwitcher />
+            <Button asChild variant="outline">
+              <Link href="/login"><User className="mr-2 h-4 w-4" /> Member Login</Link>
+            </Button>
             <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/5 hover:text-primary">
                 <Link href="/donate"><Heart className="mr-2 h-4 w-4 fill-primary" /> {t('nav_donate')}</Link>
             </Button>
