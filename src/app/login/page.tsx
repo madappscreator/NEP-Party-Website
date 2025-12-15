@@ -15,6 +15,12 @@ import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
+declare global {
+  interface Window {
+    grecaptcha: any;
+  }
+}
+
 export default function LoginPage() {
   const [step, setStep] = React.useState<'mobile' | 'otp'>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('');
@@ -27,8 +33,26 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
+  const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
+  const widgetIdRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (auth && !recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'enterprise': true, 
+        });
+    }
+
+    return () => {
+        if (widgetIdRef.current !== null && window.grecaptcha) {
+            window.grecaptcha.reset(widgetIdRef.current);
+        }
+    };
+  }, [auth]);
+
   const handleSendOtp = async () => {
-    if (!auth) {
+    if (!auth || !recaptchaVerifierRef.current) {
         toast({ title: "Error", description: "Firebase not initialized. Please refresh.", variant: "destructive" });
         return;
     }
@@ -37,11 +61,11 @@ export default function LoginPage() {
         return;
     }
     setIsOtpSending(true);
+
+    const verifier = recaptchaVerifierRef.current;
+
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-        });
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
         setConfirmationResult(confirmation);
         setStep('otp');
@@ -49,6 +73,9 @@ export default function LoginPage() {
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error sending OTP", description: error.message, variant: "destructive" });
+        if (widgetIdRef.current !== null && window.grecaptcha) {
+            window.grecaptcha.reset(widgetIdRef.current);
+        }
     } finally {
         setIsOtpSending(false);
     }

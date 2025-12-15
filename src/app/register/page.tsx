@@ -23,6 +23,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
 
+declare global {
+  interface Window {
+    grecaptcha: any;
+  }
+}
+
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
 type FormData = {
@@ -91,10 +97,29 @@ export default function RegisterPage() {
 
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
+
+  const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
+  const widgetIdRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (auth && !recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'enterprise': true, 
+        });
+    }
+
+    return () => {
+        // Cleanup reCAPTCHA when component unmounts
+        if (widgetIdRef.current !== null && window.grecaptcha) {
+            window.grecaptcha.reset(widgetIdRef.current);
+        }
+    };
+  }, [auth]);
   
 
   const handleSendOtp = async () => {
-    if (!auth) {
+    if (!auth || !recaptchaVerifierRef.current) {
         toast({ title: "Error", description: "Firebase not initialized.", variant: "destructive" });
         return;
     }
@@ -104,22 +129,22 @@ export default function RegisterPage() {
     }
     setIsOtpSending(true);
     
+    const verifier = recaptchaVerifierRef.current;
+    
     try {
-      const phoneNumber = `+91${mobileNumber}`;
-      
-      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
-      });
-
-      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
-
-      setConfirmationResult(confirmation);
-      setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
-      setStep('otp');
-      toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
+        const phoneNumber = `+91${mobileNumber}`;
+        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+        setConfirmationResult(confirmation);
+        setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
+        setStep('otp');
+        toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error sending OTP", description: error.message, variant: "destructive" });
+        // Reset reCAPTCHA on failure
+        if (widgetIdRef.current !== null && window.grecaptcha) {
+            window.grecaptcha.reset(widgetIdRef.current);
+        }
     } finally {
         setIsOtpSending(false);
     }
