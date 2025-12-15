@@ -1,6 +1,6 @@
 
 
-import type { NavItem, Language, ManifestoPoint, Member, Donation, Album, Wing } from './types';
+import type { NavItem, Language, ManifestoPoint, Member, Donation, Album, Wing, PendingPayment } from './types';
 
 export const NAV_LINKS: NavItem[] = [
   { href: '/', label: 'Home' },
@@ -150,6 +150,36 @@ export const DUMMY_DONATIONS: Donation[] = [
     { id: 'DON003', donorName: 'Sunita Williams', amount: 2500, date: '2024-07-27', status: 'Verified' },
     { id: 'DON004', donorName: 'M. Anand', amount: 10000, date: '2024-07-26', status: 'Verified' },
 ];
+
+export const DUMMY_PENDING_PAYMENTS: PendingPayment[] = [
+  {
+    id: 'PAY-001',
+    memberId: 'NEP-2025-100001',
+    name: 'Arun Kumar',
+    mobile: '9876543210',
+    location: 'Tamil Nadu / Chennai',
+    amount: 10,
+    paymentMode: 'UPI',
+    transactionRef: 'UPI-TR-123456789',
+    screenshotUrl: 'https://picsum.photos/seed/pay1/200/300',
+    status: 'Pending',
+    date: '2024-08-01'
+  },
+  {
+    id: 'PAY-002',
+    memberId: 'NEP-2025-100002',
+    name: 'Priya Singh',
+    mobile: '9123456789',
+    location: 'Maharashtra / Mumbai',
+    amount: 500,
+    paymentMode: 'QR',
+    transactionRef: 'QR-REF-987654321',
+    screenshotUrl: 'https://picsum.photos/seed/pay2/200/300',
+    status: 'Pending',
+    date: '2024-08-01'
+  },
+];
+
 
 /**
  * To populate the gallery, please update this GALLERY_ALBUMS array.

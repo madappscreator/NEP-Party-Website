@@ -36,6 +36,21 @@ export type Donation = {
     status: 'Verified' | 'Pending';
 };
 
+export type PendingPayment = {
+  id: string;
+  memberId: string;
+  name: string;
+  mobile: string;
+  location: string;
+  amount: number;
+  paymentMode: 'UPI' | 'QR' | 'Bank';
+  transactionRef: string;
+  screenshotUrl: string;
+  status: 'Pending';
+  date: string;
+};
+
+
 export type ManifestoPoint = {
     title: string;
     description: string;
