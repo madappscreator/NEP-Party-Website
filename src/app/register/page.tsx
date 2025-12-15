@@ -93,22 +93,29 @@ export default function RegisterPage() {
 
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
+  
+  const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
 
-  const setupRecaptcha = React.useCallback(() => {
-    if (!auth) return;
-    if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response: any) => {
-          // reCAPTCHA solved.
-        }
-      });
+  React.useEffect(() => {
+    if (auth && !recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': (response: any) => {
+              // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
     }
+    // Cleanup on unmount
+    return () => {
+        if (recaptchaVerifierRef.current) {
+            recaptchaVerifierRef.current.clear();
+        }
+    };
   }, [auth]);
 
 
   const handleSendOtp = async () => {
-    if (!auth) {
+    if (!auth || !recaptchaVerifierRef.current) {
         toast({ title: "Error", description: "Firebase not initialized.", variant: "destructive" });
         return;
     }
@@ -117,10 +124,10 @@ export default function RegisterPage() {
         return;
     }
     setIsOtpSending(true);
-    setupRecaptcha();
+    
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = (window as any).recaptchaVerifier;
+        const appVerifier = recaptchaVerifierRef.current;
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
         setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
@@ -129,9 +136,6 @@ export default function RegisterPage() {
     } catch (error) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
-         if ((window as any).grecaptcha && (window as any).recaptchaVerifier) {
-          (window as any).grecaptcha.reset((window as any).recaptchaVerifier.widgetId);
-        }
     } finally {
         setIsOtpSending(false);
     }
