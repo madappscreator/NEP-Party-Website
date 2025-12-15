@@ -84,16 +84,17 @@ export default function RegisterPage() {
   const { auth } = useFirebase();
   const { toast } = useToast();
 
-  React.useEffect(() => {
-    if (auth && !(window as any).recaptchaVerifier) {
+  const setupRecaptcha = () => {
+    if (!auth) return;
+    if (!(window as any).recaptchaVerifier) {
       (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': (response: any) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
+          // reCAPTCHA solved.
         }
       });
     }
-  }, [auth]);
+  };
 
 
   const handleSendOtp = async () => {
@@ -106,6 +107,7 @@ export default function RegisterPage() {
         return;
     }
     setIsOtpSending(true);
+    setupRecaptcha();
     try {
         const phoneNumber = `+91${mobileNumber}`;
         const appVerifier = (window as any).recaptchaVerifier;
@@ -117,6 +119,11 @@ export default function RegisterPage() {
     } catch (error) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
+         if ((window as any).recaptchaVerifier) {
+          (window as any).recaptchaVerifier.render().then((widgetId: any) => {
+            grecaptcha.reset(widgetId);
+          });
+        }
     } finally {
         setIsOtpSending(false);
     }

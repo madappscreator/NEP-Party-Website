@@ -28,16 +28,17 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
-  React.useEffect(() => {
-    if (auth && !(window as any).recaptchaVerifier) {
+  const setupRecaptcha = () => {
+    if (!auth) return;
+    if (!(window as any).recaptchaVerifier) {
       (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': (response: any) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
+          // reCAPTCHA solved.
         }
       });
     }
-  }, [auth]);
+  };
 
   const handleSendOtp = async () => {
     if (!auth) {
@@ -49,6 +50,7 @@ export default function LoginPage() {
         return;
     }
     setIsOtpSending(true);
+    setupRecaptcha();
     try {
         const phoneNumber = `+91${mobileNumber}`;
         const appVerifier = (window as any).recaptchaVerifier;
@@ -59,6 +61,12 @@ export default function LoginPage() {
     } catch (error) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
+        // Reset reCAPTCHA so user can try again
+        if ((window as any).recaptchaVerifier) {
+          (window as any).recaptchaVerifier.render().then((widgetId: any) => {
+            grecaptcha.reset(widgetId);
+          });
+        }
     } finally {
         setIsOtpSending(false);
     }
