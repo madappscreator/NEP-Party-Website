@@ -358,12 +358,14 @@ function getPayloadConfigFromPayload(
 const DonutChart = ({ data, category, index, className } : { data: any[], category: string, index: string, className?: string }) => {
   const chartConfig = React.useMemo(() => {
     const config: ChartConfig = {};
-    data.forEach(item => {
-      config[item[index]] = {
-        label: item[index],
-        color: item.fill,
-      };
-    });
+    if (data) {
+      data.forEach(item => {
+        config[item[index]] = {
+          label: item[index],
+          color: item.fill,
+        };
+      });
+    }
     return config;
   }, [data, index]);
 
@@ -388,12 +390,14 @@ const DonutChart = ({ data, category, index, className } : { data: any[], catego
 
 const BarChart = ({ data, index, categories, colors, className }: { data: any[], index: string, categories: string[], colors: string[], className?: string }) => {
     const chartConfig: ChartConfig = {};
-    categories.forEach((category, i) => {
-        chartConfig[category] = {
-            label: category,
-            color: `hsl(var(--chart-${i + 1}))`
-        }
-    });
+    if (categories) {
+        categories.forEach((category, i) => {
+            chartConfig[category] = {
+                label: category,
+                color: `hsl(var(--chart-${i + 1}))`
+            }
+        });
+    }
 
   return (
     <ChartContainer config={chartConfig} className={cn("min-h-[200px] w-full", className)}>
@@ -427,3 +431,5 @@ export {
   DonutChart,
   BarChart,
 }
+
+    
