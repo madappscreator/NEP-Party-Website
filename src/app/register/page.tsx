@@ -76,6 +76,7 @@ const donationAmounts = [10, 100, 500, 1000, 2000];
 declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier;
+    grecaptcha?: any;
   }
 }
 
@@ -99,57 +100,40 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
-  React.useEffect(() => {
-    if (!auth) return;
-
-    // Initialize reCAPTCHA verifier once and attach to window
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        },
-        'expired-callback': () => {
-          // Response expired.
-        }
-      });
-    }
-
-    // Cleanup function to clear the verifier when the component unmounts
-    return () => {
-      window.recaptchaVerifier?.clear();
-    };
-  }, [auth]);
-
   const handleSendOtp = async () => {
-    if (!auth || !window.recaptchaVerifier) {
-        toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
-        return;
+    if (!auth) {
+      toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
+      return;
     }
     if (mobileNumber.length !== 10) {
-        toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
-        return;
+      toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
+      return;
     }
     setIsOtpSending(true);
-    
-    try {
-        const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = window.recaptchaVerifier;
 
-        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-        setConfirmationResult(confirmation);
-        setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
-        setStep('otp');
-        toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
+    try {
+      const phoneNumber = `+91${mobileNumber}`;
+      
+      const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {},
+      });
+
+      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+
+      setConfirmationResult(confirmation);
+      setFormData(prev => ({ ...prev, mobileNumber: phoneNumber }));
+      setStep('otp');
+      toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
-        console.error("Error sending OTP: ", error);
-        if (error.code === 'auth/too-many-requests') {
-            toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
-        } else {
-            toast({ title: "Error sending OTP", description: "Could not send OTP. Please ensure your number is correct and try again later.", variant: "destructive" });
-        }
+      console.error("Error sending OTP: ", error);
+       if (error.code === 'auth/too-many-requests') {
+          toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
+      } else {
+          toast({ title: "Error sending OTP", description: "Could not send OTP. Please ensure your number is correct and try again.", variant: "destructive" });
+      }
     } finally {
-        setIsOtpSending(false);
+      setIsOtpSending(false);
     }
   };
 

@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier;
+    grecaptcha?: any;
   }
 }
 
@@ -35,30 +36,8 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
-  React.useEffect(() => {
-    if (!auth) return;
-
-    // Initialize reCAPTCHA verifier once and attach to window
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        },
-        'expired-callback': () => {
-          // Response expired.
-        }
-      });
-    }
-
-    // Cleanup function to clear the verifier when the component unmounts
-    return () => {
-      window.recaptchaVerifier?.clear();
-    };
-  }, [auth]);
-
   const handleSendOtp = async () => {
-    if (!auth || !window.recaptchaVerifier) {
+    if (!auth) {
         toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
         return;
     }
@@ -70,7 +49,10 @@ export default function LoginPage() {
 
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = window.recaptchaVerifier;
+        const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': () => {},
+        });
         
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
