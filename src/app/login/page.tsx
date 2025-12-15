@@ -19,17 +19,6 @@ import { useRouter } from 'next/navigation';
 // Keep the verifier instance outside the component to prevent it from being re-created on re-renders.
 let appVerifier: RecaptchaVerifier | null = null;
 
-const getRecaptchaVerifier = (auth: Auth) => {
-    if (!appVerifier) {
-        appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'enterprise': true, // Use enterprise version
-        });
-    }
-    return appVerifier;
-};
-
-
 export default function LoginPage() {
   const [step, setStep] = React.useState<'mobile' | 'otp'>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('');
@@ -53,29 +42,24 @@ export default function LoginPage() {
     }
     setIsOtpSending(true);
     try {
-        const phoneNumber = `+91${mobileNumber}`;
-        const verifier = getRecaptchaVerifier(auth);
-        
-        // Explicitly render the reCAPTCHA widget
-        const widgetId = await verifier.render();
-        verifier.reset(widgetId);
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': () => {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
+        appVerifier = verifier;
 
-        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+        const phoneNumber = `+91${mobileNumber}`;
+        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
         setStep('otp');
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: `Failed to send OTP. ${error.message}`, variant: "destructive" });
-        // Reset the verifier if it exists
         if (appVerifier) {
-            appVerifier.render().then((widgetId) => {
-              // @ts-ignore
-              if (window.grecaptcha) {
-                // @ts-ignore
-                window.grecaptcha.reset(widgetId);
-              }
-            });
+            appVerifier.clear();
         }
     } finally {
         setIsOtpSending(false);

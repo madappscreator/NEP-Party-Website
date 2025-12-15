@@ -74,16 +74,7 @@ const donationAmounts = [10, 100, 500, 1000, 2000];
 
 // Keep the verifier instance outside the component to prevent it from being re-created on re-renders.
 let appVerifier: RecaptchaVerifier | null = null;
-
-const getRecaptchaVerifier = (auth: Auth) => {
-    if (!appVerifier) {
-        appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'enterprise': true, // Use enterprise version
-        });
-    }
-    return appVerifier;
-};
+let recaptchaWidgetId: number | null = null;
 
 
 export default function RegisterPage() {
@@ -121,14 +112,17 @@ export default function RegisterPage() {
     setIsOtpSending(true);
     
     try {
+        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': () => {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
+        appVerifier = verifier;
+        
         const phoneNumber = `+91${mobileNumber}`;
-        const verifier = getRecaptchaVerifier(auth);
+        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
 
-        // Explicitly render the reCAPTCHA widget and then reset it.
-        const widgetId = await verifier.render();
-        verifier.reset(widgetId);
-
-        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
         setConfirmationResult(confirmation);
         setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
         setStep('otp');
@@ -137,13 +131,7 @@ export default function RegisterPage() {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: `Failed to send OTP. ${error.message}`, variant: "destructive" });
         if (appVerifier) {
-            appVerifier.render().then((widgetId) => {
-              // @ts-ignore
-              if (window.grecaptcha) {
-                // @ts-ignore
-                window.grecaptcha.reset(widgetId);
-              }
-            });
+            appVerifier.clear();
         }
     } finally {
         setIsOtpSending(false);
@@ -334,6 +322,7 @@ const handleSelectChange = (id: string, value: string) => {
               <CardDescription>Enter your mobile number to begin. We'll send you an OTP for verification.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div id="recaptcha-container"></div>
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
                 <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} />
@@ -670,7 +659,6 @@ const handleSelectChange = (id: string, value: string) => {
 
   return (
     <div className="container flex items-center justify-center min-h-[80vh] py-12">
-      <div id="recaptcha-container"></div>
       <Card className="w-full max-w-3xl shadow-lg">
         {renderStep()}
       </Card>
