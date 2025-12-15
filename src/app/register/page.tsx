@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { UserPlus, ShieldCheck, Upload, Wallet, CheckCircle, Mail, HelpCircle } from 'lucide-react';
+import { UserPlus, ShieldCheck, Upload, Wallet, CheckCircle, Mail, HelpCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import {
   RecaptchaVerifier,
@@ -16,7 +15,7 @@ import {
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
 import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
@@ -41,7 +40,7 @@ type FormData = {
   constituency: string;
   membershipAmount: number;
   declarationAccepted: boolean;
-  photoUrl: string; // Data URL for upload
+  photoFile: File | null;
   transactionId: string;
   paymentScreenshot: File | null;
   ppoCopy: File | null;
@@ -63,7 +62,7 @@ const initialFormData: FormData = {
     constituency: '',
     membershipAmount: 10,
     declarationAccepted: false,
-    photoUrl: '',
+    photoFile: null,
     transactionId: '',
     paymentScreenshot: null,
     ppoCopy: null,
@@ -72,7 +71,6 @@ const initialFormData: FormData = {
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
 
-// 1. Declare verifier outside the component to ensure it's a singleton per module.
 let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 export default function RegisterPage() {
@@ -86,8 +84,7 @@ export default function RegisterPage() {
 
   const [formData, setFormData] = React.useState<FormData>(initialFormData);
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
-  const [screenshotPreview, setScreenshotPreview] = React.useState<string | null>(null);
-
+  
   const [districts, setDistricts] = React.useState<District[]>([]);
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
   const [customAmount, setCustomAmount] = React.useState('');
@@ -95,17 +92,15 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
-  // 2. Create an initialization function as per instructions.
   const initRecaptcha = () => {
     if (!auth) return;
-    // Initialize only if it hasn't been created yet.
     if (!recaptchaVerifier) {
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': () => {
-              // reCAPTCHA solved
-            },
-        });
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved
+        },
+      });
     }
   }
 
@@ -123,7 +118,6 @@ export default function RegisterPage() {
     setIsOtpSending(true);
 
     try {
-      // 3. Initialize on demand and send OTP.
       initRecaptcha();
       const phoneNumber = `+91${mobileNumber}`;
       const appVerifier = recaptchaVerifier!;
@@ -136,8 +130,6 @@ export default function RegisterPage() {
       toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
-
-        // 4. CRITICAL: Reset the verifier on failure.
         if (recaptchaVerifier) {
             recaptchaVerifier.clear();
             recaptchaVerifier = null;
@@ -169,7 +161,8 @@ export default function RegisterPage() {
         const memberDoc = await getDoc(doc(firestore, 'members', memberId));
         if (memberDoc.exists()) {
              toast({ title: "Already Registered", description: "You are already a member. Redirecting to your profile." });
-             // redirect to profile page in next step, for now just show a toast
+             // In a real app, you'd redirect here.
+             // router.push('/profile');
         } else {
             setStep('details');
             toast({ title: "Success", description: "Mobile number verified successfully." });
@@ -184,8 +177,8 @@ export default function RegisterPage() {
 };
 
 const handleFinalSubmit = async () => {
-    if (!user || !firestore) {
-        toast({ title: "Error", description: "Could not submit form. Please refresh and try again.", variant: "destructive" });
+    if (!auth?.currentUser || !firestore) {
+        toast({ title: "Authentication Error", description: "User not authenticated. Please restart the process.", variant: "destructive" });
         return;
     }
     if (!formData.paymentScreenshot) {
@@ -199,20 +192,19 @@ const handleFinalSubmit = async () => {
 
     try {
         const storage = getStorage();
-        const memberId = user.uid;
-
-        // Upload payment screenshot
-        const screenshotRef = ref(storage, `payment_proofs/${memberId}/${formData.paymentScreenshot.name}`);
-        const screenshotUploadResult = await uploadString(screenshotRef, screenshotPreview!, 'data_url');
-        const screenshotUrl = await getDownloadURL(screenshotUploadResult.ref);
-
-        // Upload profile photo
-        let photoUrl = '';
-        if (formData.photoUrl) {
-            const photoRef = ref(storage, `profile_photos/${memberId}/profile.jpg`);
-            const photoUploadResult = await uploadString(photoRef, formData.photoUrl, 'data_url');
-            photoUrl = await getDownloadURL(photoUploadResult.ref);
+        const memberId = auth.currentUser.uid;
+        
+        const uploadFile = async (file: File, path: string) => {
+            if (!file) return '';
+            const fileRef = ref(storage, path);
+            const uploadResult = await uploadBytes(fileRef, file);
+            return await getDownloadURL(uploadResult.ref);
         }
+
+        const paymentScreenshotUrl = await uploadFile(formData.paymentScreenshot, `payment_proofs/${memberId}/${formData.paymentScreenshot.name}`);
+        const photoUrl = await uploadFile(formData.photoFile!, `profile_photos/${memberId}/profile.jpg`);
+        const ppoCopyUrl = await uploadFile(formData.ppoCopy!, `documents/${memberId}/ppo.pdf`);
+        const aadharCardUrl = await uploadFile(formData.aadharCard!, `documents/${memberId}/aadhar.pdf`);
         
         // Prepare member data
         const memberData = {
@@ -231,6 +223,8 @@ const handleFinalSubmit = async () => {
             constituency: formData.constituency,
             declarationAccepted: formData.declarationAccepted,
             photoUrl: photoUrl,
+            ppoCopyUrl: ppoCopyUrl,
+            aadharCardUrl: aadharCardUrl,
             status: 'pending', // Initial status
             paymentStatus: 'pending',
             createdAt: serverTimestamp()
@@ -242,7 +236,7 @@ const handleFinalSubmit = async () => {
             amount: formData.membershipAmount,
             paymentMethod: 'UPI',
             transactionId: formData.transactionId,
-            paymentScreenshotUrl: screenshotUrl,
+            paymentScreenshotUrl: paymentScreenshotUrl,
             status: 'pending', // Initial status
             createdAt: serverTimestamp()
         };
@@ -253,9 +247,13 @@ const handleFinalSubmit = async () => {
 
         setStep('confirm');
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Form submission error:", error);
-        toast({ title: "Submission Failed", description: "There was an error submitting your application. Please try again.", variant: "destructive" });
+        let description = "There was an error submitting your application. Please try again.";
+        if (error.code === 'storage/unauthorized') {
+            description = "Storage Error: You do not have permission to upload files. Please check security rules.";
+        }
+        toast({ title: "Submission Failed", description: description, variant: "destructive" });
     } finally {
         setIsSubmitting(false);
     }
@@ -272,12 +270,10 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'pho
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onloadend = () => {
-            const dataUrl = reader.result as string;
             if (fileType === 'photo') {
-                setPhotoPreview(dataUrl);
-                setFormData(prev => ({...prev, photoUrl: dataUrl}));
+                setPhotoPreview(reader.result as string);
+                setFormData(prev => ({...prev, photoFile: file}));
             } else if (fileType === 'screenshot') {
-                setScreenshotPreview(dataUrl);
                 setFormData(prev => ({...prev, paymentScreenshot: file}));
             } else if (fileType === 'ppo') {
                  setFormData(prev => ({...prev, ppoCopy: file}));
@@ -345,7 +341,9 @@ const handleSelectChange = (id: string, value: string) => {
                 <Label htmlFor="mobile">Mobile Number</Label>
                 <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
               </div>
-              <Button onClick={handleNextStep} className="w-full" disabled={isOtpSending}>{isOtpSending ? 'Sending...' : 'Send OTP'}</Button>
+              <Button onClick={handleNextStep} className="w-full" disabled={isOtpSending}>
+                {isOtpSending ? <Loader2 className="animate-spin" /> : 'Send OTP'}
+              </Button>
             </CardContent>
           </>
         );
@@ -361,7 +359,9 @@ const handleSelectChange = (id: string, value: string) => {
                     <Label htmlFor="otp">Enter OTP</Label>
                     <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isOtpVerifying} />
                   </div>
-                  <Button onClick={handleNextStep} className="w-full" disabled={isOtpVerifying}>{isOtpVerifying ? 'Verifying...' : 'Verify & Proceed'}</Button>
+                  <Button onClick={handleNextStep} className="w-full" disabled={isOtpVerifying}>
+                    {isOtpVerifying ? <Loader2 className="animate-spin" /> : 'Verify & Proceed'}
+                  </Button>
                    <Button variant="link" size="sm" className="w-full" onClick={() => setStep('mobile')}>Change Number</Button>
                 </CardContent>
               </>
@@ -513,14 +513,14 @@ const handleSelectChange = (id: string, value: string) => {
                                 <Label htmlFor="ppo" className="cursor-pointer">
                                     <Upload className="mr-2 h-4 w-4" />
                                     Upload PPO {formData.ppoCopy && <CheckCircle className="ml-auto h-4 w-4 text-green-500" />}
-                                    <Input id="ppo" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'ppo')}/>
+                                    <Input id="ppo" type="file" className="sr-only" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileChange(e, 'ppo')}/>
                                 </Label>
                             </Button>
                              <Button asChild variant="outline">
                                 <Label htmlFor="aadhar" className="cursor-pointer">
                                     <Upload className="mr-2 h-4 w-4" />
                                     Upload Aadhar {formData.aadharCard && <CheckCircle className="ml-auto h-4 w-4 text-green-500" />}
-                                    <Input id="aadhar" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'aadhar')}/>
+                                    <Input id="aadhar" type="file" className="sr-only" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => handleFileChange(e, 'aadhar')}/>
                                 </Label>
                             </Button>
                         </div>
@@ -589,7 +589,7 @@ const handleSelectChange = (id: string, value: string) => {
                     </div>
                     
                     <Button onClick={handleNextStep} className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                        {isSubmitting ? <Loader2 className="animate-spin" /> : 'Submit Application'}
                     </Button>
                 </CardContent>
                 </>

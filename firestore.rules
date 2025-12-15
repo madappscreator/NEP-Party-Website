@@ -115,11 +115,11 @@ service cloud.firestore {
      * @principle Restricts access to a user's own data tree.
      */
     match /members/{memberId} {
-      allow get: if isOwner(memberId);
-      allow list: if false;
+      allow get: if isOwner(memberId) || isAdmin();
+      allow list: if isAdmin();
       allow create: if isOwner(memberId) && request.resource.data.id == memberId;
-      allow update: if isOwner(memberId) && isExistingDoc() && ownerIsImmutable('id');
-      allow delete: if isOwner(memberId) && isExistingDoc();
+      allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('id');
+      allow delete: if isAdmin() && isExistingDoc();
 
       match /payments/{paymentId} {
         allow get: if isOwner(memberId) || isAdmin();
@@ -139,7 +139,7 @@ service cloud.firestore {
      */
     match /donations/{donationId} {
       allow get: if (isOwner(resource.data.memberId) || isAdmin());
-      allow list: if false;
+      allow list: if isAdmin();
       allow create: if createdByOwner('memberId');
       allow update: if isExistingAdmin();
       allow delete: if isExistingAdmin();
@@ -154,7 +154,7 @@ service cloud.firestore {
      */
     match /admins/{adminId} {
       allow get: if isAdmin();
-      allow list: if false;
+      allow list: if isAdmin();
       allow create: if isAdmin();
       allow update: if isExistingAdmin();
       allow delete: if isExistingAdmin();
@@ -221,25 +221,31 @@ service cloud.firestore {
     }
   }
 }
-
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // Allow public read access to journey caravan images and gallery images
+    // Public read access for gallery and caravan images
+    match /gallery/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
     match /caravan/{allPaths=**} {
       allow read: if true;
+      allow write: if false;
     }
-     match /gallery/{allPaths=**} {
-      allow read: if true;
+    
+    // Users can write to their own profile photo path
+    match /profile_photos/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true; // Public read for profile photos
     }
 
-    // Allow users to upload their own profile photo
-    match /profile_photos/{userId}/{allPaths=**} {
+    // Users can write their own payment proofs, but they are not public
+    match /payment_proofs/{userId}/{fileName} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow users to upload payment proofs into their own folder
-    match /payment_proofs/{userId}/{allPaths=**} {
+    // Users can write their own documents, but they are not public
+    match /documents/{userId}/{fileName} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
