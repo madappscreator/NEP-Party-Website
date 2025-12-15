@@ -100,6 +100,23 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
+   React.useEffect(() => {
+    if (!auth) return;
+
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {},
+      });
+    }
+
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+      }
+    };
+  }, [auth]);
+
   const handleSendOtp = async () => {
     if (!auth) {
       toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
@@ -113,12 +130,8 @@ export default function RegisterPage() {
 
     try {
       const phoneNumber = `+91${mobileNumber}`;
+      const appVerifier = window.recaptchaVerifier!;
       
-      const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {},
-      });
-
       const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
 
       setConfirmationResult(confirmation);
@@ -126,7 +139,7 @@ export default function RegisterPage() {
       setStep('otp');
       toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
-      console.error("Error sending OTP: ", error);
+        console.error("Error sending OTP: ", error);
        if (error.code === 'auth/too-many-requests') {
           toast({ title: "Too Many Requests", description: "You've made too many requests. Please wait a while before trying again.", variant: "destructive" });
       } else {

@@ -36,6 +36,27 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
+  React.useEffect(() => {
+    if (!auth) return;
+
+    // Initialize reCAPTCHA verifier once and attach to window
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved, allow user to proceed
+        },
+      });
+    }
+
+    // Cleanup function to clear the verifier
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+      }
+    };
+  }, [auth]);
+
   const handleSendOtp = async () => {
     if (!auth) {
         toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
@@ -49,10 +70,7 @@ export default function LoginPage() {
 
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': () => {},
-        });
+        const appVerifier = window.recaptchaVerifier!;
         
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
