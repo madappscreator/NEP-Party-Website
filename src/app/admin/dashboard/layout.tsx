@@ -14,6 +14,8 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -112,7 +114,7 @@ export default function DashboardLayout({
                 </CollapsibleContent>
             </Collapsible>
             
-             <Collapsible defaultOpen={isLinkActive('/admin/dashboard/payments', false)}>
+             <Collapsible defaultOpen={isLinkActive('/admin/dashboard/payments', false) || isLinkActive('/admin/dashboard/donations', false)}>
                 <CollapsibleTrigger asChild>
                     <SidebarMenuButton className="w-full">
                         <Icons.Wallet/>
