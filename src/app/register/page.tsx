@@ -72,6 +72,13 @@ const initialFormData: FormData = {
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
 
+// Make TS aware of the new window property
+declare global {
+  interface Window {
+    recaptchaVerifier?: RecaptchaVerifier;
+  }
+}
+
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('');
@@ -89,12 +96,33 @@ export default function RegisterPage() {
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
   const [customAmount, setCustomAmount] = React.useState('');
 
-
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
 
+  React.useEffect(() => {
+    if (!auth) return;
+
+    // Initialize reCAPTCHA verifier once and attach to window
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        },
+        'expired-callback': () => {
+          // Response expired.
+        }
+      });
+    }
+
+    // Cleanup function to clear the verifier when the component unmounts
+    return () => {
+      window.recaptchaVerifier?.clear();
+    };
+  }, [auth]);
+
   const handleSendOtp = async () => {
-    if (!auth) {
+    if (!auth || !window.recaptchaVerifier) {
         toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
         return;
     }
@@ -106,18 +134,8 @@ export default function RegisterPage() {
     
     try {
         const phoneNumber = `+91${mobileNumber}`;
-        
-        // Create a new verifier for every attempt
-        const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': () => {
-              // reCAPTCHA solved, allow signInWithPhoneNumber.
-            },
-            'expired-callback': () => {
-              // Response expired. Ask user to solve reCAPTCHA again.
-            }
-        });
-        
+        const appVerifier = window.recaptchaVerifier;
+
         const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
         setConfirmationResult(confirmation);
         setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
@@ -663,5 +681,3 @@ const handleSelectChange = (id: string, value: string) => {
     </div>
   );
 }
-
-    
