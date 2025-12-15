@@ -84,7 +84,7 @@ export default function RegisterPage() {
   const { auth } = useFirebase();
   const { toast } = useToast();
 
-  const setupRecaptcha = () => {
+  const setupRecaptcha = React.useCallback(() => {
     if (!auth) return;
     if (!(window as any).recaptchaVerifier) {
       (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -94,7 +94,7 @@ export default function RegisterPage() {
         }
       });
     }
-  };
+  }, [auth]);
 
 
   const handleSendOtp = async () => {
@@ -119,10 +119,8 @@ export default function RegisterPage() {
     } catch (error) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
-         if ((window as any).recaptchaVerifier) {
-          (window as any).recaptchaVerifier.render().then((widgetId: any) => {
-            grecaptcha.reset(widgetId);
-          });
+         if ((window as any).grecaptcha && (window as any).recaptchaVerifier) {
+          (window as any).grecaptcha.reset((window as any).recaptchaVerifier.widgetId);
         }
     } finally {
         setIsOtpSending(false);

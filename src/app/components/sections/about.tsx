@@ -40,7 +40,7 @@ export function About() {
         </div>
         <div className="flex justify-center items-center">
              <div className="relative w-72 h-72">
-                <Image src="/NEP Flag.jpg" alt="NEP Flag" layout="fill" className="rounded-full object-cover" />
+                <Image src="/NEP Flag.jpg" alt="NEP Flag" fill className="rounded-full object-cover" sizes="18rem" />
             </div>
         </div>
       </div>

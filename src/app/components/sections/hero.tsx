@@ -51,6 +51,7 @@ export function Hero() {
                             fill
                             className="object-cover object-top"
                             priority
+                            sizes="(max-width: 768px) 100vw, 50vw"
                             data-ai-hint="portrait man"
                         />
                     </div>

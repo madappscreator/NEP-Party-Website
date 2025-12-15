@@ -28,7 +28,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
 
-  const setupRecaptcha = () => {
+  const setupRecaptcha = React.useCallback(() => {
     if (!auth) return;
     if (!(window as any).recaptchaVerifier) {
       (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -38,7 +38,7 @@ export default function LoginPage() {
         }
       });
     }
-  };
+  }, [auth]);
 
   const handleSendOtp = async () => {
     if (!auth) {
@@ -62,10 +62,8 @@ export default function LoginPage() {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
         // Reset reCAPTCHA so user can try again
-        if ((window as any).recaptchaVerifier) {
-          (window as any).recaptchaVerifier.render().then((widgetId: any) => {
-            grecaptcha.reset(widgetId);
-          });
+        if ((window as any).grecaptcha && (window as any).recaptchaVerifier) {
+          (window as any).grecaptcha.reset((window as any).recaptchaVerifier.widgetId);
         }
     } finally {
         setIsOtpSending(false);
