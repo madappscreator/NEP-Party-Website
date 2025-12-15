@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -32,6 +32,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { useFirebase } from '@/firebase';
 
 const AdminBreadcrumb = () => {
     const pathname = usePathname();
@@ -73,11 +74,20 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { auth } = useFirebase();
 
   const isLinkActive = (href: string, exact: boolean = true) => {
     if (exact) return pathname === href;
     return pathname.startsWith(href);
   }
+
+  const handleLogout = async () => {
+    if (auth) {
+      await auth.signOut();
+      router.push('/admin');
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -144,8 +154,8 @@ export default function DashboardLayout({
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-            <Button variant="ghost" className="w-full justify-start gap-2" asChild>
-                <Link href="/"><LogOut/><span>Logout</span></Link>
+            <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleLogout}>
+                <LogOut/><span>Logout</span>
             </Button>
         </SidebarFooter>
       </Sidebar>
@@ -170,11 +180,9 @@ export default function DashboardLayout({
               <DropdownMenuSeparator />
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-               <DropdownMenuItem asChild>
-                <Link href="/">
+               <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Logout</span>
-                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
