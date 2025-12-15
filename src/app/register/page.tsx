@@ -68,7 +68,7 @@ const donationAmounts = [10, 100, 500, 1000, 2000];
 
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
-  const [mobileNumber, setMobileNumber] = React.useState('9876543210');
+  const [mobileNumber, setMobileNumber] = React.useState('');
   const [otp, setOtp] = React.useState('');
   const [confirmationResult, setConfirmationResult] = React.useState<ConfirmationResult | null>(null);
   const [isOtpSending, setIsOtpSending] = React.useState(false);
