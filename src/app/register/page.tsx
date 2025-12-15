@@ -95,25 +95,19 @@ export default function RegisterPage() {
   const { toast } = useToast();
   
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
-  const recaptchaWrapperRef = React.useRef<HTMLDivElement>(null);
-
 
   React.useEffect(() => {
-    if (auth && recaptchaWrapperRef.current && !recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaWrapperRef.current, {
+    if (auth && !recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
             'callback': (response: any) => {
               // reCAPTCHA solved, allow signInWithPhoneNumber.
             },
-            'enterprise': true, // Use reCAPTCHA Enterprise
+            'expired-callback': () => {
+              // Response expired. Ask user to solve reCAPTCHA again.
+            },
         });
     }
-    // Cleanup on unmount
-    return () => {
-        if (recaptchaVerifierRef.current) {
-            recaptchaVerifierRef.current.clear();
-        }
-    };
   }, [auth]);
 
 
@@ -139,12 +133,14 @@ export default function RegisterPage() {
     } catch (error) {
         console.error("Error sending OTP: ", error);
         toast({ title: "Error", description: "Failed to send OTP. Please try again.", variant: "destructive" });
-        // Reset verifier on error
-        recaptchaVerifierRef.current.render().then((widgetId) => {
-            if(auth && recaptchaVerifierRef.current) {
-                grecaptcha.enterprise.reset(recaptchaVerifierRef.current.widgetId);
-            }
-        });
+        if (recaptchaVerifierRef.current) {
+            recaptchaVerifierRef.current.render().then((widgetId) => {
+                if (auth && recaptchaVerifierRef.current) {
+                  // @ts-ignore
+                  grecaptcha.reset(widgetId);
+                }
+            });
+        }
     } finally {
         setIsOtpSending(false);
     }
@@ -159,6 +155,9 @@ export default function RegisterPage() {
     try {
         const userCredential = await confirmationResult.confirm(otp);
         const memberId = userCredential.user.uid;
+        if (!firestore) {
+            throw new Error("Firestore not available");
+        }
         const memberDoc = await getDoc(doc(firestore, 'members', memberId));
         if (memberDoc.exists()) {
              toast({ title: "Already Registered", description: "You are already a member. Redirecting to your profile." });
@@ -667,7 +666,7 @@ const handleSelectChange = (id: string, value: string) => {
 
   return (
     <div className="container flex items-center justify-center min-h-[80vh] py-12">
-      <div ref={recaptchaWrapperRef} id="recaptcha-container"></div>
+      <div id="recaptcha-container"></div>
       <Card className="w-full max-w-3xl shadow-lg">
         {renderStep()}
       </Card>
