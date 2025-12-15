@@ -14,6 +14,10 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +33,9 @@ import { ADMIN_NAV_LINKS } from '@/lib/constants';
 import * as Icons from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronRight } from 'lucide-react';
+
 
 export default function DashboardLayout({
   children,
@@ -43,6 +50,10 @@ export default function DashboardLayout({
     return <Icon />;
   };
 
+  const isLinkActive = (href: string) => {
+    return pathname === href;
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -51,20 +62,60 @@ export default function DashboardLayout({
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {ADMIN_NAV_LINKS.map((link) => (
-              <SidebarMenuItem key={link.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === link.href}
-                  tooltip={link.label}
-                >
-                  <Link href={link.href}>
-                    {link.icon && renderIcon(link.icon)}
-                    <span>{link.label}</span>
-                  </Link>
+            <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isLinkActive('/admin/dashboard')}>
+                  <Link href="/admin/dashboard"><Icons.LayoutDashboard/><span>Dashboard</span></Link>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            </SidebarMenuItem>
+
+             <Collapsible>
+                <CollapsibleTrigger className="w-full">
+                    <SidebarMenuButton className="w-full" isActive={pathname.startsWith('/admin/dashboard/members')}>
+                        <Icons.Users/>
+                        <span>Members</span>
+                        <ChevronRight className="h-4 w-4 ml-auto transition-transform [&[data-state=open]]:rotate-90" />
+                    </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <SidebarMenuSub>
+                        <SidebarMenuSubButton asChild isActive={isLinkActive('/admin/dashboard/members')}>
+                            <Link href="/admin/dashboard/members">All Members</Link>
+                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton asChild isActive={isLinkActive('/admin/dashboard/members/pending-approvals')}>
+                             <Link href="/admin/dashboard/members/pending-approvals">Pending Approvals</Link>
+                        </SidebarMenuSubButton>
+                         <SidebarMenuSubButton>Rejected Members</SidebarMenuSubButton>
+                    </SidebarMenuSub>
+                </CollapsibleContent>
+            </Collapsible>
+            
+             <Collapsible>
+                <CollapsibleTrigger className="w-full">
+                    <SidebarMenuButton className="w-full" isActive={pathname.startsWith('/admin/dashboard/donations') || pathname.startsWith('/admin/dashboard/payments')}>
+                        <Icons.Heart/>
+                        <span>Payments</span>
+                        <ChevronRight className="h-4 w-4 ml-auto transition-transform [&[data-state=open]]:rotate-90" />
+                    </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                     <SidebarMenuSub>
+                        <SidebarMenuSubButton asChild isActive={isLinkActive('/admin/dashboard/payments/pending')}>
+                           <Link href="/admin/dashboard/payments/pending">Pending Payments</Link>
+                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton asChild isActive={isLinkActive('/admin/dashboard/donations')}>
+                            <Link href="/admin/dashboard/donations">Approved Payments</Link>
+                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton>Failed Payments</SidebarMenuSubButton>
+                    </SidebarMenuSub>
+                </CollapsibleContent>
+            </Collapsible>
+
+            <SidebarMenuItem>
+                <SidebarMenuButton><Icons.FileText/><span>Reports</span></SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+                <SidebarMenuButton><Icons.Settings/><span>Settings</span></SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
