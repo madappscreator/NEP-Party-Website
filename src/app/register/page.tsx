@@ -12,7 +12,6 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
-  Auth,
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
 import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -72,11 +71,6 @@ const initialFormData: FormData = {
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
 
-// Keep the verifier instance outside the component to prevent it from being re-created on re-renders.
-let appVerifier: RecaptchaVerifier | null = null;
-let recaptchaWidgetId: number | null = null;
-
-
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('');
@@ -89,7 +83,6 @@ export default function RegisterPage() {
   const [formData, setFormData] = React.useState<FormData>(initialFormData);
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
   const [screenshotPreview, setScreenshotPreview] = React.useState<string | null>(null);
-
 
   const [districts, setDistricts] = React.useState<District[]>([]);
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
@@ -112,27 +105,21 @@ export default function RegisterPage() {
     setIsOtpSending(true);
     
     try {
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': () => {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-            }
-        });
-        appVerifier = verifier;
-        
-        const phoneNumber = `+91${mobileNumber}`;
-        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+      const phoneNumber = `+91${mobileNumber}`;
+      
+      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
+      });
 
-        setConfirmationResult(confirmation);
-        setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
-        setStep('otp');
-        toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
+      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+
+      setConfirmationResult(confirmation);
+      setFormData(prev => ({...prev, mobileNumber: phoneNumber}));
+      setStep('otp');
+      toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
-        toast({ title: "Error", description: `Failed to send OTP. ${error.message}`, variant: "destructive" });
-        if (appVerifier) {
-            appVerifier.clear();
-        }
+        toast({ title: "Error sending OTP", description: error.message, variant: "destructive" });
     } finally {
         setIsOtpSending(false);
     }

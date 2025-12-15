@@ -10,14 +10,10 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
-  Auth,
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-
-// Keep the verifier instance outside the component to prevent it from being re-created on re-renders.
-let appVerifier: RecaptchaVerifier | null = null;
 
 export default function LoginPage() {
   const [step, setStep] = React.useState<'mobile' | 'otp'>('mobile');
@@ -42,25 +38,17 @@ export default function LoginPage() {
     }
     setIsOtpSending(true);
     try {
+        const phoneNumber = `+91${mobileNumber}`;
         const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
-            'callback': () => {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-            }
         });
-        appVerifier = verifier;
-
-        const phoneNumber = `+91${mobileNumber}`;
-        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+        const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
         setConfirmationResult(confirmation);
         setStep('otp');
         toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
-        toast({ title: "Error", description: `Failed to send OTP. ${error.message}`, variant: "destructive" });
-        if (appVerifier) {
-            appVerifier.clear();
-        }
+        toast({ title: "Error sending OTP", description: error.message, variant: "destructive" });
     } finally {
         setIsOtpSending(false);
     }
