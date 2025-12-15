@@ -355,6 +355,68 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+const DonutChart = ({ data, category, index, className } : { data: any[], category: string, index: string, className?: string }) => {
+  const chartConfig = React.useMemo(() => {
+    const config: ChartConfig = {};
+    data.forEach(item => {
+      config[item[index]] = {
+        label: item[index],
+        color: item.fill,
+      };
+    });
+    return config;
+  }, [data, index]);
+
+  return (
+    <ChartContainer config={chartConfig} className={cn("min-h-[200px] w-full", className)}>
+      <RechartsPrimitive.PieChart>
+        <ChartTooltip content={<ChartTooltipContent nameKey={index} hideLabel />} />
+        <RechartsPrimitive.Pie data={data} dataKey={category} nameKey={index}>
+           <RechartsPrimitive.LabelList
+              dataKey={index}
+              className="fill-background"
+              stroke="none"
+              fontSize={12}
+              formatter={(value: string) => chartConfig[value]?.label}
+            />
+        </RechartsPrimitive.Pie>
+         <ChartLegend content={<ChartLegendContent />} />
+      </RechartsPrimitive.PieChart>
+    </ChartContainer>
+  )
+}
+
+const BarChart = ({ data, index, categories, colors, className }: { data: any[], index: string, categories: string[], colors: string[], className?: string }) => {
+    const chartConfig: ChartConfig = {};
+    categories.forEach((category, i) => {
+        chartConfig[category] = {
+            label: category,
+            color: `hsl(var(--chart-${i + 1}))`
+        }
+    });
+
+  return (
+    <ChartContainer config={chartConfig} className={cn("min-h-[200px] w-full", className)}>
+      <RechartsPrimitive.BarChart data={data}>
+         <RechartsPrimitive.CartesianGrid vertical={false} />
+        <RechartsPrimitive.XAxis
+          dataKey={index}
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+        />
+        <RechartsPrimitive.YAxis />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartLegend />
+        {categories.map((category, i) => (
+            <RechartsPrimitive.Bar key={category} dataKey={category} fill={`var(--color-${category})`} radius={4} />
+        ))}
+      </RechartsPrimitive.BarChart>
+    </ChartContainer>
+  );
+};
+
+
 export {
   ChartContainer,
   ChartTooltip,
@@ -362,4 +424,6 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  DonutChart,
+  BarChart,
 }
