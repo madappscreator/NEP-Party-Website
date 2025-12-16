@@ -1,0 +1,108 @@
+body {
+  background: #f2f2f2;
+  font-family: Inter, sans-serif;
+}
+
+/* CARD */
+.nep-card {
+  width: 720px;
+  height: 420px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  overflow: hidden;
+  margin: 40px auto;
+}
+
+/* HEADER */
+.card-header {
+  background: #31ADE5;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  gap: 15px;
+}
+
+.flag-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+}
+
+.header-text h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.header-text p {
+  margin: 2px 0;
+  font-size: 12px;
+}
+
+/* BODY */
+.card-body {
+  display: flex;
+  padding: 18px;
+  gap: 20px;
+}
+
+/* MEMBER PHOTO */
+.photo-box img {
+  width: 130px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 3px solid #6B732A;
+}
+
+/* DETAILS */
+.details {
+  flex: 1;
+  font-size: 14px;
+}
+
+.details h3 {
+  color: #FF7A00;
+  margin-bottom: 8px;
+}
+
+.details p {
+  margin: 4px 0;
+}
+
+/* QR CODE */
+.qr img {
+  margin-top: 10px;
+  width: 80px;
+}
+
+/* PRESIDENT PHOTO */
+.president-box {
+  text-align: center;
+}
+
+.president-box img {
+  width: 130px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 3px solid #31ADE5;
+}
+
+.president-box p {
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* FOOTER */
+.card-footer {
+  background: #6B732A;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
