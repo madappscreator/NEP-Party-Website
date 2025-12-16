@@ -1,8 +1,12 @@
-'use client';
+"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from "@/context/language-context";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Send } from "lucide-react";
 
 export default function ContactPage() {
   const { t } = useLanguage();
@@ -16,60 +20,114 @@ export default function ContactPage() {
         </div>
       </header>
 
-      <section className="container py-16 md:py-24">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <Card className="text-center shadow-lg">
-                  <CardHeader>
-                      <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
-                          <Phone className="h-8 w-8 text-primary" />
-                      </div>
-                      <CardTitle className="mt-4">{t('contact_phone')}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-muted-foreground text-lg">
-                      <a href="tel:+919176101115" className="block hover:text-primary transition-colors">+91 91761 01115</a>
-                      <a href="tel:+919176102229" className="block hover:text-primary transition-colors">+91 91761 02229</a>
-                  </CardContent>
-                </Card>
-                
-                <Card className="text-center shadow-lg">
-                   <CardHeader>
-                      <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
-                          <Mail className="h-8 w-8 text-primary" />
-                      </div>
-                      <CardTitle className="mt-4">{t('contact_email')}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-muted-foreground text-lg">
-                     <a href="mailto:allindianep@gmail.com" className="block hover:text-primary transition-colors">allindianep@gmail.com</a>
-                  </CardContent>
-                </Card>
-                
-                <Card className="text-center shadow-lg md:col-span-2 lg:col-span-1">
-                   <CardHeader>
-                      <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
-                          <MapPin className="h-8 w-8 text-primary" />
-                      </div>
-                      <CardTitle className="mt-4">{t('contact_address')}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-muted-foreground text-lg">
-                    <p>A4, Vishwaa Pride Apartment, Nookampalayam Main Road, Perumbakkam, Chennai - 600100, Tamil Nadu, India</p>
-                  </CardContent>
-                </Card>
+      <section className="container py-12 md:py-20">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+          {/* Left: Contact info column */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold">{t('contact_information') || t('contact_title')}</h2>
+
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <Phone className="h-6 w-6 text-primary" />
               </div>
+              <div>
+                <h3 className="font-semibold">{t('contact_phone')}</h3>
+                <div className="text-muted-foreground mt-2">
+                  <a href="tel:+919176101115" className="block hover:text-primary transition-colors">+91 91761 01115</a>
+                  <a href="tel:+919176102229" className="block hover:text-primary transition-colors">+91 91761 02229</a>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <Mail className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">{t('contact_email')}</h3>
+                <div className="text-muted-foreground mt-2">
+                  <a href="mailto:allindianep@gmail.com" className="block hover:text-primary transition-colors">allindianep@gmail.com</a>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <MapPin className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">{t('contact_address')}</h3>
+                <div className="text-muted-foreground mt-2">
+                  <p>{t('contact_address_l1') || 'National Ex-Servicemen Party'}</p>
+                  <p>{t('contact_address_l2') || 'A4, Vishwaa Pride Apartment, Nookampalayam Main Road, Perumbakkam, Chennai - 600100, Tamil Nadu, India'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <svg className="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <div>
+                <h3 className="font-semibold">{t('contact_office_hours_title') || 'Office Hours'}</h3>
+                <div className="text-muted-foreground mt-2">{t('contact_office_hours') || 'Mon - Sat: 10 AM - 6 PM'}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Contact form card */}
+          <div>
+            <Card className="shadow-lg rounded-md">
+              <CardHeader className="px-6 pt-6">
+                <CardTitle className="text-xl">{t('contact_send_message_title') || 'Send us a Message'}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                  <div>
+                    <Label htmlFor="name">{t('contact_form_name') || 'Name *'}</Label>
+                    <Input id="name" name="name" placeholder="" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="phone">{t('contact_form_phone') || 'Phone *'}</Label>
+                    <Input id="phone" name="phone" placeholder="" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email">{t('contact_form_email') || 'Email'}</Label>
+                    <Input id="email" name="email" placeholder="" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="message">{t('contact_form_message') || 'Message *'}</Label>
+                    <Textarea id="message" name="message" rows={5} />
+                  </div>
+
+                  <div>
+                    <Button type="submit" className="w-full" style={{ backgroundColor: '#29A9E1' }}>
+                      <Send className="mr-2 h-4 w-4" /> {t('contact_send_message') || 'Send Message'}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </section>
 
       <section className="bg-white">
-        <div className="container py-16 md:py-24">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">{t('contact_map_title')}</h2>
-          <div className="aspect-video rounded-lg overflow-hidden shadow-2xl">
+        <div className="container py-12 md:py-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">{t('contact_map_title')}</h2>
+          <div className="mx-auto max-w-3xl h-48 md:h-64 rounded-lg overflow-hidden shadow-2xl">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.020338959614!2d80.22903581482208!3d12.970591990856516!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a525d8b6da2a69d%3A0x6c6c7f5f2b2b6d5!2sVishwaa%20Pride!5e0!3m2!1sen!2sin!4v1620826989421!5m2!1sen!2sin"
+              src="https://www.google.com/maps?q=V5WX+W9+Chennai,+Tamil+Nadu&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen={true}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
+            />
           </div>
         </div>
       </section>

@@ -72,6 +72,13 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        nep: {
+          blue: 'var(--nep-blue)',
+          green: 'var(--nep-green)',
+          white: 'var(--nep-white)',
+          black: 'var(--nep-black)',
+          orange: 'var(--nep-orange)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',

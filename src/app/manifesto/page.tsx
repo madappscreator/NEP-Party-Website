@@ -31,7 +31,7 @@ export default function ManifestoPage() {
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {MANIFESTO_POINTS.map((point, index) => {
-              const pointKey = point.title.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_');
+              const pointKey = point.title.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_').replace(/-/, '_');
               return (
               <Card key={point.title} className="bg-white shadow-lg hover:shadow-xl transition-shadow border-t-4 border-primary">
                 <CardHeader>
@@ -51,6 +51,21 @@ export default function ManifestoPage() {
               </Card>
             )})}
           </div>
+        </div>
+      </section>
+
+      <section className="py-12 md:py-24 bg-muted">
+        <div className="container max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">{t('manifesto_our_promise_title')}</h2>
+          </div>
+          <Card className="shadow-lg border-l-4 border-primary">
+            <CardContent className="pt-8">
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                {t('manifesto_our_promise_desc')}
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </>

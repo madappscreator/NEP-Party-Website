@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
 import { uploadFileServerAction } from '@/app/actions/upload';
+import PaymentStatusTracker from '@/components/payment-status-tracker';
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -634,83 +635,7 @@ const handleSelectChange = (id: string, value: string) => {
                 </>
             );
     case 'confirm':
-        const statusSteps = [
-            { label: 'Payment Submitted', status: 'complete' },
-            { label: 'Application Received', status: 'complete' },
-            { label: 'Verifying Payment', status: 'pending' },
-            { label: 'Membership Approved', status: 'incomplete' },
-            { label: 'Card Sent', status: 'incomplete' },
-        ];
-        const whatYouGet = [
-            'Digital Membership ID',
-            'Membership Card (PDF + QR Code)',
-            'Access to member updates and announcements',
-            'Eligibility for volunteer and leadership programs',
-        ];
-
-        return (
-            <>
-                <CardHeader className="items-center text-center">
-                    <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
-                    <CardTitle className="text-2xl">Thank You for Your Contribution!</CardTitle>
-                    <CardDescription className="max-w-md">
-                        Your payment has been successfully submitted and is currently under review. Our verification team will manually validate the transaction.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="text-center space-y-8">
-                    <div>
-                        <h3 className="font-semibold text-lg mb-4">What Happens Next?</h3>
-                        <div className="border rounded-lg p-4 bg-muted/50 max-w-sm mx-auto">
-                            <ul className="space-y-3 text-left">
-                                {statusSteps.map((s, index) => (
-                                    <li key={index} className="flex items-center gap-3">
-                                        {s.status === 'complete' && <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />}
-                                        {s.status === 'pending' && <div className="h-5 w-5 flex-shrink-0 relative flex items-center justify-center"><div className="h-2 w-2 bg-yellow-500 rounded-full animate-ping absolute"></div><div className="h-2 w-2 bg-yellow-500 rounded-full"></div></div>}
-                                        {s.status === 'incomplete' && <div className="h-5 w-5 flex-shrink-0 border-2 border-muted-foreground rounded-full" />}
-                                        <span className={s.status === 'incomplete' ? 'text-muted-foreground' : ''}>{s.label}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <Progress value={40} className="mt-4 h-2" />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">Expected Approval Time: 30 minutes to 24 hours.</p>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-6 text-left">
-                        <div className="border rounded-lg p-4">
-                            <h3 className="font-semibold mb-2">What You Will Receive</h3>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                {whatYouGet.map(item => (
-                                    <li key={item} className="flex items-start gap-2">
-                                        <CheckCircle className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                         <div className="border rounded-lg p-4 flex flex-col justify-center">
-                            <h3 className="font-semibold mb-2 flex items-center gap-2"><HelpCircle className="h-5 w-5" /> Need Help?</h3>
-                            <p className="text-sm text-muted-foreground">If you have any issues, feel free to contact us:</p>
-                             <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                                <li><strong>Email:</strong> support@allindianep.com</li>
-                                <li><strong>WhatsApp:</strong> +91 XXXXX XXXXX</li>
-                                <li className="text-xs">Helpline: 9 AM – 7 PM (All Days)</li>
-                            </ul>
-                        </div>
-                    </div>
-                     <blockquote className="border-l-4 border-primary pl-4 text-left italic text-muted-foreground">
-                        “Thank you for standing with those who served the nation. Together, we build a stronger India.”
-                    </blockquote>
-
-                    <div className="space-y-4">
-                         <Button onClick={() => toast({ title: 'Checking status...', description: 'Your application is still under review.' })}>Check Status Again</Button>
-                         <Button asChild variant="outline">
-                            <Link href="/">Back to Home</Link>
-                        </Button>
-                    </div>
-                </CardContent>
-            </>
-        );
+        return user ? <PaymentStatusTracker userId={user.uid} t={t} /> : <div>Loading...</div>;
     }
   };
 

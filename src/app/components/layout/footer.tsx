@@ -9,16 +9,14 @@ import { useLanguage } from '@/context/language-context';
 export function Footer() {
   const { t } = useLanguage();
   const year = new Date().getFullYear();
-  const quickLinks = NAV_LINKS.slice(0, 5);
-  const moreLinks = NAV_LINKS.slice(5);
 
   return (
-    <footer className="bg-accent text-accent-foreground">
+    <footer className="bg-slate-900 text-slate-200">
       <div className="container py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
             <Logo />
-            <p className="text-sm">
+            <p className="text-sm text-slate-300">
                 {t('footer_party_bio')}
             </p>
             <div className="flex items-center gap-4">
@@ -37,20 +35,20 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-lg mb-4 text-white">{t('footer_quick_links')}</h3>
             <ul className="space-y-2">
-              {quickLinks.map(link => (
-                <li key={link.href}><Link href={link.href} className="text-sm hover:text-primary transition-colors">{t(`nav_${link.label.toLowerCase().replace(/ /g, '_')}`)}</Link></li>
-              ))}
-                <li><Link href="/register" className="text-sm hover:text-primary transition-colors">{t('join_party')}</Link></li>
-                <li><Link href="/design-card" className="text-sm hover:text-primary transition-colors">{t('nav_member_card')}</Link></li>
+              <li><Link href="/" className="text-sm hover:text-primary transition-colors">{t('nav_home')}</Link></li>
+              <li><Link href="/about" className="text-sm hover:text-primary transition-colors">{t('nav_about_us')}</Link></li>
+              <li><Link href="/manifesto" className="text-sm hover:text-primary transition-colors">{t('nav_manifesto')}</Link></li>
+              <li><Link href="/wings" className="text-sm hover:text-primary transition-colors">{t('nav_our_wings')}</Link></li>
+              <li><Link href="/news" className="text-sm hover:text-primary transition-colors">{t('nav_news')}</Link></li>
+              <li><Link href="/design-card" className="text-sm hover:text-primary transition-colors">{t('nav_member_card')}</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold text-lg mb-4 text-white">{t('footer_more_links')}</h3>
              <ul className="space-y-2">
-              {moreLinks.map(link => (
-                <li key={link.href}><Link href={link.href} className="text-sm hover:text-primary transition-colors">{t(`nav_${link.label.toLowerCase().replace(/ /g, '_')}`)}</Link></li>
-              ))}
-                <li><Link href="/donate" className="text-sm hover:text-primary transition-colors">{t('nav_donate')}</Link></li>
+              <li><Link href="/gallery" className="text-sm hover:text-primary transition-colors">{t('nav_gallery')}</Link></li>
+              <li><Link href="/contact" className="text-sm hover:text-primary transition-colors">{t('nav_contact')}</Link></li>
+              <li><Link href="/donate" className="text-sm hover:text-primary transition-colors">{t('nav_donate')}</Link></li>
             </ul>
           </div>
 
@@ -76,7 +74,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-muted mt-8 pt-6 text-sm text-center md:flex md:justify-between">
+        <div className="border-t border-slate-700 mt-8 pt-6 text-sm text-center md:flex md:justify-between">
           <div className="space-x-4">
             <Link href="#" className="hover:text-primary">{t('footer_privacy')}</Link>
             <Link href="#" className="hover:text-primary">{t('footer_terms')}</Link>
@@ -85,11 +83,11 @@ export function Footer() {
           <p className="mt-4 md:mt-0">© {year} {t('footer_copyright')}.</p>
         </div>
       </div>
-      <div className="bg-background text-foreground py-4 text-center text-xs">
-          <p className="text-muted-foreground">{t('footer_tech_partner_title')}</p>
-          <p className="font-semibold">MadAppsCreator</p>
-          <p className="text-muted-foreground">{t('footer_tech_partner_services')}</p>
-          <div className="flex justify-center gap-4 mt-1 text-muted-foreground">
+      <div className="bg-slate-100 text-slate-900 py-4 text-center text-xs">
+          <p className="text-slate-600 uppercase text-xs font-semibold">{t('footer_tech_partner_title')}</p>
+          <p className="font-bold text-lg">MadAppsCreator</p>
+          <p className="text-slate-600">{t('footer_tech_partner_services')}</p>
+          <div className="flex justify-center gap-2 mt-2 text-slate-600">
              <a href="mailto:contact@madappscreator.in" className="hover:text-primary">contact@madappscreator.in</a>
              <span>•</span>
              <a href="tel:+919625788018" className="hover:text-primary">+91 96257 88018</a>

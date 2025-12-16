@@ -46,18 +46,17 @@ function FounderSection() {
             <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl">{t('founder_title')}</h2>
         </div>
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="flex justify-center">
-            <div className="relative">
-                <Image
-                    src="/NEP President.jpg"
-                    alt="Founder President — Lion. Dr. Suresh Babu K"
-                    width={350}
-                    height={350}
-                    className="rounded-lg object-cover shadow-xl"
-                    data-ai-hint="portrait man leader"
-                />
-                <Badge className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-lg px-4 py-2">{t('founder_badge')}</Badge>
+          <div className="flex flex-col items-center justify-center">
+            <div className="relative w-96 h-96 rounded-xl overflow-hidden border-4 border-primary shadow-2xl">
+              <Image
+                src="/NEP President.jpg"
+                alt="Founder President — Lion. Dr. Suresh Babu K"
+                fill
+                className="object-cover"
+                data-ai-hint="portrait man leader"
+              />
             </div>
+            <Badge className="mt-6 text-lg px-6 py-2 bg-primary text-white">{t('founder_role')}</Badge>
           </div>
           <div className="space-y-4">
             <h3 className="text-2xl font-bold">{t('founder_name')}</h3>
@@ -87,7 +86,7 @@ function OurStory() {
             <div className="container grid md:grid-cols-2 gap-12 items-center">
                 <div className="flex justify-center">
                      <Image
-                        src="https://picsum.photos/seed/story/600/400"
+                        src="/IMG-20251130-WA0015.jpg"
                         alt="Our Story"
                         width={600}
                         height={400}

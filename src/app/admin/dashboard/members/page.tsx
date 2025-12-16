@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Table,
   TableBody,
@@ -9,11 +11,50 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { DUMMY_MEMBERS } from "@/lib/constants";
 import { FileDown, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useFirebase } from "@/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import type { Member } from "@/lib/types";
 
 export default function MembersPage() {
+  const { firestore } = useFirebase();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!firestore) return;
+      try {
+        const membersRef = collection(firestore, 'members');
+        const q = query(membersRef, where('status', '==', 'active'));
+        const querySnapshot = await getDocs(q);
+
+        const membersList: Member[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          membersList.push({
+            id: doc.id,
+            name: data.name || 'N/A',
+            state: data.state || 'N/A',
+            district: data.district || 'N/A',
+            constituency: data.constituency || 'N/A',
+            status: 'active',
+            mobileNumber: data.mobileNumber || 'N/A',
+            createdAt: data.createdAt,
+          });
+        });
+        setMembers(membersList);
+      } catch (error) {
+        console.error('Error fetching members:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, [firestore]);
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between items-center">
@@ -40,13 +81,13 @@ export default function MembersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {DUMMY_MEMBERS.map((member) => (
+            {members.map((member) => (
               <TableRow key={member.id}>
                 <TableCell className="font-medium">{member.name}</TableCell>
                 <TableCell>{member.state}</TableCell>
                 <TableCell>{member.constituency}</TableCell>
                 <TableCell>
-                  <Badge variant={member.status === "Approved" ? "default" : "secondary"} className={member.status === "Approved" ? "bg-green-600" : ""}>
+                  <Badge variant={member.status === "active" ? "default" : "secondary"} className={member.status === "active" ? "bg-green-600" : ""}>
                     {member.status}
                   </Badge>
                 </TableCell>
@@ -60,7 +101,7 @@ export default function MembersPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                       {member.status === "Pending" && <DropdownMenuItem>Approve</DropdownMenuItem>}
+                       {member.status === "pending" && <DropdownMenuItem>Approve</DropdownMenuItem>}
                       <DropdownMenuItem>View Details</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -73,7 +114,7 @@ export default function MembersPage() {
       </CardContent>
       <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Showing <strong>1-5</strong> of <strong>{DUMMY_MEMBERS.length}</strong> members
+            Showing <strong>1-{members.length}</strong> of <strong>{members.length}</strong> members
           </div>
       </CardFooter>
     </Card>

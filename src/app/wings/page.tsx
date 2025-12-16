@@ -34,6 +34,11 @@ export default function WingsPage() {
             {WINGS_DATA.map((wing) => {
               const nameKey = `wings_${wing.name.toLowerCase().replace(/ /g, '_').replace(/-/g, '_')}_name`;
               const descriptionKey = `wings_${wing.name.toLowerCase().replace(/ /g, '_').replace(/-/g, '_')}_description`;
+              let wingName = t(nameKey);
+              let wingDesc = t(descriptionKey);
+              if (wingName === nameKey || !wingName) wingName = wing.name;
+              if (wingDesc === descriptionKey || !wingDesc) wingDesc = wing.description;
+
               return (
               <Card key={wing.name} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow">
                 <CardHeader>
@@ -41,12 +46,12 @@ export default function WingsPage() {
                     <div className="bg-primary/10 p-3 rounded-full">
                       {renderIcon(wing.icon)}
                     </div>
-                    <CardTitle className="text-xl">{t(nameKey)}</CardTitle>
+                    <CardTitle className="text-xl">{wingName}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <CardDescription className="text-base text-muted-foreground">
-                    {t(descriptionKey)}
+                    {wingDesc}
                   </CardDescription>
                 </CardContent>
                 <div className="p-6 pt-0">

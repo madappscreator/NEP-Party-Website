@@ -158,13 +158,13 @@ export default function MemberCard({ member, t }: MemberCardProps) {
       </div>
 
       <div className="flex flex-col items-center gap-4 my-8">
-        <p className="text-gray-600 font-medium">{t('card.downloadAs') || 'Download your card as:'}</p>
-        <div className="flex gap-4">
-          <button onClick={downloadCardAsImage} className="btn-primary flex items-center gap-2 px-6 py-3">
+        <p className="text-gray-600 font-semibold text-lg">{t('card.downloadAs') || 'Download your card as:'}</p>
+        <div className="flex gap-4 flex-wrap justify-center">
+          <button onClick={downloadCardAsImage} className="bg-primary hover:bg-primary/90 text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-lg transition shadow-md">
             <FileImage size={20} />
             {t('card.downloadImage') || 'Download as Image (PNG)'}
           </button>
-          <button onClick={downloadCardAsPDF} className="btn-secondary flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+          <button onClick={downloadCardAsPDF} className="bg-accent hover:bg-accent/90 text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-lg transition shadow-md">
             <FileText size={20} />
             {t('card.downloadPDF') || 'Download as PDF'}
           </button>

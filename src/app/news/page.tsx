@@ -28,8 +28,12 @@ export default function NewsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {DUMMY_NEWS_ARTICLES.map((article) => {
           const image = PlaceHolderImages.find(p => p.id === article.imageId);
-          const articleTitle = t(`news_article_${article.id}_title`);
-          const articleContent = t(`news_article_${article.id}_content`);
+          const articleTitleKey = `news_article_${article.id}_title`;
+          const articleContentKey = `news_article_${article.id}_content`;
+          let articleTitle = t(articleTitleKey);
+          let articleContent = t(articleContentKey);
+          if (articleTitle === articleTitleKey || !articleTitle) articleTitle = article.title;
+          if (articleContent === articleContentKey || !articleContent) articleContent = article.content;
           return (
             <Card key={article.id} className="flex flex-col">
               <CardHeader>

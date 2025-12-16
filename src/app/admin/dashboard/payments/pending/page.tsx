@@ -156,9 +156,10 @@ export default function PendingPaymentsPage() {
             
             // Update Member Status AND Payment Status on Member Doc
             transaction.update(memberRef, { 
-                status: 'active',
-                paymentStatus: 'approved', // CRITICAL FIX: Update this so profile page shows Active
-                memberId: newMemberId, 
+                status: 'APPROVED',
+                paymentStatus: 'approved',
+                membershipId: newMemberId,
+                membershipValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
                 membershipApprovedAt: serverTimestamp()
             });
         });
@@ -188,8 +189,8 @@ export default function PendingPaymentsPage() {
                     rejectedAt: serverTimestamp()
                 });
                 transaction.update(memberRef, { 
-                    status: 'rejected',
-                    paymentStatus: 'failed'
+                    status: 'REJECTED',
+                    paymentStatus: 'rejected'
                 });
            });
            
