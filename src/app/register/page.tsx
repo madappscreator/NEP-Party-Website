@@ -23,6 +23,7 @@ import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
 import { uploadFileServerAction } from '@/app/actions/upload';
 import PaymentStatusTracker from '@/components/payment-status-tracker';
+import { useLanguage } from '@/context/language-context';
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -92,6 +93,7 @@ export default function RegisterPage() {
 
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const initRecaptcha = () => {
     if (!auth) return;
@@ -583,7 +585,7 @@ const handleSelectChange = (id: string, value: string) => {
                 <>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Wallet/>Membership Payment</CardTitle>
-                    <CardDescription>Complete your registration by paying the membership fee. The minimum amount is ₹10.</CardDescription>
+                    <CardDescription>Complete your registration by paying the membership fee. The minimum amount is <span className="font-sans">₹</span>10.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
@@ -594,6 +596,7 @@ const handleSelectChange = (id: string, value: string) => {
                                     key={amount} 
                                     variant={formData.membershipAmount === amount && customAmount === '' ? 'default' : 'outline'}
                                     onClick={() => handleAmountSelect(amount)}
+                                    className="font-sans"
                                 >
                                     ₹{amount}
                                 </Button>
@@ -605,7 +608,7 @@ const handleSelectChange = (id: string, value: string) => {
                         <Input id="customAmount" type="number" placeholder="e.g. 501" value={customAmount} onChange={handleCustomAmountChange}/>
                     </div>
 
-                    <div className="text-center font-bold text-lg">
+                    <div className="text-center font-bold text-lg font-sans">
                         Total Amount: ₹{formData.membershipAmount}
                     </div>
 

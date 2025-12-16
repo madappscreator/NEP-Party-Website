@@ -69,8 +69,6 @@ export default function ProfilePage() {
       validUntil = expiryDate.toISOString();
     }
 
-    const isApproved = rawMember.paymentStatus === 'approved' || rawMember.status?.toUpperCase() === 'APPROVED' || rawMember.status?.toUpperCase() === 'ACTIVE';
-
     const transformed: MemberProfile = {
       name: rawMember.name,
       fatherName: rawMember.fatherName || null,
@@ -79,8 +77,8 @@ export default function ProfilePage() {
       district: rawMember.district,
       state: rawMember.state,
       constituency: rawMember.constituency || 'N/A',
-      membershipId: isApproved && rawMember.memberID ? rawMember.memberID : 'Pending Approval',
-      status: isApproved ? 'APPROVED' : 'PENDING',
+      membershipId: rawMember.membershipId || rawMember.memberID || 'Pending Approval',
+      status: (rawMember.paymentStatus === 'approved' || rawMember.status?.toUpperCase() === 'APPROVED' || rawMember.status?.toUpperCase() === 'ACTIVE') ? 'APPROVED' : 'PENDING',
       membershipType: rawMember.membershipType || 'Basic Membership',
       membershipValidUntil: validUntil,
     };
