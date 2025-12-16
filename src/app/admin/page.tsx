@@ -34,11 +34,26 @@ export default function AdminLoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // After successful login, check if the user is an admin
-      const adminDocRef = doc(firestore, 'admins', user.uid);
-      const adminDocSnap = await getDoc(adminDocRef);
+      // Check if user is the hardcoded super admin
+      const isSuperAdmin = user.uid === 'Bb7jPb8p6sW8EfP0MxXce3s8qSs2';
 
-      if (adminDocSnap.exists()) {
+      // After successful login, check if the user is an admin in Firestore
+      // We check both the 'admins' collection (for profile data) and fallback to super admin ID
+      let isAdmin = isSuperAdmin;
+      
+      if (!isAdmin) {
+          try {
+            const adminDocRef = doc(firestore, 'admins', user.uid);
+            const adminDocSnap = await getDoc(adminDocRef);
+            if (adminDocSnap.exists()) {
+                isAdmin = true;
+            }
+          } catch (err) {
+              console.warn("Could not verify admin doc, assuming not admin unless super admin.", err);
+          }
+      }
+
+      if (isAdmin) {
         // User is an admin, proceed to dashboard
         toast({ title: "Success", description: "Admin login successful." });
         router.push('/admin/dashboard');

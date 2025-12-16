@@ -15,13 +15,13 @@ import {
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
 import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
+import { uploadFileServerAction } from '@/app/actions/upload';
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -180,10 +180,9 @@ export default function RegisterPage() {
 };
 
 const handleFinalSubmit = async () => {
-    // **CRITICAL FIX**: Ensure user is authenticated before any upload attempt.
     if (!auth?.currentUser) {
         toast({ title: "Authentication Error", description: "User not authenticated. Please restart the process.", variant: "destructive" });
-        setIsSubmitting(false); // Make sure to reset submitting state
+        setIsSubmitting(false);
         return;
     }
 
@@ -197,21 +196,54 @@ const handleFinalSubmit = async () => {
     toast({ title: "Submitting Application", description: "Please wait, do not close this page." });
 
     try {
-        const storage = getStorage();
+        await auth.currentUser.getIdToken(true);
         const memberId = auth.currentUser.uid;
         
-        // **CRITICAL FIX**: Use uploadBytes from the Firebase SDK
+        const sanitizeFileName = (fileName: string) => fileName.replace(/\s+/g, "_");
+
+        const fileToBase64 = (file: File): Promise<string> => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        // Use SERVER ACTION for upload
         const uploadFile = async (file: File, path: string): Promise<string> => {
             if (!file) return '';
-            const fileRef = ref(storage, path);
-            const uploadResult = await uploadBytes(fileRef, file);
-            return await getDownloadURL(uploadResult.ref);
+            const base64String = await fileToBase64(file);
+            
+            // Call the server action
+            const result = await uploadFileServerAction(path, base64String);
+            
+            if (!result.success || !result.url) {
+                throw new Error(result.error || "Upload failed");
+            }
+            return result.url;
         }
 
-        const paymentScreenshotUrl = await uploadFile(formData.paymentScreenshot, `payment_proofs/${memberId}/${formData.paymentScreenshot.name}`);
-        const photoUrl = await uploadFile(formData.photoFile!, `profile_photos/${memberId}/profile.jpg`);
-        const ppoCopyUrl = await uploadFile(formData.ppoCopy!, `documents/${memberId}/ppo.pdf`);
-        const aadharCardUrl = await uploadFile(formData.aadharCard!, `documents/${memberId}/aadhar.pdf`);
+        const safeScreenshotName = sanitizeFileName(formData.paymentScreenshot.name);
+        const paymentScreenshotUrl = await uploadFile(formData.paymentScreenshot, `payment_proofs/${memberId}/${safeScreenshotName}`);
+        
+        let photoUrl = '';
+        if (formData.photoFile) {
+             const safePhotoName = sanitizeFileName(formData.photoFile.name);
+             photoUrl = await uploadFile(formData.photoFile, `profile_photos/${memberId}/${safePhotoName}`);
+        }
+       
+        let ppoCopyUrl = '';
+        if (formData.ppoCopy) {
+            const safePpoName = sanitizeFileName(formData.ppoCopy.name);
+            ppoCopyUrl = await uploadFile(formData.ppoCopy, `documents/${memberId}/${safePpoName}`);
+        }
+
+        let aadharCardUrl = '';
+        if (formData.aadharCard) {
+            const safeAadharName = sanitizeFileName(formData.aadharCard.name);
+            aadharCardUrl = await uploadFile(formData.aadharCard, `documents/${memberId}/${safeAadharName}`);
+        }
         
         // Prepare member data
         const memberData = {
@@ -257,11 +289,8 @@ const handleFinalSubmit = async () => {
     } catch (error: any) {
         console.error("Form submission error:", error);
         let description = "There was an error submitting your application. Please try again.";
-        if (error.code === 'storage/unauthorized') {
-            description = "Storage Error: You do not have permission to upload files. Please check security rules.";
-        }
-        if (error.code === 'storage/object-not-found') {
-             description = "Storage Error: File path not found. This might be a permission issue.";
+        if (error.message) {
+            description = `Upload Error: ${error.message}`;
         }
         toast({ title: "Submission Failed", description: description, variant: "destructive" });
     } finally {

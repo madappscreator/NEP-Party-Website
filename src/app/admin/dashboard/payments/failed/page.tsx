@@ -10,14 +10,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { FileDown, MoreHorizontal, Loader2, RefreshCcw } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Loader2, RefreshCcw, XCircle } from "lucide-react";
 import * as React from 'react';
 import { useFirebase } from "@/firebase";
 import { collectionGroup, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 
-type ApprovedPayment = {
+type FailedPayment = {
   id: string;
   memberId: string;
   donorName: string;
@@ -25,11 +24,11 @@ type ApprovedPayment = {
   date: string;
   rawDate: any;
   status: string;
-  transactionId: string;
+  reason?: string;
 };
 
-export default function ApprovedPaymentsPage() {
-  const [payments, setPayments] = React.useState<ApprovedPayment[]>([]);
+export default function FailedPaymentsPage() {
+  const [payments, setPayments] = React.useState<FailedPayment[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { firestore } = useFirebase();
   const { toast } = useToast();
@@ -38,15 +37,13 @@ export default function ApprovedPaymentsPage() {
     if (!firestore) return;
     setIsLoading(true);
     try {
-      // Query approved payments
-      // Note: If this fails with index error, use the fallback "fetch all & filter" strategy
-      // but usually 'status == approved' uses the same index as 'status == pending'
-      const q = query(collectionGroup(firestore, 'payments'), where('status', '==', 'approved'));
+      // Query rejected or failed payments
+      // We might need an 'in' query or just fetch rejected for now.
+      const q = query(collectionGroup(firestore, 'payments'), where('status', '==', 'rejected'));
       const querySnapshot = await getDocs(q);
       
-      const fetchedPayments: ApprovedPayment[] = [];
+      const fetchedPayments: FailedPayment[] = [];
 
-      // Fetch member names in parallel
       const paymentDocs = querySnapshot.docs;
       
       await Promise.all(paymentDocs.map(async (pDoc) => {
@@ -69,10 +66,10 @@ export default function ApprovedPaymentsPage() {
               memberId: data.memberId,
               donorName: donorName,
               amount: data.amount || 0,
-              transactionId: data.transactionId || '',
               date: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'N/A',
               rawDate: data.createdAt,
-              status: 'Verified' // Since we filtered by approved
+              status: 'Rejected',
+              reason: data.rejectionReason || 'Verification Failed'
           });
       }));
 
@@ -82,7 +79,7 @@ export default function ApprovedPaymentsPage() {
       setPayments(fetchedPayments);
 
     } catch (error) {
-      console.error("Error fetching approved payments:", error);
+      console.error("Error fetching failed payments:", error);
       toast({ title: "Error", description: "Failed to load payments.", variant: "destructive" });
     } finally {
       setIsLoading(false);
@@ -97,36 +94,27 @@ export default function ApprovedPaymentsPage() {
     <Card>
       <CardHeader className="flex flex-row justify-between items-center">
         <div>
-            <CardTitle>Approved Payments</CardTitle>
-            <CardDescription>View all verified member payments and donations.</CardDescription>
+            <CardTitle>Failed / Rejected Payments</CardTitle>
+            <CardDescription>Payments that were rejected or failed verification.</CardDescription>
         </div>
-        <div className="flex gap-2">
-            <Button size="icon" variant="outline" onClick={fetchPayments} disabled={isLoading}>
-                <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Button size="sm" variant="outline">
-                <FileDown className="h-4 w-4 mr-2" />
-                Export
-            </Button>
-        </div>
+        <Button size="icon" variant="outline" onClick={fetchPayments} disabled={isLoading}>
+            <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+        </Button>
       </CardHeader>
       <CardContent>
         {isLoading ? (
              <div className="flex justify-center py-8"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>
         ) : payments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No approved payments found.</div>
+            <div className="text-center py-8 text-muted-foreground">No failed payments found.</div>
         ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Donor Name</TableHead>
+              <TableHead>Member Name</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Transaction ID</TableHead>
+              <TableHead>Reason</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>
-                <span className="sr-only">Actions</span>
-              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -138,26 +126,11 @@ export default function ApprovedPaymentsPage() {
                 </TableCell>
                 <TableCell className="text-right">₹{payment.amount.toLocaleString('en-IN')}</TableCell>
                 <TableCell>{payment.date}</TableCell>
-                <TableCell className="font-mono text-xs">{payment.transactionId}</TableCell>
+                <TableCell className="text-muted-foreground">{payment.reason}</TableCell>
                 <TableCell>
-                  <Badge className="bg-green-600 hover:bg-green-700">
-                    {payment.status}
+                  <Badge variant="destructive" className="flex w-fit items-center gap-1">
+                    <XCircle className="h-3 w-3" /> {payment.status}
                   </Badge>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                       <DropdownMenuItem>Generate Receipt</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -167,7 +140,7 @@ export default function ApprovedPaymentsPage() {
       </CardContent>
       <CardFooter>
           <div className="text-xs text-muted-foreground">
-            Showing <strong>{payments.length}</strong> payments
+            Showing <strong>{payments.length}</strong> records
           </div>
       </CardFooter>
     </Card>

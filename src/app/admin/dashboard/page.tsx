@@ -16,43 +16,128 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { FileDown, Users, UserCheck, Wallet, Search } from 'lucide-react';
+import { FileDown, Users, UserCheck, Wallet, Search, Loader2 } from 'lucide-react';
 import { indianGeography } from '@/lib/geography';
 import * as React from 'react';
 import { Input } from '@/components/ui/input';
-
-const memberDataByState = [
-  { name: 'Tamil Nadu', value: 120, fill: 'var(--color-chart-1)' },
-  { name: 'Maharashtra', value: 98, fill: 'var(--color-chart-2)' },
-  { name: 'Uttar Pradesh', value: 87, fill: 'var(--color-chart-3)' },
-  { name: 'Karnataka', value: 76, fill: 'var(--color-chart-4)' },
-  { name: 'Delhi', value: 54, fill: 'var(--color-chart-5)' },
-  { name: 'Other', value: 112, fill: 'hsl(var(--muted))' },
-];
-
-const memberDataByDistrict = [
-    { name: 'Chennai', value: 45, fill: 'var(--color-chart-1)' },
-    { name: 'Coimbatore', value: 32, fill: 'var(--color-chart-2)' },
-    { name: 'Madurai', value: 28, fill: 'var(--color-chart-3)' },
-    { name: 'Salem', value: 15, fill: 'var(--color-chart-4)' },
-];
-
-const registrationActivity = [
-    { date: "Jan", registrations: 23 },
-    { date: "Feb", registrations: 31 },
-    { date: "Mar", registrations: 45 },
-    { date: "Apr", registrations: 62 },
-    { date: "May", registrations: 53 },
-    { date: "Jun", registrations: 78 },
-];
-
+import { useFirebase } from '@/firebase';
+import { collection, getDocs, query, where, getCountFromServer, collectionGroup } from 'firebase/firestore';
 
 export default function DashboardPage() {
   const [selectedState, setSelectedState] = React.useState('');
   const [selectedDistrict, setSelectedDistrict] = React.useState('');
+  const [searchTerm, setSearchTerm] = React.useState('');
+  
+  const [stats, setStats] = React.useState({
+      totalMembers: 0,
+      pendingApprovals: 0,
+      totalDonations: 0
+  });
+  
+  const [membersData, setMembersData] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  const { firestore } = useFirebase();
 
   const districts = selectedState ? indianGeography.find(s => s.name === selectedState)?.districts || [] : [];
-  
+
+  React.useEffect(() => {
+      const fetchStats = async () => {
+          if (!firestore) return;
+          setIsLoading(true);
+          try {
+              // 1. Get Totals (Efficiently)
+              const membersColl = collection(firestore, 'members');
+              const totalMembersSnapshot = await getCountFromServer(membersColl);
+              
+              const paymentsQuery = query(collectionGroup(firestore, 'payments'), where('status', '==', 'pending'));
+              let pendingCount = 0;
+              try {
+                  const pendingSnapshot = await getCountFromServer(paymentsQuery);
+                  pendingCount = pendingSnapshot.data().count;
+              } catch (e) {
+                  console.warn("Pending count failed (likely index building)", e);
+              }
+
+              // 2. Fetch Payments Client-Side for Sum (Bypasses Aggregation Index requirement)
+              // Since we don't expect millions of payments yet, this is fine.
+              let totalDonations = 0;
+              try {
+                  const approvedPaymentsQuery = query(collectionGroup(firestore, 'payments'), where('status', '==', 'approved'));
+                  const approvedSnap = await getDocs(approvedPaymentsQuery);
+                  approvedSnap.forEach(doc => {
+                      totalDonations += (doc.data().amount || 0);
+                  });
+              } catch (e) {
+                   console.warn("Client-side sum failed", e);
+              }
+
+              // 3. Fetch Actual Data for Analytics
+              const q = query(membersColl); 
+              const querySnapshot = await getDocs(q);
+              
+              const fetchedMembers = querySnapshot.docs.map(doc => doc.data());
+              setMembersData(fetchedMembers);
+              
+              setStats({
+                  totalMembers: totalMembersSnapshot.data().count,
+                  pendingApprovals: pendingCount,
+                  totalDonations: totalDonations
+              });
+
+          } catch (error) {
+              console.error("Dashboard fetch error:", error);
+          } finally {
+              setIsLoading(false);
+          }
+      };
+
+      fetchStats();
+  }, [firestore]);
+
+  // --- Filtering Logic ---
+  const filteredMembers = React.useMemo(() => {
+      return membersData.filter(m => {
+          const matchesState = selectedState && selectedState !== 'all' ? m.state === selectedState : true;
+          const matchesDistrict = selectedDistrict ? m.district === selectedDistrict : true;
+          const matchesSearch = searchTerm ? (
+              (m.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+              (m.mobileNumber?.includes(searchTerm))
+          ) : true;
+          return matchesState && matchesDistrict && matchesSearch;
+      });
+  }, [membersData, selectedState, selectedDistrict, searchTerm]);
+
+  // --- Chart Data Preparation ---
+  const chartDataByState = React.useMemo(() => {
+      if (selectedState && selectedState !== 'all') return []; 
+      const counts: Record<string, number> = {};
+      filteredMembers.forEach(m => {
+          const state = m.state || 'Unknown';
+          counts[state] = (counts[state] || 0) + 1;
+      });
+      return Object.entries(counts).map(([name, value], i) => ({
+          name, 
+          value, 
+          fill: `var(--color-chart-${(i % 5) + 1})`
+      }));
+  }, [filteredMembers, selectedState]);
+
+  const chartDataByDistrict = React.useMemo(() => {
+      if (!selectedState || selectedState === 'all') return []; 
+      const counts: Record<string, number> = {};
+      filteredMembers.forEach(m => {
+          const dist = m.district || 'Unknown';
+          counts[dist] = (counts[dist] || 0) + 1;
+      });
+      return Object.entries(counts).map(([name, value], i) => ({
+          name, 
+          value, 
+          fill: `var(--color-chart-${(i % 5) + 1})`
+      }));
+  }, [filteredMembers, selectedState]);
+
+
   return (
     <div className="flex flex-col gap-6">
        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -62,8 +147,8 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">+0 since last week</p>
+            <div className="text-2xl font-bold">{isLoading ? "-" : stats.totalMembers}</div>
+            <p className="text-xs text-muted-foreground">Registered users</p>
           </CardContent>
         </Card>
         <Card>
@@ -74,9 +159,9 @@ export default function DashboardPage() {
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{isLoading ? "-" : stats.pendingApprovals}</div>
             <p className="text-xs text-muted-foreground">
-              New applicants waiting for verification
+              Waiting for verification
             </p>
           </CardContent>
         </Card>
@@ -86,9 +171,9 @@ export default function DashboardPage() {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹0</div>
+            <div className="text-2xl font-bold">₹{stats.totalDonations.toLocaleString('en-IN')}</div>
             <p className="text-xs text-muted-foreground">
-              +₹0 this month
+              Collected so far
             </p>
           </CardContent>
         </Card>
@@ -112,20 +197,22 @@ export default function DashboardPage() {
                 <CardDescription>Visualize member registrations across different regions.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                 <div className="border rounded-lg p-4">
+                 <div className="border rounded-lg p-4 bg-muted/20">
                     <div className="flex flex-wrap items-center gap-4">
-                        <Select onValueChange={setSelectedState}>
-                            <SelectTrigger className="w-full md:w-[180px]">
+                        <Select onValueChange={setSelectedState} value={selectedState}>
+                            <SelectTrigger className="w-full md:w-[200px]">
                                 <SelectValue placeholder="Select State" />
                             </SelectTrigger>
                             <SelectContent>
+                                <SelectItem value="all">All States</SelectItem>
                                 {indianGeography.map(state => (
                                     <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                        <Select onValueChange={setSelectedDistrict} disabled={!selectedState}>
-                            <SelectTrigger className="w-full md:w-[180px]">
+                        
+                        <Select onValueChange={setSelectedDistrict} disabled={!selectedState || selectedState === 'all'} value={selectedDistrict}>
+                            <SelectTrigger className="w-full md:w-[200px]">
                                 <SelectValue placeholder="Select District" />
                             </SelectTrigger>
                             <SelectContent>
@@ -134,44 +221,50 @@ export default function DashboardPage() {
                                 ))}
                             </SelectContent>
                         </Select>
+
                         <div className="relative flex-1 min-w-[200px]">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                            <Input placeholder="Search name or mobile..." className="pl-9"/>
+                            <Input 
+                                placeholder="Search name or mobile..." 
+                                className="pl-9"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
-                        <Button variant="outline">Reset</Button>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => { setSelectedState(''); setSelectedDistrict(''); setSearchTerm(''); }}
+                        >
+                            Reset
+                        </Button>
                     </div>
                  </div>
-                 <div className="grid md:grid-cols-2 gap-8 pt-4">
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-semibold text-center">By State</h3>
-                        <DonutChart data={memberDataByState} category="value" index="name" className="h-48" />
+
+                 {isLoading ? (
+                     <div className="flex justify-center h-48 items-center"><Loader2 className="animate-spin" /></div>
+                 ) : (
+                    <div className="grid md:grid-cols-2 gap-8 pt-4">
+                        {!selectedState || selectedState === 'all' ? (
+                            <div className="flex flex-col gap-4">
+                                <h3 className="font-semibold text-center">By State</h3>
+                                <DonutChart data={chartDataByState} category="value" index="name" className="h-48" />
+                            </div>
+                        ) : null}
+
+                        {selectedState && selectedState !== 'all' ? (
+                            <div className="flex flex-col gap-4">
+                                <h3 className="font-semibold text-center">By District (in {selectedState})</h3>
+                                {chartDataByDistrict.length > 0 ? (
+                                    <DonutChart data={chartDataByDistrict} category="value" index="name" className="h-48" />
+                                ) : (
+                                    <p className="text-center text-muted-foreground py-10">No data for this state.</p>
+                                )}
+                            </div>
+                        ) : null}
                     </div>
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-semibold text-center">By District (in Tamil Nadu)</h3>
-                        <DonutChart data={memberDataByDistrict} category="value" index="name" className="h-48" />
-                    </div>
-                </div>
+                 )}
             </CardContent>
         </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Registration Activity</CardTitle>
-          <CardDescription>
-            Track new member registrations over the past 6 months.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <BarChart
-            data={registrationActivity}
-            index="date"
-            categories={['registrations']}
-            colors={['primary']}
-            className="h-64"
-          />
-        </CardContent>
-      </Card>
-
     </div>
   );
 }
