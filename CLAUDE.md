@@ -131,3 +131,115 @@ npm run typecheck # Check TypeScript types
 npm run dev       # Start development server
 npm run build     # Build for production
 ```
+
+---
+
+## Vercel Deployment Setup (Dec 17, 2025)
+
+### Environment Variables for Vercel
+
+**File Created**: `.env.example` - template for all required environment variables
+
+**Required Environment Variables** (add these to Vercel Project Settings):
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCB3-bAipwrG-DQJDcf6PWk0lsIic9DIkc
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=studio-8928688313-be767.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=studio-8928688313-be767
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=studio-8928688313-be767.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=338422095586
+NEXT_PUBLIC_FIREBASE_APP_ID=1:338422095586:web:5aad7ee746f69b0e87c8bb
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key_here (optional)
+```
+
+### Steps to Deploy on Vercel
+
+**1. Connect GitHub Repository**
+- Go to [vercel.com](https://vercel.com)
+- Click "Add New" → "Project"
+- Import your GitHub repository
+- Select the repository containing this project
+
+**2. Configure Environment Variables**
+- In the Vercel project settings, go to "Settings" → "Environment Variables"
+- Add each variable from above:
+  - `NEXT_PUBLIC_FIREBASE_API_KEY`
+  - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+  - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+  - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+  - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+  - `NEXT_PUBLIC_FIREBASE_APP_ID`
+  - `NEXT_PUBLIC_GEMINI_API_KEY` (if using Gemini features)
+- **Important**: `NEXT_PUBLIC_*` variables are exposed to the browser - they contain public Firebase config
+
+**3. Configure Firebase Security Rules**
+- Update `firestore.rules` to allow Vercel domain requests
+- Allow Firebase Authentication from your Vercel domain
+- Update Firebase Console → Authentication → Authorized domains
+
+**4. Build Settings**
+- Framework: Next.js (auto-detected)
+- Build Command: `npm run build`
+- Output Directory: `.next` (auto-detected)
+- Install Command: `npm install`
+
+**5. Deploy**
+- Click "Deploy" button
+- Vercel will build and deploy automatically
+- Subsequent pushes to main branch trigger auto-deployment
+
+### Firebase Security Configuration
+
+**Update Firestore Rules** (`firestore.rules`):
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}
+```
+
+**Firebase Console Settings**:
+1. Go to Firebase Console
+2. Project Settings → General
+3. Add authorized domain: `your-vercel-deployment.vercel.app`
+4. Authentication → Sign-in method → Enabled providers
+5. Storage → Update CORS configuration if needed
+
+### Verification Checklist
+
+- ✅ All `NEXT_PUBLIC_*` variables set in Vercel
+- ✅ Firebase credentials valid and active
+- ✅ Firestore rules updated for Vercel domain
+- ✅ Firebase Authentication authorized domain added
+- ✅ Build succeeds without errors
+- ✅ Landing page loads correctly
+- ✅ Registration flow works with phone OTP
+- ✅ Admin dashboard accessible
+- ✅ Payment status tracking works
+- ✅ Profile page displays membership card
+
+### Troubleshooting
+
+**Issue: Firebase initialization fails**
+- Verify all `NEXT_PUBLIC_FIREBASE_*` variables are correct
+- Check Firebase Console → Project Settings for exact values
+- Ensure variable names match exactly (case-sensitive)
+
+**Issue: Authentication doesn't work**
+- Add Vercel domain to Firebase Console → Authentication → Authorized domains
+- Check Firebase → Authentication → Sign-in method has enabled providers
+
+**Issue: Firestore queries fail**
+- Verify Firestore rules allow authenticated users
+- Check browser console for specific error messages
+- Ensure collection names match exactly (case-sensitive)
+
+**Issue: Storage/Images not loading**
+- Check Firebase Console → Storage → Rules
+- Verify CORS configuration allows Vercel domain
+- Check image paths in public folder
