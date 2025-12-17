@@ -24,6 +24,8 @@ import { Progress } from '@/components/ui/progress';
 import { uploadFileServerAction } from '@/app/actions/upload';
 import PaymentStatusTracker from '@/components/payment-status-tracker';
 import { useLanguage } from '@/context/language-context';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -149,7 +151,9 @@ export default function RegisterPage() {
         if (recaptchaVerifierRef.current) {
           recaptchaVerifierRef.current.render().then((widgetId) => {
             // @ts-ignore
-            grecaptcha.reset(widgetId);
+            if (typeof grecaptcha !== 'undefined') {
+              grecaptcha.reset(widgetId);
+            }
           });
         }
 
@@ -210,32 +214,15 @@ const handleFinalSubmit = async () => {
     toast({ title: "Submitting Application", description: "Please wait, do not close this page." });
 
     try {
-        await auth.currentUser.getIdToken(true);
         const memberId = auth.currentUser.uid;
+        const storage = getStorage();
         
         const sanitizeFileName = (fileName: string) => fileName.replace(/\s+/g, "_");
 
-        const fileToBase64 = (file: File): Promise<string> => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = error => reject(error);
-            });
-        };
-
-        // Use SERVER ACTION for upload
         const uploadFile = async (file: File, path: string): Promise<string> => {
-            if (!file) return '';
-            const base64String = await fileToBase64(file);
-            
-            // Call the server action
-            const result = await uploadFileServerAction(path, base64String);
-            
-            if (!result.success || !result.url) {
-                throw new Error(result.error || "Upload failed");
-            }
-            return result.url;
+            const fileRef = ref(storage, path);
+            await uploadBytes(fileRef, file);
+            return await getDownloadURL(fileRef);
         }
 
         const safeScreenshotName = sanitizeFileName(formData.paymentScreenshot.name);
