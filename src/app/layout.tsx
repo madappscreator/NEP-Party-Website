@@ -12,9 +12,23 @@ import { FirebaseClientProvider } from '@/firebase';
 export const metadata: Metadata = {
   title: 'National Ex Servicemen Party',
   description:
-    'The official digital platform for the National Ex-Servicemen Party (NEP). Join us, support our cause, and help build a stronger India. For ex-servicemen and all proud citizens.',
-  keywords:
-    'National Ex Servicemen Party, Ex-servicemen political party India, NEP, Indian politics, ex-servicemen rights',
+    'The official digital platform for the National Ex-Servicemen Party (NEP). A political party for military veterans, servicemen, and all proud citizens of India. Join us, support our cause, and help build a stronger nation.',
+  keywords: [
+    'National Ex Servicemen Party',
+    'NEP',
+    'NEP Party',
+    'Ex-servicemen political party India',
+    'Indian politics',
+    'ex-servicemen rights',
+    'Military',
+    'Servicemen',
+    'National',
+    'Party',
+    'veterans',
+    'Indian Armed Forces',
+    'political party for veterans',
+    'join Indian political party'
+  ],
 };
 
 export default function RootLayout({

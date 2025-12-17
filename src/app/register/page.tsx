@@ -96,22 +96,7 @@ export default function RegisterPage() {
   const { t } = useLanguage();
   
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
-
-  React.useEffect(() => {
-    if (!auth) return;
-
-    if (!recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, automatically triggers auth flow
-        },
-        'expired-callback': () => {
-          // Response expired. Ask user to solve reCAPTCHA again.
-        }
-      });
-    }
-  }, [auth]);
+  const recaptchaWrapperRef = React.useRef<HTMLDivElement>(null);
 
 
   const handleSendOtp = async () => {
@@ -119,8 +104,8 @@ export default function RegisterPage() {
       toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
       return;
     }
-    if (mobileNumber.length !== 10) {
-      toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
+    if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
+      toast({ title: "Invalid Number", description: "Please enter a valid 10-digit Indian mobile number.", variant: "destructive" });
       return;
     }
     if (isOtpSending) return;
@@ -128,6 +113,19 @@ export default function RegisterPage() {
     setIsOtpSending(true);
     
     try {
+        // Initialize reCAPTCHA verifier if it doesn't exist
+        if (!recaptchaVerifierRef.current && recaptchaWrapperRef.current) {
+            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaWrapperRef.current, {
+                'size': 'invisible',
+                'callback': () => {
+                    // reCAPTCHA solved, automatically triggers auth flow
+                },
+                'expired-callback': () => {
+                    // Response expired. User needs to try sending OTP again.
+                }
+            });
+        }
+
       const phoneNumber = `+91${mobileNumber}`;
       const appVerifier = recaptchaVerifierRef.current!;
 
@@ -140,21 +138,20 @@ export default function RegisterPage() {
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
         
-        let errorMessage = "Could not send OTP. Please try again.";
-        if (error.code === 'auth/too-many-requests') {
-           errorMessage = "You've made too many requests. Please wait a while before trying again.";
-        } else if (error.code === 'auth/captcha-check-failed') {
-            errorMessage = "reCAPTCHA verification failed. Please try again.";
-        }
-
-        // Reset reCAPTCHA only on specific errors if needed, or always to be safe
-        if (recaptchaVerifierRef.current) {
-          recaptchaVerifierRef.current.render().then((widgetId) => {
-            // @ts-ignore
-            if (typeof grecaptcha !== 'undefined') {
-              grecaptcha.reset(widgetId);
-            }
-          });
+        let errorMessage = "An unexpected error occurred. Please try again.";
+        switch (error.code) {
+            case 'auth/too-many-requests':
+                errorMessage = "You've made too many requests. Please wait a while before trying again.";
+                break;
+            case 'auth/invalid-phone-number':
+                errorMessage = "The phone number is not valid. Please check and try again.";
+                break;
+            case 'auth/captcha-check-failed':
+                errorMessage = "reCAPTCHA verification failed. Please refresh the page and try again.";
+                break;
+            case 'auth/network-request-failed':
+                errorMessage = "Network error. Please check your internet connection and try again.";
+                break;
         }
 
         toast({ title: "Error sending OTP", description: errorMessage, variant: "destructive" });
@@ -379,7 +376,7 @@ const handleSelectChange = (id: string, value: string) => {
               <CardDescription>Enter your mobile number to begin. We'll send you an OTP for verification.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div id="recaptcha-container"></div>
+              <div id="recaptcha-container" ref={recaptchaWrapperRef}></div>
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
                 <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
@@ -516,7 +513,7 @@ const handleSelectChange = (id: string, value: string) => {
                                 {constituencies.map(c => (
                                     <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
                                 ))}
-                            </SelectContent>
+                            </Content>
                         </Select>
                     </div>
                  </div>
@@ -651,4 +648,3 @@ const handleSelectChange = (id: string, value: string) => {
     </div>
   );
 }
-
