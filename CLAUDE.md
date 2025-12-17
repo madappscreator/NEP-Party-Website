@@ -243,3 +243,45 @@ service cloud.firestore {
 - Check Firebase Console → Storage → Rules
 - Verify CORS configuration allows Vercel domain
 - Check image paths in public folder
+
+---
+
+## Site Branding Updates (Dec 17, 2025)
+
+### Site Title Changed
+**File**: `src/app/layout.tsx`
+- **Changed from**: `"NEP Digital Platform | National Ex-Servicemen Party"`
+- **Changed to**: `"National Ex Servicemen Party"`
+- **Impact**: Browser tab title now displays the official party name
+
+### Favicon & Logo Configuration
+**Current Setup**:
+- **Favicon**: Uses NEP Flag image (`/NEP Flag.jpg`)
+- **Logo Component**: `src/app/components/layout/logo.tsx`
+- **Logo Image**: `/NEP Flag.jpg` (83.52 KB)
+- **Display**: Logo appears in header with "NEP" text and subtitle
+
+**Favicon References**:
+- `public/favicon.ico` - Default favicon (keep as backup)
+- `src/app/favicon.ico` - App favicon
+- Dynamic favicon: `/NEP Flag.jpg` set in layout.tsx head tag
+
+**Favicon Format Support**:
+```html
+<link rel="icon" href="/NEP Flag.jpg" sizes="any" />
+```
+
+This configuration:
+✅ Displays NEP Flag as browser tab icon
+✅ Works across all modern browsers
+✅ Displays correctly in bookmarks and history
+✅ Mobile-friendly (iOS, Android)
+
+### Verification
+To verify the changes:
+1. Run `npm run dev`
+2. Open browser and check:
+   - Page title in browser tab: "National Ex Servicemen Party"
+   - Favicon visible in tab (NEP Flag image)
+   - Logo displays in header
+3. Check different browsers (Chrome, Firefox, Safari, Edge)

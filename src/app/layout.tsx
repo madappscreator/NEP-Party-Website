@@ -10,7 +10,7 @@ import { LanguageProvider } from '@/context/language-context';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'NEP Digital Platform | National Ex-Servicemen Party',
+  title: 'National Ex Servicemen Party',
   description:
     'The official digital platform for the National Ex-Servicemen Party (NEP). Join us, support our cause, and help build a stronger India. For ex-servicemen and all proud citizens.',
   keywords:
