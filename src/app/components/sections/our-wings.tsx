@@ -30,7 +30,7 @@ export function OurWings() {
                             variant={activeWing === wing ? 'default' : 'secondary'}
                             className="text-lg px-4 py-2 cursor-pointer transition-all"
                         >
-                            {t(`wings_${wing.toLowerCase().replace(/ /g, '_').replace(/'/g, '')}_name`)}
+                            {t(`wings_${wing.toLowerCase().replace(/ /g, '_').replace(/-/g, '_').replace(/'/g, '')}_name`)}
                         </Badge>
                     ))}
                 </div>
