@@ -513,7 +513,7 @@ const handleSelectChange = (id: string, value: string) => {
                                 {constituencies.map(c => (
                                     <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
                                 ))}
-                            </Content>
+                            </SelectContent>
                         </Select>
                     </div>
                  </div>
