@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { useLanguage } from '@/context/language-context';
+import { QRCodeSVG } from 'qrcode.react';
+
 
 interface MemberProfile {
   name: string;
@@ -49,14 +51,16 @@ const NewMemberCard: React.FC<NewMemberCardProps> = ({ member }) => {
           <p><strong>PHONE:</strong> {member.phone}</p>
           <p><strong>DISTRICT:</strong> {member.district}</p>
           <p><strong>CONSTITUENCY:</strong> {member.constituency}</p>
-          <div className="qr">
-            <img src="/upi-qr.png" alt="QR Code" />
-          </div>
         </div>
 
-        <div className="president-box">
-          <img src="/NEP President.jpg" alt="President Photo" />
-          <p>Party President</p>
+        <div className="right-panel">
+            <div className="president-box">
+              <img src="/NEP President.jpg" alt="President Photo" />
+              <p>Party President</p>
+            </div>
+             <div className="qr">
+                <QRCodeSVG value={`NEP:${member.membershipId}`} size={64} />
+            </div>
         </div>
       </div>
 
