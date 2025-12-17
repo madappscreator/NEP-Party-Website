@@ -144,6 +144,7 @@
   },
   "profile": {
     "title": "Member Profile",
+    "subtitle": "Manage your membership details",
     "logout": "Logout",
     "editProfile": "Edit Profile",
     "membershipId": "Membership ID",
@@ -161,7 +162,12 @@
     "noProfile": "No profile found.",
     "registerNow": "Register Now",
     "viewCard": "View Member Card",
-    "yourCard": "Your Membership Card"
+    "yourCard": "Your Membership Card",
+    "memberDetails": "Member Details",
+    "name": "Name",
+    "validUntil": "Valid Until",
+    "downloadImage": "Download as Image (PNG)",
+    "downloadPDF": "Download as PDF"
   },
   "contact": {
     "title": "Contact Us",
@@ -295,27 +301,5 @@
   "gallery_album_press_meets_desc": "Official press conferences and media interactions.",
 
   "gallery_album_protests_name": "Protests",
-  "gallery_album_protests_desc": "Documentation of peaceful protests and rallies.",
-  
-  "profile_title": "My Profile",
-  "profile_logout": "Logout",
-  "profile_memberDetails": "Member Details",
-  "profile_name": "Name",
-  "profile_membershipId": "Membership ID",
-  "profile_membershipType": "Membership Type",
-  "profile_fatherName": "Father's Name",
-  "profile_phone": "Phone",
-  "profile_district": "District",
-  "profile_state": "State",
-  "profile_validUntil": "Valid Until",
-  "profile_editProfile": "Edit Profile",
-  "profile_yourCard": "Your Membership Card",
-  "profile_statusApproved": "Membership Approved",
-  "profile_approvedMessage": "Your membership is active and you can access all benefits.",
-  "profile_statusPending": "Membership Pending",
-  "profile_pendingMessage": "Your application is under review. Please wait for approval.",
-  "profile_statusRejected": "Membership Rejected",
-  "profile_rejectedMessage": "Your membership application was not approved. You can reapply.",
-  "profile_noProfile": "No profile found. Please register to continue.",
-  "profile_registerNow": "Register Now"
+  "gallery_album_protests_desc": "Documentation of peaceful protests and rallies."
 }

@@ -183,7 +183,7 @@ export default function ProfilePage() {
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{t('profile_title')}</h1>
-            <p className="text-gray-600 mt-1">{t('profile_subtitle') || 'Manage your membership details'}</p>
+            <p className="text-gray-600 mt-1">{t('profile_subtitle')}</p>
           </div>
           <button onClick={() => auth.signOut()} className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition shadow-md">
             {t('profile_logout')}
@@ -204,14 +204,14 @@ export default function ProfilePage() {
                 className="bg-primary hover:bg-primary/90 text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-lg transition shadow-md"
               >
                 <FileImage size={20} />
-                {t('card.downloadImage') || 'Download as Image (PNG)'}
+                {t('profile_downloadImage')}
               </button>
               <button 
                 onClick={downloadCardAsPDF} 
                 className="bg-accent hover:bg-accent/90 text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-lg transition shadow-md"
               >
                 <FileText size={20} />
-                {t('card.downloadPDF') || 'Download as PDF'}
+                {t('profile_downloadPDF')}
               </button>
             </div>
           </div>
