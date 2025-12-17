@@ -21,7 +21,6 @@ import { indianGeography, State, District, Constituency } from '@/lib/geography'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
-import { uploadFileServerAction } from '@/app/actions/upload';
 import PaymentStatusTracker from '@/components/payment-status-tracker';
 import { useLanguage } from '@/context/language-context';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -282,6 +281,9 @@ const handleFinalSubmit = async () => {
         };
         
         // Save documents to Firestore
+        if (!firestore) {
+            throw new Error("Firestore is not initialized.");
+        }
         await setDoc(doc(firestore, 'members', memberId), memberData);
         await setDoc(doc(firestore, `members/${memberId}/payments`, 'initial-payment'), paymentData);
 
