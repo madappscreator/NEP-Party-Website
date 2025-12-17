@@ -373,5 +373,31 @@
   "wings_women_wing_description": "Empowers women in leadership, governance, and society. Works towards safety, equality, and economic independence.",
   
   "wings_youth_wing_name": "Youth Wing",
-  "wings_youth_wing_description": "Engages young citizens in politics and public service. Focuses on leadership, employment, and nation-building initiatives."
+  "wings_youth_wing_description": "Engages young citizens in politics and public service. Focuses on leadership, employment, and nation-building initiatives.",
+
+  "profile_title": "My Profile",
+  "profile_subtitle": "View and manage your membership information",
+  "profile_logout": "Logout",
+  "profile_yourCard": "Your Membership Card",
+  "profile_downloadImage": "Download as Image (PNG)",
+  "profile_downloadPDF": "Download as PDF",
+  "profile_memberDetails": "Member Details",
+  "profile_editProfile": "Edit Profile",
+  "profile_name": "Name",
+  "profile_membershipId": "Membership ID",
+  "profile_membershipType": "Membership Type",
+  "profile_fatherName": "Father's Name",
+  "profile_phone": "Phone Number",
+  "profile_district": "District",
+  "profile_state": "State",
+  "profile_constituency": "Constituency",
+  "profile_validUntil": "Valid Until",
+  "profile_statusApproved": "Membership Approved",
+  "profile_approvedMessage": "Your membership is active and you can access all benefits.",
+  "profile_statusPending": "Membership Pending",
+  "profile_pendingMessage": "Your application is under review. Please wait for approval.",
+  "profile_statusRejected": "Membership Rejected",
+  "profile_rejectedMessage": "Your membership application was not approved. You can reapply.",
+  "profile_noProfile": "No profile found. Please register to continue.",
+  "profile_registerNow": "Register Now"
 }
