@@ -73,8 +73,6 @@ const initialFormData: FormData = {
 
 const donationAmounts = [10, 100, 500, 1000, 2000];
 
-let recaptchaVerifier: RecaptchaVerifier | null = null;
-
 export default function RegisterPage() {
   const [step, setStep] = React.useState<Step>('mobile');
   const [mobileNumber, setMobileNumber] = React.useState('');
@@ -94,18 +92,25 @@ export default function RegisterPage() {
   const { auth, firestore, user } = useFirebase();
   const { toast } = useToast();
   const { t } = useLanguage();
+  
+  const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
 
-  const initRecaptcha = () => {
+  React.useEffect(() => {
     if (!auth) return;
-    if (!recaptchaVerifier) {
-      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+
+    if (!recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
         'callback': () => {
-          // reCAPTCHA solved
+          // reCAPTCHA solved, automatically triggers auth flow
         },
+        'expired-callback': () => {
+          // Response expired. Ask user to solve reCAPTCHA again.
+        }
       });
     }
-  }
+  }, [auth]);
+
 
   const handleSendOtp = async () => {
     if (!auth) {
@@ -119,12 +124,11 @@ export default function RegisterPage() {
     if (isOtpSending) return;
 
     setIsOtpSending(true);
-
+    
     try {
-      initRecaptcha();
       const phoneNumber = `+91${mobileNumber}`;
-      const appVerifier = recaptchaVerifier!;
-      
+      const appVerifier = recaptchaVerifierRef.current!;
+
       const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
 
       setConfirmationResult(confirmation);
@@ -133,16 +137,23 @@ export default function RegisterPage() {
       toast({ title: "OTP Sent", description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
-        if (recaptchaVerifier) {
-            recaptchaVerifier.clear();
-            recaptchaVerifier = null;
+        
+        let errorMessage = "Could not send OTP. Please try again.";
+        if (error.code === 'auth/too-many-requests') {
+           errorMessage = "You've made too many requests. Please wait a while before trying again.";
+        } else if (error.code === 'auth/captcha-check-failed') {
+            errorMessage = "reCAPTCHA verification failed. Please try again.";
         }
 
-       let errorMessage = "Could not send OTP. Please try again.";
-       if (error.code === 'auth/too-many-requests') {
-          errorMessage = "You've made too many requests. Please wait a while before trying again.";
-      }
-      toast({ title: "Error sending OTP", description: errorMessage, variant: "destructive" });
+        // Reset reCAPTCHA only on specific errors if needed, or always to be safe
+        if (recaptchaVerifierRef.current) {
+          recaptchaVerifierRef.current.render().then((widgetId) => {
+            // @ts-ignore
+            grecaptcha.reset(widgetId);
+          });
+        }
+
+        toast({ title: "Error sending OTP", description: errorMessage, variant: "destructive" });
     } finally {
       setIsOtpSending(false);
     }
