@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -21,9 +22,10 @@ import { indianGeography, State, District, Constituency } from '@/lib/geography'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
-import { uploadFileServerAction } from '@/app/actions/upload';
 import PaymentStatusTracker from '@/components/payment-status-tracker';
 import { useLanguage } from '@/context/language-context';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
 
@@ -94,22 +96,7 @@ export default function RegisterPage() {
   const { t } = useLanguage();
   
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
-
-  React.useEffect(() => {
-    if (!auth) return;
-
-    if (!recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, automatically triggers auth flow
-        },
-        'expired-callback': () => {
-          // Response expired. Ask user to solve reCAPTCHA again.
-        }
-      });
-    }
-  }, [auth]);
+  const recaptchaWrapperRef = React.useRef<HTMLDivElement>(null);
 
 
   const handleSendOtp = async () => {
@@ -117,8 +104,8 @@ export default function RegisterPage() {
       toast({ title: "Error", description: "Authentication service not ready. Please refresh.", variant: "destructive" });
       return;
     }
-    if (mobileNumber.length !== 10) {
-      toast({ title: "Invalid Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
+    if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
+      toast({ title: "Invalid Number", description: "Please enter a valid 10-digit Indian mobile number.", variant: "destructive" });
       return;
     }
     if (isOtpSending) return;
@@ -126,6 +113,19 @@ export default function RegisterPage() {
     setIsOtpSending(true);
     
     try {
+        // Initialize reCAPTCHA verifier if it doesn't exist
+        if (!recaptchaVerifierRef.current && recaptchaWrapperRef.current) {
+            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaWrapperRef.current, {
+                'size': 'invisible',
+                'callback': () => {
+                    // reCAPTCHA solved, automatically triggers auth flow
+                },
+                'expired-callback': () => {
+                    // Response expired. User needs to try sending OTP again.
+                }
+            });
+        }
+
       const phoneNumber = `+91${mobileNumber}`;
       const appVerifier = recaptchaVerifierRef.current!;
 
@@ -138,11 +138,20 @@ export default function RegisterPage() {
     } catch (error: any) {
         console.error("Error sending OTP: ", error);
         
-        let errorMessage = "Could not send OTP. Please try again.";
-        if (error.code === 'auth/too-many-requests') {
-           errorMessage = "You've made too many requests. Please wait a while before trying again.";
-        } else if (error.code === 'auth/captcha-check-failed') {
-            errorMessage = "reCAPTCHA verification failed. Please try again.";
+        let errorMessage = "An unexpected error occurred. Please try again.";
+        switch (error.code) {
+            case 'auth/too-many-requests':
+                errorMessage = "You've made too many requests. Please wait a while before trying again.";
+                break;
+            case 'auth/invalid-phone-number':
+                errorMessage = "The phone number is not valid. Please check and try again.";
+                break;
+            case 'auth/captcha-check-failed':
+                errorMessage = "reCAPTCHA verification failed. Please refresh the page and try again.";
+                break;
+            case 'auth/network-request-failed':
+                errorMessage = "Network error. Please check your internet connection and try again.";
+                break;
         }
 
         if (recaptchaVerifierRef.current) {
@@ -207,32 +216,15 @@ const handleFinalSubmit = async () => {
     toast({ title: "Submitting Application", description: "Please wait, do not close this page." });
 
     try {
-        await auth.currentUser.getIdToken(true);
         const memberId = auth.currentUser.uid;
+        const storage = getStorage();
         
         const sanitizeFileName = (fileName: string) => fileName.replace(/\s+/g, "_");
 
-        const fileToBase64 = (file: File): Promise<string> => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = error => reject(error);
-            });
-        };
-
-        // Use SERVER ACTION for upload
         const uploadFile = async (file: File, path: string): Promise<string> => {
-            if (!file) return '';
-            const base64String = await fileToBase64(file);
-            
-            // Call the server action
-            const result = await uploadFileServerAction(path, base64String);
-            
-            if (!result.success || !result.url) {
-                throw new Error(result.error || "Upload failed");
-            }
-            return result.url;
+            const fileRef = ref(storage, path);
+            await uploadBytes(fileRef, file);
+            return await getDownloadURL(fileRef);
         }
 
         const safeScreenshotName = sanitizeFileName(formData.paymentScreenshot.name);
@@ -292,6 +284,9 @@ const handleFinalSubmit = async () => {
         };
         
         // Save documents to Firestore
+        if (!firestore) {
+            throw new Error("Firestore is not initialized.");
+        }
         await setDoc(doc(firestore, 'members', memberId), memberData);
         await setDoc(doc(firestore, `members/${memberId}/payments`, 'initial-payment'), paymentData);
 
@@ -386,7 +381,7 @@ const handleSelectChange = (id: string, value: string) => {
               <CardDescription>Enter your mobile number to begin. We'll send you an OTP for verification.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div id="recaptcha-container"></div>
+              <div id="recaptcha-container" ref={recaptchaWrapperRef}></div>
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
                 <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
