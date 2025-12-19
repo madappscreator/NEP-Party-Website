@@ -1,6 +1,72 @@
 # Recent Fixes and Updates
 
-## Language Translations Completed (Dec 17, 2025)
+## Critical Bug Fixes (Dec 17, 2025 - Evening Session)
+
+### 3 Major Bugs Fixed
+
+#### **Bug 1: Payment File Upload Failing**
+**Problem**: Users getting "Upload Error: An unexpected response was received from the server" when submitting payment screenshots
+**Root Cause**: Firebase Storage REST API was missing the API key authentication parameter
+**Solution**: 
+- File: `src/app/actions/upload.ts` (lines 6, 8, 26, 57)
+- Added `apiKey` parameter to `performUpload()` function
+- Pass API key to all Firebase Storage bucket candidates
+- Includes fallback for API key from firebaseConfig
+
+**Code Changes**:
+```typescript
+// Before: uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o?name=${encodedPath}`;
+// After: uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o?name=${encodedPath}&key=${apiKey}`;
+```
+
+#### **Bug 2: Currency Symbol (₹) Rendering as ₽**
+**Problem**: Indian Rupee symbol displaying incorrectly across all pages
+**Root Cause**: Google Fonts import missing `latin-ext` subset needed for Rupee Unicode character (U+20B9)
+**Solution**:
+- File: `src/app/layout.tsx` (line 38)
+- Added `&subset=latin,latin-ext` to Google Fonts CSS import
+- Ensures Noto Sans font includes extended Latin characters with proper Rupee symbol
+
+**Code Changes**:
+```html
+<!-- Before: family=PT+Sans:wght@400;700&family=Noto+Sans:wght@400;500;600;700&display=swap -->
+<!-- After: family=PT+Sans:wght@400;700&family=Noto+Sans:wght@400;500;600;700&subset=latin,latin-ext&display=swap -->
+```
+
+#### **Bug 3: reCaptcha Error After 3 OTP Attempts**
+**Problem**: After 3 failed OTP attempts, reCaptcha widget becomes stuck and won't respond to new requests
+**Root Cause**: Register page error handler wasn't clearing reCaptcha verifier (unlike login page which does)
+**Solution**:
+- File: `src/app/register/page.tsx` (lines 148-151)
+- Added `.clear()` call and set verifier to `null` in reCaptcha error handler
+- Matches the pattern used in `src/app/login/page.tsx`
+
+**Code Changes**:
+```typescript
+// Before: grecaptcha.reset(widgetId) - only resets the widget
+// After: 
+if (recaptchaVerifierRef.current) {
+  recaptchaVerifierRef.current.clear();
+  recaptchaVerifierRef.current = null;
+}
+```
+
+### Verification Status
+- ✅ All 3 bugs identified and root causes analyzed
+- ✅ Fixes implemented in minimal, focused changes
+- ✅ Translation files verified intact (no missing locales)
+- ✅ Firebase config verified with apiKey export
+- ✅ Changes backward compatible with fallback values
+- ✅ All related files compile without issues
+
+### Impact Assessment
+- **Payment Upload**: Now includes proper authentication for Firebase Storage
+- **Currency Symbol**: Will display correctly in admin dashboard, payment tables, and all pages
+- **reCaptcha**: Users can retry OTP after failures without page refresh
+
+---
+
+## Language Translations Completed (Dec 17, 2025 - Morning Session)
 
 ### Comprehensive Multi-Language Support Implemented
 **Status**: ✅ Complete translation files created for all regional languages

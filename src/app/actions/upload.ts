@@ -3,11 +3,11 @@
 import { firebaseConfig } from "@/firebase/config";
 
 // Helper function to perform the raw upload
-async function performUpload(bucketName: string, path: string, contentType: string, buffer: Buffer) {
+async function performUpload(bucketName: string, path: string, contentType: string, buffer: Buffer, apiKey: string) {
     const encodedPath = encodeURIComponent(path);
-    const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o?name=${encodedPath}`;
+    const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o?name=${encodedPath}&key=${apiKey}`;
     
-    console.log(`Server Action: Attempting upload to ${uploadUrl}`);
+    console.log(`Server Action: Attempting upload to ${uploadUrl.replace(apiKey, '***')}`);
 
     const response = await fetch(uploadUrl, {
       method: 'POST',
@@ -23,6 +23,7 @@ async function performUpload(bucketName: string, path: string, contentType: stri
 export async function uploadFileServerAction(path: string, base64Data: string) {
   try {
     const projectId = firebaseConfig.projectId || "studio-8928688313-be767";
+    const apiKey = firebaseConfig.apiKey || "AIzaSyCB3-bAipwrG-DQJDcf6PWk0lsIic9DIkc";
     
     // Candidate buckets to try in order
     const candidates = [
@@ -53,7 +54,7 @@ export async function uploadFileServerAction(path: string, base64Data: string) {
     // 2. Try Loop
     for (const bucket of uniqueCandidates) {
         console.log(`Server Action: Trying bucket candidate: ${bucket}`);
-        const result = await performUpload(bucket, path, contentType, buffer);
+        const result = await performUpload(bucket, path, contentType, buffer, apiKey);
         
         if (result.response.ok) {
             successfulResponse = result.response;

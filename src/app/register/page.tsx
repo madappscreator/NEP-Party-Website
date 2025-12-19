@@ -145,12 +145,9 @@ export default function RegisterPage() {
             errorMessage = "reCAPTCHA verification failed. Please try again.";
         }
 
-        // Reset reCAPTCHA only on specific errors if needed, or always to be safe
         if (recaptchaVerifierRef.current) {
-          recaptchaVerifierRef.current.render().then((widgetId) => {
-            // @ts-ignore
-            grecaptcha.reset(widgetId);
-          });
+          recaptchaVerifierRef.current.clear();
+          recaptchaVerifierRef.current = null;
         }
 
         toast({ title: "Error sending OTP", description: errorMessage, variant: "destructive" });
