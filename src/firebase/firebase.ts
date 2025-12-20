@@ -4,7 +4,10 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getStorage, FirebaseStorage } from "firebase/storage";
-import { firebaseConfig } from './config';
+import { firebaseConfig, validateFirebaseConfig } from './config';
+
+// Validate Firebase config on client side (don't throw errors)
+const isConfigValid = validateFirebaseConfig();
 
 /**
  * ✅ Initialize Firebase safely (prevents duplicate apps)

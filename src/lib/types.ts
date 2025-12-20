@@ -23,13 +23,26 @@ export type NewsArticle = {
 
 export type Member = {
     id: string;
-    name:string;
+    name: string;
     state: string;
     district: string;
     constituency: string;
     status: 'active' | 'pending' | 'rejected';
     mobileNumber: string;
     createdAt: Timestamp;
+    photoUrl?: string;
+    fatherName?: string;
+    gender?: string;
+    dateOfBirth?: string;
+    occupation?: string;
+    educationalQualification?: string;
+    email?: string;
+    residentialAddress?: string;
+    membershipAmount?: number;
+    paymentStatus?: string;
+    documents?: boolean;
+    ppoCopyUrl?: string;
+    aadharCardUrl?: string;
 };
 
 export type Payment = {
