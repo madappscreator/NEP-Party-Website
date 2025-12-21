@@ -118,7 +118,7 @@ export default function RegisterPage() {
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
   const [customAmount, setCustomAmount] = React.useState('');
 
-  const { auth, firestore, user } = useFirebase();
+    const { firebaseApp, auth, firestore, user } = useFirebase();
   const { toast } = useToast();
   const { t } = useLanguage();
   
@@ -356,7 +356,6 @@ const handleFinalSubmit = async (transactionId: string) => {
         const memberRef = doc(firestore, 'members', memberId);
 
         // Call the Cloud Function to generate a sequential membership ID (explicit app + region)
-        const { firebaseApp } = useFirebase();
         const functions = getFunctions(firebaseApp, 'us-central1');
         const generateMembershipId = httpsCallable(functions, 'generateMembershipId');
         let membershipId = '';
