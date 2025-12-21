@@ -261,7 +261,7 @@ export default function RegisterPage() {
     }
 };
 
-const handleFinalSubmit = async () => {
+const handleFinalSubmit = async (transactionId: string) => {
     if (!auth?.currentUser) {
         toast({ title: "Authentication Error", description: "User not authenticated. Please restart the process.", variant: "destructive" });
         setIsSubmitting(false);
@@ -343,7 +343,7 @@ const handleFinalSubmit = async () => {
             memberId: memberId,
             amount: formData.membershipAmount,
             paymentMethod: 'Razorpay',
-            transactionId: formData.transactionId,
+            transactionId: transactionId,
             status: 'approved', // Set to approved for Razorpay payments
             createdAt: serverTimestamp()
         };
@@ -362,7 +362,7 @@ const handleFinalSubmit = async () => {
         let membershipId = '';
         
         try {
-          const result = await generateMembershipId();
+          const result = await generateMembershipId({ memberId });
           membershipId = (result.data as any).membershipId;
         } catch (err: any) {
           console.error('Error calling generateMembershipId:', err);
@@ -459,7 +459,6 @@ const handleSelectChange = (id: string, value: string) => {
     if (step === 'otp') handleVerifyOtp();
     if (step === 'details') setStep('declaration');
     if (step === 'declaration') setStep('payment');
-    if (step === 'payment') handleFinalSubmit();
   };
 
   const renderStep = () => {
@@ -723,14 +722,7 @@ const handleSelectChange = (id: string, value: string) => {
                     <RazorpayPayment
                         amount={formData.membershipAmount}
                         onSuccess={async (paymentData) => {
-                            // Update form data with payment info
-                            setFormData(prev => ({
-                                ...prev,
-                                transactionId: paymentData.razorpay_payment_id,
-                                paymentScreenshot: null // Not needed for Razorpay
-                            }));
-                            // Auto-submit after successful payment
-                            await handleFinalSubmit();
+                            await handleFinalSubmit(paymentData.razorpay_payment_id);
                         }}
                         onFailure={() => {
                             toast({ title: "Payment Failed", description: "Please try again or contact support.", variant: "destructive" });
