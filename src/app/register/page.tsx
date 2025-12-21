@@ -19,6 +19,7 @@ import { setDoc, doc, serverTimestamp, getDoc, runTransaction } from 'firebase/f
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
+import { WINGS_DATA } from '@/lib/constants';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
@@ -36,6 +37,7 @@ type FormData = {
   gender: string;
   dateOfBirth: string;
   occupation: string;
+    wing: string;
   mobileNumber: string;
   educationalQualification: string;
   email: string;
@@ -59,6 +61,7 @@ const initialFormData: FormData = {
     gender: '',
     dateOfBirth: '',
     occupation: '',
+    wing: '',
     mobileNumber: '',
     educationalQualification: '',
     email: '',
@@ -320,6 +323,7 @@ const handleFinalSubmit = async () => {
             state: formData.state,
             district: formData.district,
             constituency: formData.constituency,
+            wing: formData.wing,
             aadharNumber: formData.aadharNumber,
             membershipAmount: formData.membershipAmount,
             membershipType: formData.membershipType,
@@ -349,34 +353,25 @@ const handleFinalSubmit = async () => {
         }
 
         const memberRef = doc(firestore, 'members', memberId);
-        const counterRef = doc(firestore, 'counters', 'members');
 
-        await runTransaction(firestore, async (tx) => {
-            const counterSnap = await tx.get(counterRef);
-            let next = 1;
-            if (!counterSnap.exists()) {
-                tx.set(counterRef, { last: 1 });
-                next = 1;
-            } else {
-                const data: any = counterSnap.data();
-                const last = data?.last || 0;
-                next = last + 1;
-                tx.update(counterRef, { last: next });
-            }
+        // Generate a reasonably unique membershipId on client to avoid relying on
+        // server-side counters which require stricter Firestore rules.
+        // Format: NEP + unix seconds + 4-char random suffix (e.g. NEP1700000000-ab12)
+        const unixSec = Math.floor(Date.now() / 1000);
+        const rand = Math.random().toString(36).slice(2, 6);
+        const membershipId = `NEP${unixSec}-${rand}`;
 
-            const membershipId = `NEP${String(next).padStart(6, '0')}`;
+        const memberDataWithId = {
+            ...memberData,
+            membershipId,
+        };
 
-            const memberDataWithId = {
-                ...memberData,
-                membershipId,
-            };
+        // Write member document and initial payment document directly.
+        // These writes require only that the authenticated user can write their own member doc.
+        await setDoc(memberRef, memberDataWithId);
 
-            tx.set(memberRef, memberDataWithId);
-
-            // Use a unique payment ID instead of 'initial-payment' to avoid duplicate keys
-            const paymentId = `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            tx.set(doc(firestore, `members/${memberId}/payments`, paymentId), { ...paymentData, membershipId });
-        });
+        const paymentId = `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        await setDoc(doc(firestore, `members/${memberId}/payments`, paymentId), { ...paymentData, membershipId });
 
         setStep('confirm');
 
@@ -551,6 +546,19 @@ const handleSelectChange = (id: string, value: string) => {
                  <div className="space-y-2">
                     <Label htmlFor="occupation">Occupation</Label>
                     <Input id="occupation" value={formData.occupation} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="wing">Wing (Optional)</Label>
+                     <Select onValueChange={(value) => handleSelectChange('wing', value)} value={formData.wing}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Wing" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {WINGS_DATA.map(w => (
+                                <SelectItem key={w.name} value={w.name}>{w.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="mobileNumber">Contact Number</Label>

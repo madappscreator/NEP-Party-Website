@@ -123,10 +123,10 @@ service cloud.firestore {
       allow delete: if isExistingAdmin();
     }
     
-    // Add counters collection for ID generation
+    // Counters collection - managed by admin Cloud Functions only
+    // (or used internally by server-side logic with admin privileges)
     match /counters/{counterId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin(); 
+      allow read, write: if isAdmin();
     }
   }
 }
