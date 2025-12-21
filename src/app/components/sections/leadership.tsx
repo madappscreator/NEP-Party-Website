@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useLanguage } from "@/context/language-context";
@@ -17,6 +18,7 @@ export function Leadership() {
                         width={400}
                         height={400}
                         className="rounded-lg object-cover shadow-xl"
+                        style={{ width: "auto", height: "auto" }}
                         data-ai-hint="portrait man leader"
                     />
                 </div>
