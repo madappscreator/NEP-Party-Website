@@ -276,9 +276,15 @@ const handleFinalSubmit = async () => {
         const sanitizeFileName = (fileName: string) => fileName.replace(/\s+/g, "_");
 
         const uploadFile = async (file: File, path: string): Promise<string> => {
-            const fileRef = ref(storage, path);
-            await uploadBytes(fileRef, file);
-            return await getDownloadURL(fileRef);
+            try {
+                const fileRef = ref(storage, path);
+                await uploadBytes(fileRef, file);
+                return await getDownloadURL(fileRef);
+            } catch (err: any) {
+                console.error('Upload failed for', path, err);
+                // Return empty string so member creation can continue even if uploads fail
+                return '';
+            }
         }
 
         let photoUrl = '';
