@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import Razorpay from 'razorpay';
+const Razorpay = require('razorpay');
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
