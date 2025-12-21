@@ -9,7 +9,8 @@
   "functions": {
     "source": "functions",
     "codebase": "default",
-    "runtime": "nodejs20"
+    "runtime": "nodejs20",
+    "region": "asia-south1"
   },
   "emulators": {
     "firestore": {

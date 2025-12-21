@@ -1,0 +1,39 @@
+type User @table {
+  email: String!
+  passwordHash: String!
+  role: String!
+  createdAt: Timestamp!
+  firstName: String
+  lastName: String
+  phoneNumber: String
+}
+
+type Application @table {
+  applicant: User!
+  applicationDate: Timestamp!
+  status: String!
+  motivationText: String
+}
+
+type Member @table {
+  user: User!
+  membershipDate: Timestamp!
+  status: String!
+  streetAddress: String
+  city: String
+  state: String
+  zipCode: String
+  occupation: String
+  politicalInterests: String
+}
+
+type Role @table {
+  name: String!
+  description: String!
+}
+
+type MemberRole @table(key: ["member", "role"]) {
+  member: Member!
+  role: Role!
+  assignedDate: Timestamp!
+}
