@@ -355,18 +355,31 @@ const handleFinalSubmit = async (transactionId: string) => {
 
         const memberRef = doc(firestore, 'members', memberId);
 
-        // Call the Cloud Function to generate a sequential membership ID (explicit app + region)
-        const functions = getFunctions(firebaseApp, 'us-central1');
-        const generateMembershipId = httpsCallable(functions, 'generateMembershipId');
-        let membershipId = '';
-        
-        try {
-          const result = await generateMembershipId({ memberId });
-          membershipId = (result.data as any).membershipId;
-        } catch (err: any) {
-          console.error('Error calling generateMembershipId:', err);
-          throw new Error('Failed to generate membership ID. Please try again.');
-        }
+                // Call the Cloud Function to generate a sequential membership ID (explicit app + region)
+                const functions = getFunctions(firebaseApp, 'us-central1');
+                const generateMembershipId = httpsCallable(functions, 'generateMembershipId');
+                let membershipId = '';
+
+                // Debug: log auth and functions info before calling
+                try {
+                    console.log('Calling generateMembershipId — uid:', user?.uid, 'memberId:', memberId);
+                    try { console.log('Functions service region/info:', (functions as any).region || functions); } catch (e) {}
+
+                    const result = await generateMembershipId({ memberId });
+                    console.log('generateMembershipId result:', result);
+                    membershipId = (result.data as any).membershipId;
+                } catch (err: any) {
+                    // Enhanced error logging for debugging
+                    try {
+                        console.error('Error calling generateMembershipId — code:', err?.code, 'message:', err?.message, 'details:', err?.details || err);
+                        console.error('Full error object:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+                    } catch (e) {
+                        console.error('Error serializing callable error:', e, err);
+                    }
+
+                    // Re-throw user-facing message
+                    throw new Error('Failed to generate membership ID. Please try again.');
+                }
 
         const memberDataWithId = {
             ...memberData,
