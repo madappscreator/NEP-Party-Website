@@ -355,8 +355,9 @@ const handleFinalSubmit = async () => {
 
         const memberRef = doc(firestore, 'members', memberId);
 
-        // Call the Cloud Function to generate a sequential membership ID
-        const functions = getFunctions();
+        // Call the Cloud Function to generate a sequential membership ID (explicit app + region)
+        const { firebaseApp } = useFirebase();
+        const functions = getFunctions(firebaseApp, 'us-central1');
         const generateMembershipId = httpsCallable(functions, 'generateMembershipId');
         let membershipId = '';
         
