@@ -11,6 +11,7 @@ const db = admin.firestore();
  * - Requires an authenticated user (context.auth present).
  * - Uses a Firestore transaction on `counters/members` to increment `last`.
  * - Returns an object: { membershipId: string }
+ * - Format: NEP-<YYYY>-<6-digit-sequence> (e.g., NEP-2025-100007)
  *
  * Security: this function runs with admin privileges, so Firestore rules
  * are bypassed for the operations inside. The client must authenticate
@@ -24,21 +25,22 @@ export const generateMembershipId = functions.https.onCall(async (data: any, con
 
   try {
     const counterRef = db.doc('counters/members');
+    const currentYear = new Date().getFullYear();
 
     const membershipId = await db.runTransaction(async (tx) => {
       const snap = await tx.get(counterRef);
-      let next = 1;
+      let next = 100001;
       if (!snap.exists) {
-        tx.set(counterRef, { last: 1 });
-        next = 1;
+        tx.set(counterRef, { last: 100001 });
+        next = 100001;
       } else {
         const data: any = snap.data();
-        const last = data?.last || 0;
+        const last = data?.last || 100000;
         next = last + 1;
         tx.update(counterRef, { last: next });
       }
 
-      const id = `NEP${String(next).padStart(6, '0')}`;
+      const id = `NEP-${currentYear}-${String(next).padStart(6, '0')}`;
       return id;
     });
 

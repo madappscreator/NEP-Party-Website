@@ -15,7 +15,7 @@ import {
   ConfirmationResult,
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
-import { setDoc, doc, serverTimestamp, getDoc, runTransaction } from 'firebase/firestore';
+import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
@@ -27,6 +27,7 @@ import PaymentStatusTracker from '@/components/payment-status-tracker';
 import { useLanguage } from '@/context/language-context';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import RazorpayPayment from '@/components/RazorpayPayment';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
@@ -354,12 +355,18 @@ const handleFinalSubmit = async () => {
 
         const memberRef = doc(firestore, 'members', memberId);
 
-        // Generate a reasonably unique membershipId on client to avoid relying on
-        // server-side counters which require stricter Firestore rules.
-        // Format: NEP + unix seconds + 4-char random suffix (e.g. NEP1700000000-ab12)
-        const unixSec = Math.floor(Date.now() / 1000);
-        const rand = Math.random().toString(36).slice(2, 6);
-        const membershipId = `NEP${unixSec}-${rand}`;
+        // Call the Cloud Function to generate a sequential membership ID
+        const functions = getFunctions();
+        const generateMembershipId = httpsCallable(functions, 'generateMembershipId');
+        let membershipId = '';
+        
+        try {
+          const result = await generateMembershipId();
+          membershipId = (result.data as any).membershipId;
+        } catch (err: any) {
+          console.error('Error calling generateMembershipId:', err);
+          throw new Error('Failed to generate membership ID. Please try again.');
+        }
 
         const memberDataWithId = {
             ...memberData,
