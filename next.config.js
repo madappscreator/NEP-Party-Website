@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  distDir: 'out',
   // Increase Server Actions body size limit to allow larger uploads from forms.
   // Put under `experimental` to be recognized by this Next.js version.
   experimental: {

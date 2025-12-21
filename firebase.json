@@ -11,14 +11,6 @@
     "codebase": "default",
     "runtime": "nodejs20"
   },
-  "hosting": {
-    "public": "out",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
-  },
   "emulators": {
     "firestore": {
       "port": 8080
