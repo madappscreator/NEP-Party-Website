@@ -1,7 +1,5 @@
-export const generateMembershipId = functions
-  .region('us-central1')
-  .runWith({ runtime: 'nodejs18', timeoutSeconds: 30 })
-  .https.onCall(async (_, context) => {
+export const generateMembershipId = functions.https.onCall(
+  async (data, context) => {
 
     if (!context.auth) {
       throw new functions.https.HttpsError(
@@ -10,40 +8,40 @@ export const generateMembershipId = functions
       );
     }
 
-    const db = admin.firestore();
+    const uid = context.auth.uid;
+    const memberRef = db.doc(`members/${uid}`);
     const counterRef = db.doc('counters/members');
     const year = new Date().getFullYear();
 
-    try {
-      const membershipId = await db.runTransaction(async (tx) => {
-        const snap = await tx.get(counterRef);
+    return await db.runTransaction(async (tx) => {
+      const memberSnap = await tx.get(memberRef);
 
-        let nextValue = 100001;
+      // 🔒 Prevent double ID generation
+      if (memberSnap.exists && memberSnap.data()?.membershipId) {
+        return { membershipId: memberSnap.data()!.membershipId };
+      }
 
-        if (snap.exists) {
-          const last = snap.data()?.last;
-          nextValue = typeof last === 'number' ? last + 1 : 100001;
-          tx.update(counterRef, {
-            last: nextValue,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        } else {
-          tx.set(counterRef, {
-            last: nextValue,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        }
+      const counterSnap = await tx.get(counterRef);
 
-        return `NEP-${year}-${String(nextValue).padStart(6, '0')}`;
-      });
+      let next = 100001;
+
+      if (counterSnap.exists) {
+        next = (counterSnap.data()?.last || 100000) + 1;
+        tx.update(counterRef, { last: next });
+      } else {
+        tx.set(counterRef, { last: next });
+      }
+
+      const membershipId = `NEP-${year}-${String(next).padStart(6, '0')}`;
+
+      // 🔐 Save membershipId to user
+      tx.set(
+        memberRef,
+        { membershipId, membershipIdGeneratedAt: admin.firestore.FieldValue.serverTimestamp() },
+        { merge: true }
+      );
 
       return { membershipId };
-
-    } catch (err) {
-      console.error('generateMembershipId failed', err);
-      throw new functions.https.HttpsError(
-        'internal',
-        'Membership ID generation failed'
-      );
-    }
-  });
+    });
+  }
+);
