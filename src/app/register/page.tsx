@@ -405,6 +405,7 @@ export default function RegisterPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="flex flex-col items-center gap-4">
+                        <Label htmlFor="photo">Passport Size Photo *</Label>
                         <Avatar className="h-24 w-24 border-2 border-dashed">
                             <AvatarImage src={photoPreview || undefined} alt="Member photo" />
                             <AvatarFallback className="bg-muted">
@@ -556,7 +557,7 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                <Button onClick={() => handleNextStep('declaration')} className="w-full">Proceed to Declaration</Button>
+                <Button onClick={() => handleNextStep('declaration')} className="w-full" disabled={!formData.photoFile}>Proceed to Declaration</Button>
                 </CardContent>
             </>
         );
@@ -647,4 +648,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
