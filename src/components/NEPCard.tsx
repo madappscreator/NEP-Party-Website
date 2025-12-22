@@ -597,7 +597,7 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
                   Perumbakkam, Chennai - 600100, Tamil Nadu, India<br />
                   <strong style={{ fontSize: '10px', marginTop: '4px', display: 'block' }}>நேஷனல் எக்ஸ்-சேவிஸ்மென் பார்டி</strong>
                   A4, விஷ்வா பிரைட் அபார்ட்மெண்ட், நூகம்பாளையம் மென் ரோடு,<br />
-                  பெரும்பாக்கம், சென்னை - 600100, தமிழ்நாடு, இந்தியா
+                  பெரும்பாக்கம், சென்னை தமிழ்நாடு, இந்தியா - 600100.
                 </p>
               </div>
             </div>
