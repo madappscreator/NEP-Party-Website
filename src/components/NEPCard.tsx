@@ -679,6 +679,6 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
       </div>
     </div>
   );
-});
+};
 
 export default NEPCard;
