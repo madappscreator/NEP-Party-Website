@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -26,7 +27,6 @@ import PaymentStatusTracker from '@/components/payment-status-tracker';
 import { useLanguage } from '@/context/language-context';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import RazorpayPayment from '@/components/RazorpayPayment';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
@@ -130,9 +130,8 @@ export default function RegisterPage() {
   const { t } = useLanguage();
 
   const recaptchaVerifierRef = React.useRef<RecaptchaVerifier | null>(null);
-  const recaptchaWrapperRef = React.useRef<HTMLDivElement>(null);
-  const recaptchaWidgetId = React.useRef<number | null>(null);
 
+  // Clean up reCAPTCHA on component unmount
   React.useEffect(() => {
     return () => {
       if (recaptchaVerifierRef.current) {
@@ -157,37 +156,31 @@ export default function RegisterPage() {
   
     try {
       const phoneNumber = `+91${mobileNumber}`;
-      if (recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current.clear();
-      }
-  
-      if (recaptchaWrapperRef.current) {
-        recaptchaWrapperRef.current.innerHTML = `<div id="recaptcha-container-inner"></div>`;
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container-inner', {
-          size: 'invisible',
-          callback: () => {},
+      
+      if (!recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': () => {},
         });
-        recaptchaVerifierRef.current = verifier;
       }
   
-      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifierRef.current!);
+      const confirmation = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifierRef.current);
       setConfirmationResult(confirmation);
       setStep('otp');
       toast({ title: 'OTP Sent', description: `An OTP has been sent to ${phoneNumber}.` });
     } catch (error: any) {
       console.error('Error sending OTP: ', error);
-  
+      
       if (recaptchaVerifierRef.current) {
-          recaptchaVerifierRef.current.clear();
-          recaptchaVerifierRef.current = null;
+        recaptchaVerifierRef.current.clear();
+        recaptchaVerifierRef.current = null;
       }
-      if (typeof window !== 'undefined' && window.grecaptcha && recaptchaWidgetId.current !== null) {
-          window.grecaptcha.reset(recaptchaWidgetId.current);
-      }
-  
+
       let errorMessage = 'Could not send OTP. Please try again.';
       if (error.code === 'auth/too-many-requests') {
         errorMessage = 'You\'ve made too many requests. Please wait a while before trying again.';
+      } else if (error.code === 'auth/captcha-check-failed') {
+        errorMessage = 'reCAPTCHA check failed. Please make sure you are not a robot and try again.';
       }
       toast({ title: 'Error sending OTP', description: errorMessage, variant: 'destructive' });
     } finally {
@@ -366,7 +359,7 @@ export default function RegisterPage() {
               <CardDescription>Enter your mobile number to begin. We'll send you an OTP for verification.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div ref={recaptchaWrapperRef}></div>
+              <div id="recaptcha-container"></div>
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
                 <Input id="mobile" type="tel" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
@@ -654,3 +647,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+
