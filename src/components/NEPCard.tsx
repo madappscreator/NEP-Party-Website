@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -204,7 +205,7 @@ interface MemberProfile {
   membershipId: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'pending' | 'active' | 'rejected';
   membershipValidUntil: string | null;
-  wing: string;
+  wing?: string;
 }
 
 interface NEPCardProps {
@@ -213,110 +214,22 @@ interface NEPCardProps {
 
 const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
   const [currentSide, setCurrentSide] = useState<'front' | 'back'>('front');
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [qrCodeValue, setQrCodeValue] = useState<string>('');
   const [currentLang, setCurrentLang] = useState<LanguageKey>('ta');
   const cardRef = useRef<HTMLDivElement>(null);
 
   const t = translations[currentLang] || translations.ta;
 
   useEffect(() => {
-    const generateQr = async () => {
-      try {
-        const QRCode = await import('qrcode');
-        const qrData = JSON.stringify({
-          membershipId: member.membershipId,
-          name: member.name,
-          phone: member.phone,
-          district: member.district,
-          state: member.state,
-        });
-
-        const url = await QRCode.toDataURL(qrData, { width: 92, margin: 1 });
-        setQrCodeUrl(url);
-      } catch (err) {
-        console.error('Error generating QR code:', err);
-      }
-    };
-    generateQr();
+    const qrData = JSON.stringify({
+      membershipId: member.membershipId,
+      name: member.name,
+      phone: member.phone,
+      district: member.district,
+      state: member.state,
+    });
+    setQrCodeValue(qrData);
   }, [member]);
-
-  const downloadBothSidesAsImage = async () => {
-    if (!cardRef.current) return;
-    try {
-      const frontCanvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        backgroundColor: null,
-      });
-      
-      const frontImg = frontCanvas.toDataURL('image/png');
-      const frontLink = document.createElement('a');
-      frontLink.download = `NEP-Membership-Card-${member.membershipId}-Front.png`;
-      frontLink.href = frontImg;
-      frontLink.click();
-      
-      setCurrentSide('back');
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const backCanvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        backgroundColor: null,
-      });
-      
-      const backImg = backCanvas.toDataURL('image/png');
-      const backLink = document.createElement('a');
-      backLink.download = `NEP-Membership-Card-${member.membershipId}-Back.png`;
-      backLink.href = backImg;
-      backLink.click();
-      
-      setCurrentSide('front');
-    } catch (err) {
-      console.error("Error downloading cards as images:", err);
-    }
-  };
-
-  const downloadBothSidesAsPDF = async () => {
-    if (!cardRef.current) return;
-    try {
-      const frontCanvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        backgroundColor: null,
-      });
-      
-      const imgData = frontCanvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [frontCanvas.width, frontCanvas.height]
-      });
-      pdf.addImage(imgData, 'PNG', 0, 0, frontCanvas.width, frontCanvas.height);
-      
-      setCurrentSide('back');
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const backCanvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        backgroundColor: null,
-      });
-      
-      const backImgData = backCanvas.toDataURL('image/png');
-      pdf.addPage([backCanvas.width, backCanvas.height]);
-      pdf.addImage(backImgData, 'PNG', 0, 0, backCanvas.width, backCanvas.height);
-      
-      pdf.save(`NEP-Membership-Card-${member.membershipId}.pdf`);
-      
-      setCurrentSide('front');
-    } catch (err) {
-      console.error("Error downloading cards as PDF:", err);
-    }
-  };
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -347,7 +260,7 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
       {/* Card Container */}
       <div
         ref={cardRef}
-        className={`id-card ${currentSide === 'back' ? 'back' : ''} relative`}
+        className={`nep-card ${currentSide === 'back' ? 'back' : ''} relative`}
         style={{
           width: '700px',
           height: '420px',
@@ -569,18 +482,7 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
                 zIndex: 10,
               }}
             >
-              {/* QR Code */}
-              <div className="qr-section" style={{ width: '110px', display: 'flex', justifyContent: 'center' }}>
-                {qrCodeUrl && (
-                  <img
-                    src={qrCodeUrl}
-                    alt="QR Code"
-                    className="qr-code"
-                    style={{ width: '92px', height: '92px', padding: '6px', background: '#fff', display: 'block' }}
-                  />
-                )}
-              </div>
-
+             
               {/* Address Fields */}
               <div
                 className="address-fields"
@@ -605,6 +507,11 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
                   A4, விஷ்வா பிரைட் அபார்ட்மெண்ட், நூகம்பாளையம் மென் ரோடு,<br />
                   பெரும்பாக்கம், சென்னை தமிழ்நாடு, இந்தியா - 600100.
                 </p>
+              </div>
+
+               {/* QR Code */}
+              <div className="qr-section" style={{ width: '110px', display: 'flex', justifyContent: 'center', background: '#fff', padding: '6px' }}>
+                <QRCodeSVG value={qrCodeValue} size={92} includeMargin={false} />
               </div>
             </div>
 

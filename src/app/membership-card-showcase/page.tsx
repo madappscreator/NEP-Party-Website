@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -5,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
 import NEPCard from '@/components/NEPCard';
 
 export default function MembershipCardShowcase() {
@@ -60,6 +60,7 @@ export default function MembershipCardShowcase() {
                       membershipId: memberData.membershipId,
                       status: 'APPROVED' as const,
                       membershipValidUntil: null,
+                      wing: memberData.wing,
                     }}
                   />
                 </div>
