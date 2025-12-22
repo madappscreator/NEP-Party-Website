@@ -8,6 +8,7 @@ import { Heart, Menu, User } from 'lucide-react';
 import { NAV_LINKS } from '@/lib/constants';
 import { Logo } from './logo';
 import { useLanguage } from '@/context/language-context';
+import { LanguageSwitcher } from '../shared/language-switcher';
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -25,7 +26,10 @@ export function MobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
-        <Logo />
+        <div className="flex justify-between items-center pr-6">
+            <Logo />
+            <LanguageSwitcher />
+        </div>
         <div className="flex flex-col h-full mt-8">
           <div className="flex flex-col space-y-3">
             {NAV_LINKS.map((link) => (
@@ -39,15 +43,15 @@ export function MobileNav() {
               </Link>
             ))}
           </div>
-          <div className="mt-auto flex flex-col gap-4 py-4">
+          <div className="mt-auto flex flex-col gap-4 py-4 pr-6">
              <Button asChild className="w-full" variant="outline">
                 <Link href="/login" onClick={() => setIsOpen(false)}>
                     <User className="mr-2 h-4 w-4" />Member Login
                 </Link>
             </Button>
-             <Button asChild className="w-full" variant="outline">
-                <Link href="/donate" onClick={() => setIsOpen(false)}>
-                    <Heart className="mr-2 h-4 w-4" />{t('nav_donate_now')}
+             <Button asChild className="w-full" variant="outline" >
+                <Link href="/donate" onClick={() => setIsOpen(false)} className="border-primary text-primary hover:bg-primary/5 hover:text-primary">
+                    <Heart className="mr-2 h-4 w-4 fill-primary" />{t('nav_donate')}
                 </Link>
             </Button>
             <Button asChild className="w-full" style={{backgroundColor: '#FF7A00'}}>

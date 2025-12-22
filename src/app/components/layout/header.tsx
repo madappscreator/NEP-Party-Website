@@ -33,7 +33,7 @@ export function Header() {
             </nav>
 
             <div className="flex flex-1 items-center justify-end gap-2">
-              <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2">
                 <LanguageSwitcher />
                 <Button asChild variant="outline">
                   <Link href="/login"><User className="mr-2 h-4 w-4" /> Member Login</Link>
@@ -41,7 +41,7 @@ export function Header() {
                 <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/5 hover:text-primary">
                   <Link href="/donate"><Heart className="mr-2 h-4 w-4 fill-primary" /> {t('nav_donate')}</Link>
                 </Button>
-                <Button asChild style={{ backgroundColor: '#FF7A00' }}>
+                <Button asChild style={{backgroundColor: '#FF7A00'}}>
                   <Link href="/register">{t('join_party')}</Link>
                 </Button>
               </div>
