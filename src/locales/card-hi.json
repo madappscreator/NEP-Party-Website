@@ -16,5 +16,21 @@
   "presidentSignature": "अध्यक्ष के हस्ताक्षर",
   "presidentName": "अध्यक्ष का नाम",
   "presidentTitle": "अध्यक्ष",
-  "motto": "सही तरीके से, अच्छी तरह, आकर्षक तरीके से"
+  "motto": "सही तरीके से, अच्छी तरह, आकर्षक तरीके से",
+  "slogan_top": "अनुशासन, ईमानदारी, सेवा",
+  "party_name": "राष्ट्रीय पूर्व सैनिक पार्टी",
+  "card_type": "सदस्यता कार्ड",
+  "label_name": "नाम",
+  "label_father": "पिता का नाम",
+  "label_id": "सदस्य आईडी",
+  "party_details_title": "पार्टी विवरण",
+  "party_name_label": "पार्टी",
+  "address_label": "पता",
+  "phone_label": "फोन",
+  "website_label": "वेबसाइट",
+  "email_label": "ईमेल",
+  "president_signature": "अध्यक्ष का हस्ताक्षर",
+  "president_name": "अध्यक्ष का नाम",
+  "president_title": "अध्यक्ष",
+  "footer_text": "राष्ट्रीय पूर्व सैनिक पार्टी"
 }

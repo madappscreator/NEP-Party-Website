@@ -1,44 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import cardTa from '@/locales/card-ta.json';
-import cardMl from '@/locales/card-ml.json';
-import cardHi from '@/locales/card-hi.json';
-import cardTe from '@/locales/card-te.json';
-import cardKn from '@/locales/card-kn.json';
-
-// Dynamic import to avoid SSR issues
-const MultiLanguageMemberCard = dynamic(() => import('@/components/MultiLanguageMemberCard'), {
-  ssr: false,
-});
-
-type Language = 'ta' | 'ml' | 'hi' | 'te' | 'kn';
-
-const translations: Record<Language, any> = {
-  ta: cardTa,
-  ml: cardMl,
-  hi: cardHi,
-  te: cardTe,
-  kn: cardKn,
-};
-
-const languageNames: Record<Language, string> = {
-  ta: 'Tamil (தமிழ்)',
-  ml: 'Malayalam (മലയാളം)',
-  hi: 'Hindi (हिंदी)',
-  te: 'Telugu (తెలుగు)',
-  kn: 'Kannada (ಕನ್ನಡ)',
-};
+import NEPCard from '@/components/NEPCard';
 
 export default function MembershipCardShowcase() {
-  const [language, setLanguage] = useState<Language>('ta');
   const [memberData, setMemberData] = useState({
     membershipId: '13303846289',
     name: 'கிரிஸ்து வில்லிலையம் தேவி',
@@ -71,36 +41,26 @@ export default function MembershipCardShowcase() {
           <div className="lg:col-span-2">
             <Card className="h-full shadow-xl">
               <CardHeader>
-                <CardTitle>Card Preview - {languageNames[language]}</CardTitle>
+                <CardTitle>Card Preview - NEP Membership Card</CardTitle>
                 <CardDescription>Both sides in CR80 format (720×420px)</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-8">
-                {/* Language Selector */}
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(languageNames).map(([lang, name]) => (
-                    <Button
-                      key={lang}
-                      variant={language === lang ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setLanguage(lang as Language)}
-                      className="text-xs"
-                    >
-                      {name}
-                    </Button>
-                  ))}
-                </div>
-
                 {/* Card Preview */}
                 <div className="border-2 border-gray-300 rounded-lg overflow-auto bg-gray-50 p-4">
-                  <MultiLanguageMemberCard
-                    member={memberData}
-                    language={language}
-                    translations={translations[language]}
-                    partyLogoUrl="/NEP Flag.jpg"
-                    presidentPhotoUrl="/NEP President.jpg"
-                    partyWebsite="www.namtamiliar.org"
-                    partyEmail="info@namtamiliar.org"
-                    partyPhone="044-43840484"
+                  <NEPCard
+                    member={{
+                      name: memberData.name,
+                      fatherName: null,
+                      phone: memberData.phone,
+                      photoUrl: memberData.photoUrl,
+                      district: memberData.district,
+                      state: memberData.state,
+                      constituency: memberData.district,
+                      membershipType: memberData.wing || 'Basic Membership',
+                      membershipId: memberData.membershipId,
+                      status: 'APPROVED' as const,
+                      membershipValidUntil: null,
+                    }}
                   />
                 </div>
               </CardContent>
@@ -226,9 +186,9 @@ export default function MembershipCardShowcase() {
               </div>
 
               <div className="p-4 bg-indigo-50 rounded-lg">
-                <h3 className="font-semibold text-indigo-900 mb-2">Languages</h3>
-                <p className="text-sm text-indigo-700">5 Languages Supported</p>
-                <p className="text-xs text-indigo-600 mt-1">Tamil, Malayalam, Hindi, Telugu, Kannada</p>
+                <h3 className="font-semibold text-indigo-900 mb-2">Language</h3>
+                <p className="text-sm text-indigo-700">Tamil Language</p>
+                <p className="text-xs text-indigo-600 mt-1">NEP Party Specific</p>
               </div>
             </div>
 
@@ -255,13 +215,13 @@ export default function MembershipCardShowcase() {
             </div>
 
             <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-l-4 border-amber-600">
-              <h3 className="font-semibold text-amber-900 mb-2">Multi-Language Support</h3>
+              <h3 className="font-semibold text-amber-900 mb-2">NEP Party Specific</h3>
               <ul className="text-sm text-amber-700 space-y-1">
-                <li>✓ Template-Based: Single layout for all languages</li>
-                <li>✓ Language-Specific Fonts: Proper character rendering</li>
-                <li>✓ Translations: Complete UI text for each language</li>
-                <li>✓ Export: Language code in filename (e.g., card-front-ta.png)</li>
-                <li>✓ QR Data: Includes language parameter for future scanning</li>
+                <li>✓ Single Language: Tamil text throughout</li>
+                <li>✓ Party Branding: NEP logo and colors</li>
+                <li>✓ Professional Design: Clean, modern layout</li>
+                <li>✓ Export Ready: High-resolution PNG and PDF</li>
+                <li>✓ QR Integration: Membership verification</li>
               </ul>
             </div>
           </CardContent>

@@ -8,7 +8,7 @@ import { CheckCircle, Mail, HelpCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useFirebase } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import MemberCard from '@/components/member-card';
+import NEPCard from '@/components/NEPCard';
 
 interface PaymentStatusTrackerProps {
   userId: string;
@@ -114,13 +114,12 @@ export default function PaymentStatusTracker({ userId, t }: PaymentStatusTracker
           <div className="border rounded-lg p-6 bg-gradient-to-br from-primary/5 to-secondary/5">
             <h3 className="font-semibold text-lg mb-6">Your Membership Card</h3>
             <div className="flex justify-center">
-              <MemberCard 
-                member={{ 
-                  ...memberData, 
+              <NEPCard
+                member={{
+                  ...memberData,
                   phone: memberData.mobileNumber || memberData.phone,
                   membershipType: memberData.membershipType || 'BASIC'
-                }} 
-                t={t} 
+                }}
               />
             </div>
           </div>

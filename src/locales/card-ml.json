@@ -16,5 +16,21 @@
   "presidentSignature": "പ്രസിഡന്റിന്റെ ഒപ്പ്",
   "presidentName": "പ്രസിഡന്റിന്റെ പേര്",
   "presidentTitle": "പ്രസിഡന്റ്",
-  "motto": "ശരിയായ വിധത്തിൽ, നന്നായി, ആകർഷണീയമായി"
+  "motto": "ശരിയായ വിധത്തിൽ, നന്നായി, ആകർഷണീയമായി",
+  "slogan_top": "കർമ്മം, സത്യം, സേവനം",
+  "party_name": "ദേശീയ യുദ്ധപ്രവേശകരുടെ പാർട്ടി",
+  "card_type": "അംഗത്വ കാർഡ്",
+  "label_name": "പേര്",
+  "label_father": "അച്ഛന്റെ പേര്",
+  "label_id": "അംഗത്വ സംഖ്യ",
+  "party_details_title": "പാർട്ടിയുടെ വിവരങ്ങൾ",
+  "party_name_label": "പാർട്ടി",
+  "address_label": "വിലാസം",
+  "phone_label": "ഫോൺ",
+  "website_label": "വെബ്സൈറ്റ്",
+  "email_label": "ഇമെയിൽ",
+  "president_signature": "പ്രസിഡന്റിന്റെ ഒപ്പ്",
+  "president_name": "പ്രസിഡന്റിന്റെ പേര്",
+  "president_title": "പ്രസിഡന്റ്",
+  "footer_text": "ദേശീയ യുദ്ധപ്രവേശകരുടെ പാർട്ടി"
 }

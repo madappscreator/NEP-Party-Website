@@ -16,5 +16,21 @@
   "presidentSignature": "ಅಧ್ಯಕ್ಷರ ಸಹಿ",
   "presidentName": "ಅಧ್ಯಕ್ಷರ ಹೆಸರು",
   "presidentTitle": "ಅಧ್ಯಕ್ಷ",
-  "motto": "ಸರಿಯಾಗಿ, ಚೆನ್ನಾಗಿ, ಆಕರ್ಷಣೀಯವಾಗಿ"
+  "motto": "ಸರಿಯಾಗಿ, ಚೆನ್ನಾಗಿ, ಆಕರ್ಷಣೀಯವಾಗಿ",
+  "slogan_top": "ನಿಯಮ, ನಿಜಸ್ಥಿತಿ, ಸೇವೆ",
+  "party_name": "ರಾಷ್ಟ್ರೀಯ ಭೂತಪೂರ್ವ ಸೇನಾ ಪಕ್ಷ",
+  "card_type": "ಸದಸ್ಯತ್ವ ಕಾರ್ಡ್",
+  "label_name": "ಹೆಸರು",
+  "label_father": "ತಂದೆಯ ಹೆಸರು",
+  "label_id": "ಸದಸ್ಯತ್ವ ಐಡಿ",
+  "party_details_title": "ಪಕ್ಷದ ವಿವರಗಳು",
+  "party_name_label": "ಪಕ್ಷ",
+  "address_label": "ವಿಳಾಸ",
+  "phone_label": "ಫೋನ್",
+  "website_label": "ವೆಬ್‌ಸೈಟ್",
+  "email_label": "ಇಮೇಲ್",
+  "president_signature": "ಅಧ್ಯಕ್ಷರ ಸಹಿ",
+  "president_name": "ಅಧ್ಯಕ್ಷರ ಹೆಸರು",
+  "president_title": "ಅಧ್ಯಕ್ಷ",
+  "footer_text": "ರಾಷ್ಟ್ರೀಯ ಭೂತಪೂರ್ವ ಸೇನಾ ಪಕ್ಷ"
 }

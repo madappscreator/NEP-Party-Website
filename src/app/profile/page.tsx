@@ -6,7 +6,7 @@ import { doc, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { User, ShieldCheck, Hourglass, AlertTriangle, Edit, FileImage, FileText } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
-import NewMemberCard from '@/components/NewMemberCard';
+import NEPCard from '@/components/NEPCard';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -196,7 +196,7 @@ export default function ProfilePage() {
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-xl overflow-hidden mt-6 p-8 border border-primary/20">
             <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-8">{t('profile_yourCard')}</h2>
             <div className="flex justify-center mb-8" ref={cardRef}>
-              <NewMemberCard member={member} />
+              <NEPCard member={member} />
             </div>
             <div className="flex justify-center gap-4 flex-wrap">
               <button 

@@ -16,5 +16,21 @@
   "presidentSignature": "అధ్యక్ష సంతకం",
   "presidentName": "అధ్యక్ష పేరు",
   "presidentTitle": "అధ్యక్షుడు",
-  "motto": "సరిగ్గా, బాగా, ఆకర్షణీయంగా"
+  "motto": "సరిగ్గా, బాగా, ఆకర్షణీయంగా",
+  "slogan_top": "నియమం, నిజాయితీ, సేవ",
+  "party_name": "జాతీయ పూర్వ సేనానువర్తక పార్టీ",
+  "card_type": "సభ్యత్వ కార్డ్",
+  "label_name": "పేరు",
+  "label_father": "తండ్రి పేరు",
+  "label_id": "సభ్యత్వ ఐడీ",
+  "party_details_title": "పార్టీ వివరాలు",
+  "party_name_label": "పార్టీ",
+  "address_label": "చిరునామా",
+  "phone_label": "ఫోన్",
+  "website_label": "వెబ్‌సైట్",
+  "email_label": "ఇమెయిల్",
+  "president_signature": "అధ్యక్ష సంతకం",
+  "president_name": "అధ్యక్ష పేరు",
+  "president_title": "అధ్యక్షుడు",
+  "footer_text": "జాతీయ పూర్వ సేనానువర్తక పార్టీ"
 }

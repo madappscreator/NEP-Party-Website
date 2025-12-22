@@ -16,5 +16,21 @@
   "presidentSignature": "தலைவர் கையொப்பம்",
   "presidentName": "தலைவர் பெயர்",
   "presidentTitle": "தலைவர்",
-  "motto": "நெறியாக, நல்லாக, நயமாக"
+  "motto": "நெறியாக, நல்லாக, நயமாக",
+  "slogan_top": "நெறியாக, நல்லாக, நயமாக",
+  "party_name": "தேசிய முன்னாள் ராணுவவீரர்கள் கட்சி",
+  "card_type": "உறுப்பினர் அடையாள அட்டை",
+  "label_name": "பெயர்",
+  "label_father": "தந்தை பெயர்",
+  "label_id": "உறுப்பினர் எண்",
+  "party_details_title": "கட்சி விவரங்கள்",
+  "party_name_label": "கட்சி",
+  "address_label": "முகவரி",
+  "phone_label": "தொலைபேசி",
+  "website_label": "வலைத்தளம்",
+  "email_label": "மின்னஞ்சல்",
+  "president_signature": "தலைவர் கையொப்பம்",
+  "president_name": "தலைவர் பெயர்",
+  "president_title": "தலைவர்",
+  "footer_text": "தேசிய முன்னாள் ராணுவவீரர்கள் கட்சி"
 }
