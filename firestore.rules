@@ -60,8 +60,8 @@ service cloud.firestore {
     match /members/{memberId} {
       allow get: if isOwner(memberId) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isOwner(memberId) && request.resource.data.uid == memberId;
-      allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('id');
+      allow create: if isOwner(memberId);
+      allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('uid');
       allow delete: if isAdmin() && isExistingDoc();
 
       match /payments/{paymentId} {
