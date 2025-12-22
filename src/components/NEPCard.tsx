@@ -671,7 +671,7 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
               <div className="footer-contact-info" style={{ marginLeft: '18px', display: 'flex', gap: '30px', fontSize: '9px', fontWeight: 600 }}>
                 <span>www.allindianep.com</span>
                 <span>allindianep@gmail.com</span>
-                <span>044-43840484</span>
+                <span>+91 9176101115, +91 9176102229</span>
               </div>
             </div>
           </>

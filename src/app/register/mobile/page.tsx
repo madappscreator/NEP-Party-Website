@@ -150,7 +150,6 @@ export default function MobileAuthPage() {
             <Input
               id="mobile"
               type="tel"
-              placeholder="98765 43210"
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
               disabled={isOtpSending}

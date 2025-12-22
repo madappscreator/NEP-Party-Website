@@ -486,7 +486,7 @@ const handleSelectChange = (id: string, value: string) => {
               <div id="recaptcha-container" ref={recaptchaWrapperRef}></div>
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
-                <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
+                <Input id="mobile" type="tel" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
               </div>
               <Button onClick={handleNextStep} className="w-full" disabled={isOtpSending}>
                 {isOtpSending ? <Loader2 className="animate-spin" /> : 'Send OTP'}
@@ -504,7 +504,7 @@ const handleSelectChange = (id: string, value: string) => {
                 <CardContent className="space-y-4">
                    <div className="space-y-2">
                     <Label htmlFor="otp">Enter OTP</Label>
-                    <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isOtpVerifying} />
+                    <Input id="otp"  value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isOtpVerifying} />
                   </div>
                   <Button onClick={handleNextStep} className="w-full" disabled={isOtpVerifying}>
                     {isOtpVerifying ? <Loader2 className="animate-spin" /> : 'Verify & Proceed'}

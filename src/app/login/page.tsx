@@ -120,7 +120,7 @@ export default function LoginPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile Number</Label>
-                <Input id="mobile" type="tel" placeholder="98765 43210" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
+                <Input id="mobile" type="tel" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} disabled={isOtpSending} />
               </div>
               <Button onClick={handleSendOtp} className="w-full" disabled={isOtpSending}>
                 {isOtpSending ? 'Sending OTP...' : 'Send OTP'}
@@ -138,7 +138,7 @@ export default function LoginPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="otp">Enter OTP</Label>
-                <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isOtpVerifying}/>
+                <Input id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isOtpVerifying}/>
               </div>
               <Button onClick={handleVerifyOtp} className="w-full" disabled={isOtpVerifying}>
                 {isOtpVerifying ? 'Verifying...' : 'Login'}
