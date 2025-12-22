@@ -529,7 +529,7 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
                 src="/card/signature.png"
                 alt="Signature"
                 className="signature-img"
-                style={{ height: '100px', width: 'auto', display: 'block', marginBottom: '-10px' }}
+                style={{ height: '100px', width: '160px', display: 'block', marginBottom: '-10px' }}
               />
               <p className="sig-label" style={{ borderTop: '1px solid rgba(0,0,0,0.12)', fontSize: '11px', paddingTop: '4px', fontWeight: 700, color: '#111' }}>
                 தலைவர் கையொப்பம்/President Signature
