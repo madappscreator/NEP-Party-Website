@@ -3,6 +3,7 @@ import { About } from './components/sections/about';
 import { Journey } from './components/sections/journey';
 import { OurPromise } from './components/sections/our-promise';
 import { Leadership } from './components/sections/leadership';
+import { PolicyLeaders } from './components/sections/policy-leaders';
 import { WhyJoin } from './components/sections/why-join';
 import { OurWings } from './components/sections/our-wings';
 import { FinalCta } from './components/sections/final-cta';
@@ -16,6 +17,7 @@ export default function Home() {
       <About />
       <OurPromise />
       <Leadership />
+      <PolicyLeaders />
       <WhyJoin />
       <OurWings />
       <FinalCta />
