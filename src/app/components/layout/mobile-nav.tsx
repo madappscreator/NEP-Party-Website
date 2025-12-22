@@ -1,8 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Heart, Menu, User } from 'lucide-react';
 import { NAV_LINKS } from '@/lib/constants';
@@ -26,11 +27,13 @@ export function MobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
-        <div className="flex justify-between items-center pr-6">
+        <SheetHeader className="p-6 pb-0 flex flex-row justify-between items-center">
+            <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
+            <SheetDescription className="sr-only">Main menu for mobile devices</SheetDescription>
             <Logo />
             <LanguageSwitcher />
-        </div>
-        <div className="flex flex-col h-full mt-8">
+        </SheetHeader>
+        <div className="flex flex-col h-full mt-8 px-6">
           <div className="flex flex-col space-y-3">
             {NAV_LINKS.map((link) => (
               <Link
@@ -43,7 +46,7 @@ export function MobileNav() {
               </Link>
             ))}
           </div>
-          <div className="mt-auto flex flex-col gap-4 py-4 pr-6">
+          <div className="mt-auto flex flex-col gap-4 py-4">
              <Button asChild className="w-full" variant="outline">
                 <Link href="/login" onClick={() => setIsOpen(false)}>
                     <User className="mr-2 h-4 w-4" />Member Login
