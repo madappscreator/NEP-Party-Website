@@ -1,7 +1,7 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -125,7 +125,7 @@ const translations: Record<LanguageKey, {
     label_state: 'రాష్ట్రం:',
     state: 'తమిళనాడు',
     label_constitution: 'రూపాయ్యచే:',
-    constitution: 'భారతీయ రూపాయ్య',
+    constitution: 'భారత రూపాయ్య',
     label_address: 'చిరునామా:',
     office_address: 'నేషనల్ ఎక్స్-సర్వీస్మెన్ పార్టీ\nA4, Vishwaa Pride Apartment, Nookampalayam Main Road,\nPerumbakkam, Chennai - 600100, Tamil Nadu, India',
     sig_label: ' అధ్యక్షుడు',
@@ -220,18 +220,24 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
   const t = translations[currentLang] || translations.ta;
 
   useEffect(() => {
-    // Generate QR code with member data
-    const qrData = JSON.stringify({
-      membershipId: member.membershipId,
-      name: member.name,
-      phone: member.phone,
-      district: member.district,
-      state: member.state,
-    });
+    const generateQr = async () => {
+      try {
+        const QRCode = await import('qrcode');
+        const qrData = JSON.stringify({
+          membershipId: member.membershipId,
+          name: member.name,
+          phone: member.phone,
+          district: member.district,
+          state: member.state,
+        });
 
-    QRCode.toDataURL(qrData, { width: 92, margin: 1 })
-      .then(url => setQrCodeUrl(url))
-      .catch(err => console.error('Error generating QR code:', err));
+        const url = await QRCode.toDataURL(qrData, { width: 92, margin: 1 });
+        setQrCodeUrl(url);
+      } catch (err) {
+        console.error('Error generating QR code:', err);
+      }
+    };
+    generateQr();
   }, [member]);
 
   const downloadBothSidesAsImage = async () => {
