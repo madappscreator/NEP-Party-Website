@@ -350,6 +350,17 @@ export default function RegisterPage() {
   };
   
   const renderStep = () => {
+    const isDetailsStepValid =
+      formData.name &&
+      formData.fatherName &&
+      formData.gender &&
+      formData.dateOfBirth &&
+      formData.residentialAddress &&
+      formData.state &&
+      formData.district &&
+      formData.constituency &&
+      formData.photoFile;
+
     switch (step) {
       case 'mobile':
         return (
@@ -557,7 +568,7 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                <Button onClick={() => handleNextStep('declaration')} className="w-full" disabled={!formData.photoFile}>Proceed to Declaration</Button>
+                <Button onClick={() => handleNextStep('declaration')} className="w-full" disabled={!isDetailsStepValid}>Proceed to Declaration</Button>
                 </CardContent>
             </>
         );
@@ -648,3 +659,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+
