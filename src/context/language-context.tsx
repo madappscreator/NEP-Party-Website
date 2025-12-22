@@ -10,11 +10,12 @@ import hi from '@/locales/hi.json';
 import te from '@/locales/te.json';
 import ml from '@/locales/ml.json';
 import kn from '@/locales/kn.json';
+import gu from '@/locales/gu.json';
 
 type Locale = typeof i18n['locales'][number];
 
 // Define a type for your translations
-type Translations = { [key: string]: string };
+type Translations = any;
 
 const translations: Record<Locale, Translations> = {
   en,
@@ -22,7 +23,8 @@ const translations: Record<Locale, Translations> = {
   hi,
   te,
   ml,
-  kn
+  kn,
+  gu
 };
 
 interface LanguageContextType {
@@ -51,7 +53,12 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    const keys = key.split('.');
+    let value: any = translations[language];
+    for (const k of keys) {
+      value = value?.[k];
+    }
+    return value || key;
   };
   
   if (!loaded) {

@@ -8,8 +8,6 @@ interface PolicyLeader {
   id: string;
   name: string;
   nameInTamil: string;
-  title: string;
-  titleInTamil: string;
   image: string;
 }
 
@@ -18,36 +16,34 @@ export function PolicyLeaders() {
 
   const leaders: PolicyLeader[] = [
     {
-      id: 1,
-      name: "Policy Leader Name",
-      nameInTamil: "கொள்கை தலைவர் பெயர்",
-      title: "Position Title",
-      titleInTamil: "பொறுப்பு பெயர்",
-      image: "/policy-leader-1.jpg",
+      id: "1",
+      name: "Netaji Subhas Chandra Bose",
+      nameInTamil: "நேதாஜி சுபாஸ் சந்திர போஸ்",
+      image: "/Policy leaders/Netaji.png",
     },
     {
-      id: 2,
-      name: "Policy Leader Name",
-      nameInTamil: "கொள்கை தலைவர் பெயர்",
-      title: "Position Title",
-      titleInTamil: "பொறுப்பு பெயர்",
-      image: "/policy-leader-2.jpg",
+      id: "2",
+      name: "Pasumpon Muthuramalinga Thevar",
+      nameInTamil: "பசும்பொன் முத்துராமலிங்க தேவர்",
+      image: "/Policy leaders/Muthuramalinga_Thevar.jpg",
     },
     {
-      id: 3,
-      name: "Policy Leader Name",
-      nameInTamil: "கொள்கை தலைவர் பெயர்",
-      title: "Position Title",
-      titleInTamil: "பொறுப்பு பெயர்",
-      image: "/policy-leader-3.jpg",
+      id: "3",
+      name: "Dr. B.R. Ambedkar",
+      nameInTamil: "டாக்டர் பி.ஆர். அம்பேத்கர்",
+      image: "/Policy leaders/Ambedkar.jpg",
     },
     {
-      id: 4,
-      name: "Policy Leader Name",
-      nameInTamil: "கொள்கை தலைவர் பெயர்",
-      title: "Position Title",
-      titleInTamil: "பொறுப்பு பெயர்",
-      image: "/policy-leader-4.jpg",
+      id: "4",
+      name: "Dr. A.P.J. Abdul Kalam",
+      nameInTamil: "டாக்டர் அப்துல் கலாம்",
+      image: "/Policy leaders/Abdul_Kalam.jpg",
+    },
+    {
+      id: "5",
+      name: "K. Kamarajar",
+      nameInTamil: "காமராஜர்",
+      image: "/Policy leaders/Kamarajar.jpg",
     },
   ];
 
@@ -62,11 +58,11 @@ export function PolicyLeaders() {
             {t('policy_leaders_subtitle') || 'Meet our visionary policy leaders driving the party forward'}
           </p>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mt-2">
-            கொள்கை தலைவர்கள் - நாட்டின் ভविष्यत् দिशा निर्देशन करते हैं
+            கட்சி கொள்கை தலைவர்கள்
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {leaders.map((leader) => (
             <Card 
               key={leader.id}
@@ -110,7 +106,7 @@ export function PolicyLeaders() {
             {t('policy_leaders_vision') || 'Our Policy Vision'}
           </h3>
           <p className="text-center text-muted-foreground max-w-3xl mx-auto">
-            {t('policy_leaders_vision_text') || 'Our policy leaders work collaboratively to develop comprehensive strategies that serve the nation and strengthen our party\\'s vision for a better future.'}
+            {t('policy_leaders_vision_text') || 'Our policy leaders work collaboratively to develop comprehensive strategies that serve the nation and strengthen our party\'s vision for a better future.'}
           </p>
         </div>
       </div>

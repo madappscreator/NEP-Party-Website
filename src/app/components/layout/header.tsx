@@ -33,7 +33,7 @@ export function Header() {
             </nav>
 
             <div className="flex flex-1 items-center justify-end gap-2">
-              <div className="hidden md:flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <LanguageSwitcher />
                 <Button asChild variant="outline">
                   <Link href="/login"><User className="mr-2 h-4 w-4" /> Member Login</Link>

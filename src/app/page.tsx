@@ -4,7 +4,7 @@ import { Journey } from './components/sections/journey';
 import { OurPromise } from './components/sections/our-promise';
 import { Leadership } from './components/sections/leadership';
 import { PolicyLeaders } from './components/sections/policy-leaders';
-import { WhyJoin } from './components/sections/why-join';
+import { WhyJoinCard } from './components/sections/why-join-card';
 import { OurWings } from './components/sections/our-wings';
 import { FinalCta } from './components/sections/final-cta';
 import { ContactStrip } from './components/sections/contact-strip';
@@ -18,7 +18,7 @@ export default function Home() {
       <OurPromise />
       <Leadership />
       <PolicyLeaders />
-      <WhyJoin />
+      <WhyJoinCard />
       <OurWings />
       <FinalCta />
       <ContactStrip />

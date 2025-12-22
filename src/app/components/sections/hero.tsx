@@ -42,6 +42,7 @@ export function Hero() {
                             <p className="text-base text-primary-foreground/80">{t('stats_teams_label')}</p>
                         </div>
                     </div>
+
                 </div>
                 <div className="absolute inset-0 z-0">
                     <div className="absolute right-0 top-0 h-full w-full md:w-1/2 opacity-20">
