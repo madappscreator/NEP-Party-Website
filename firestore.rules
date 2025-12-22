@@ -2,8 +2,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ... (rest of the file remains same, appending the collectionGroup rule)
-
     /**
      * Checks if a user is authenticated.
      */
@@ -62,14 +60,14 @@ service cloud.firestore {
     match /members/{memberId} {
       allow get: if isOwner(memberId) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isOwner(memberId) && request.resource.data.id == memberId;
+      allow create: if isOwner(memberId) && request.resource.data.uid == memberId;
       allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('id');
       allow delete: if isAdmin() && isExistingDoc();
 
       match /payments/{paymentId} {
         allow get: if isOwner(memberId) || isAdmin();
         allow list: if isOwner(memberId) || isAdmin();
-        allow create: if isOwner(memberId) && request.resource.data.memberId == memberId;
+        allow create: if isOwner(memberId);
         allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('memberId');
         allow delete: if (isOwner(memberId) || isAdmin()) && isExistingDoc();
       }
@@ -126,6 +124,10 @@ service cloud.firestore {
     // Counters collection - managed by admin Cloud Functions only
     // (or used internally by server-side logic with admin privileges)
     match /counters/{counterId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /membershipCounters/{counterId} {
       allow read, write: if isAdmin();
     }
   }

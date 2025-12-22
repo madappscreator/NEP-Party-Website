@@ -3,8 +3,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 type LanguageKey = 'en' | 'ta' | 'hi' | 'te' | 'ml' | 'kn';
 
@@ -165,7 +163,7 @@ const translations: Record<LanguageKey, {
     office_address_short: 'നാഷണൽ എക്‌സ്-സെർവീസ്മെൻ പാർട്ടി — A4, Vishwaa Pride Apartment, Perumbakkam, Chennai - 600100'
   },
   kn: {
-    slogan_top: 'ಒಬ್ಬ ಉಭಯ, ಯಾವಾಗಲೂ ರಾಷ್ಟ್ರದ ಸೇವಕ',
+    slogan_top: 'ఒಬ್ಬ ಉಭಯ, ಯಾವಾಗಲೂ ರಾಷ್ಟ್ರದ ಸೇವಕ',
     party_name: 'ನ್ಯಾಷನಲ್ ಎಕ್ಸ್-ಸರ್ವೀಸ್‌ಮನ್ ಪಕ್ಷ',
     card_type: 'ಸದಸ್ಯತಾ ಕಾರ್ಡು',
     label_name: 'ಹೆಸರು',
@@ -435,7 +433,7 @@ const NEPCard: React.FC<NEPCardProps> = ({ member }) => {
           </>
         ) : (
           <>
-            {/* Back Side - Top Text */}
+            {/* Back Side - Top Row */}
             <div
               className="top-row"
               style={{
