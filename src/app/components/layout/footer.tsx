@@ -76,9 +76,9 @@ export function Footer() {
 
         <div className="border-t border-slate-700 mt-8 pt-6 text-sm text-center md:flex md:justify-between">
           <div className="space-x-4">
-            <Link href="#" className="hover:text-primary">{t('footer_privacy')}</Link>
-            <Link href="#" className="hover:text-primary">{t('footer_terms')}</Link>
-            <Link href="#" className="hover:text-primary">{t('footer_refund')}</Link>
+            <Link href="/policies/privacy" className="hover:text-primary">{t('footer_privacy')}</Link>
+            <Link href="/policies/terms" className="hover:text-primary">{t('footer_terms')}</Link>
+            <Link href="/policies/refund" className="hover:text-primary">{t('footer_refund')}</Link>
           </div>
           <p className="mt-4 md:mt-0">© {year} {t('footer_copyright')}.</p>
         </div>
