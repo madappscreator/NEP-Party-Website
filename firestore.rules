@@ -18,39 +18,22 @@ service cloud.firestore {
 
     /**
      * Checks if the authenticated user has administrative privileges.
-     * UPDATE: Hardcoded Super Admin for initial access.
      */
     function isAdmin() {
+      // Allow hardcoded super admin and users in the 'admins' collection
       return isSignedIn() && (
-        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
         request.auth.uid == 'Bb7jPb8p6sW8EfP0MxXce3s8qSs2'
       );
     }
 
-    function isExistingDoc() {
-      return resource != null;
-    }
-
-    function isExistingAdmin() {
-      return isAdmin() && isExistingDoc();
-    }
-
-    function createdByOwner(ownerField) {
-      return isSignedIn() && request.resource.data[ownerField] == request.auth.uid;
-    }
-
-    function ownerIsImmutable(ownerField) {
-      return request.resource.data[ownerField] == resource.data[ownerField];
-    }
-
-    // --------------------------------------------------------------------------
-    // Collection Group Queries
-    // --------------------------------------------------------------------------
-    
-    // Explicitly allow admins to query ALL payments across all users
-    match /{path=**}/payments/{paymentId} {
-      allow list: if isAdmin();
-      allow get: if isAdmin() || isOwner(resource.data.memberId);
+    /**
+     * Validates that the incoming data for a member document is being created by the owner.
+     */
+    function isCreatingOwnMemberDocument(userId) {
+      let isOwner = request.auth.uid == userId;
+      let isNewDoc = !exists(/databases/$(database)/documents/members/$(userId));
+      return isOwner && isNewDoc;
     }
 
     // --------------------------------------------------------------------------
@@ -60,75 +43,42 @@ service cloud.firestore {
     match /members/{memberId} {
       allow get: if isOwner(memberId) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isOwner(memberId);
-      allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('uid');
-      allow delete: if isAdmin() && isExistingDoc();
+      // Allow creation only if the user is creating their own document.
+      allow create: if isCreatingOwnMemberDocument(memberId);
+      // Allow user to update their own data, and admins to update any.
+      allow update: if isOwner(memberId) || isAdmin();
+      allow delete: if isAdmin();
 
       match /payments/{paymentId} {
         allow get: if isOwner(memberId) || isAdmin();
         allow list: if isOwner(memberId) || isAdmin();
+        // Allow a user to create a payment document for themselves.
         allow create: if isOwner(memberId);
-        allow update: if (isOwner(memberId) || isAdmin()) && isExistingDoc() && ownerIsImmutable('memberId');
-        allow delete: if (isOwner(memberId) || isAdmin()) && isExistingDoc();
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
       }
     }
 
     match /donations/{donationId} {
-      allow get: if (isOwner(resource.data.memberId) || isAdmin());
-      allow list: if isAdmin();
-      allow create: if createdByOwner('memberId');
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
+      allow read, write: if isSignedIn() || isAdmin();
     }
 
     match /admins/{adminId} {
-      allow get: if isAdmin() || isOwner(adminId);
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
+      allow read, list, create, update, delete: if isAdmin();
     }
 
     match /news_articles/{newsArticleId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if isAdmin();
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
-    match /membership_card_designs/{membershipCardDesignId} {
-      allow get: if isOwner(resource.data.memberId);
-      allow list: if false;
-      allow create: if createdByOwner('memberId');
-      allow update: if isOwner(resource.data.memberId) && isExistingDoc() && ownerIsImmutable('memberId');
-      allow delete: if isOwner(resource.data.memberId) && isExistingDoc();
-    }
-
-    match /receipts/{receiptId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
-    }
-
-    match /roles_admin/{userId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if false;
-      allow delete: if isExistingAdmin();
-    }
-    
-    // Counters collection - managed by admin Cloud Functions only
-    // (or used internally by server-side logic with admin privileges)
+    // Counters can only be read/written by admin (or via Cloud Functions with admin context)
     match /counters/{counterId} {
       allow read, write: if isAdmin();
     }
-
+    
     match /membershipCounters/{counterId} {
-      allow read, write: if isAdmin();
+        allow read, write: if isAdmin();
     }
   }
 }

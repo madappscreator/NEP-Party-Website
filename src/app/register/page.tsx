@@ -15,7 +15,7 @@ import {
   ConfirmationResult,
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
-import { setDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { setDoc, doc, serverTimestamp, getDoc, runTransaction } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { indianGeography, State, District, Constituency } from '@/lib/geography';
@@ -27,6 +27,7 @@ import PaymentStatusTracker from '@/components/payment-status-tracker';
 import { useLanguage } from '@/context/language-context';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import RazorpayPayment from '@/components/RazorpayPayment';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 
 type Step = 'mobile' | 'otp' | 'details' | 'declaration' | 'payment' | 'confirm';
@@ -125,7 +126,7 @@ export default function RegisterPage() {
   const [constituencies, setConstituencies] = React.useState<Constituency[]>([]);
   const [customAmount, setCustomAmount] = React.useState('');
 
-    const { firebaseApp, auth, firestore, user } = useFirebase();
+  const { firebaseApp, auth, firestore, user } = useFirebase();
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -261,7 +262,6 @@ export default function RegisterPage() {
     }
   }
 
-
   const handleSelectChange = (id: string, value: string) => {
     setFormData(prev => ({...prev, [id]: value}));
 
@@ -286,13 +286,23 @@ export default function RegisterPage() {
   };
   
   const handleFinalSubmit = async (paymentResult: any) => {
-    if (!user || !firestore) {
+    if (!user || !firestore || !firebaseApp) {
       toast({ title: 'Error', description: 'You are not logged in or database is not available.', variant: 'destructive' });
       return;
     }
     setIsSubmitting(true);
   
     try {
+      // 1. Generate Membership ID via Cloud Function
+      const functions = getFunctions(firebaseApp);
+      const generateMembershipId = httpsCallable(functions, 'generateMembershipId');
+      const { data: { membershipId } } = (await generateMembershipId()) as { data: { membershipId: string } };
+
+      if (!membershipId) {
+        throw new Error('Could not generate membership ID.');
+      }
+
+      // 2. Upload files
       let photoUrl: string | null = null;
       let ppoCopyUrl: string | null = null;
       let aadharCardUrl: string | null = null;
@@ -307,32 +317,41 @@ export default function RegisterPage() {
         aadharCardUrl = await uploadFile(formData.aadharCard, `documents/${user.uid}/aadhar/${formData.aadharCard.name}`);
       }
   
+      // 3. Prepare data for Firestore
       const memberData = {
         ...formData,
         uid: user.uid,
         createdAt: serverTimestamp(),
-        status: 'pending', // Set initial status to pending
-        paymentStatus: 'pending', // Assume payment is pending manual verification
+        status: 'APPROVED',
+        paymentStatus: 'approved',
+        membershipId, // Use the ID from the Cloud Function
+        membershipApprovedAt: serverTimestamp(),
+        membershipValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 year validity
         photoUrl,
         ppoCopyUrl,
         aadharCardUrl,
         transactionId: paymentResult.razorpay_payment_id || 'N/A',
       };
-      // Remove file objects before saving to firestore
+      
       delete (memberData as any).photoFile;
       delete (memberData as any).ppoCopy;
       delete (memberData as any).aadharCard;
 
-      await setDoc(doc(firestore, 'members', user.uid), memberData);
-      
-      // Also record the payment in a subcollection
-      await setDoc(doc(firestore, `members/${user.uid}/payments`, paymentResult.razorpay_payment_id), {
-          amount: formData.membershipAmount,
-          transactionId: paymentResult.razorpay_payment_id,
-          orderId: paymentResult.razorpay_order_id,
-          signature: paymentResult.razorpay_signature,
-          status: 'pending', // Payment needs to be verified by an admin
-          createdAt: serverTimestamp(),
+      // 4. Save data to Firestore in a transaction
+      await runTransaction(firestore, async (transaction) => {
+        const memberRef = doc(firestore, 'members', user.uid);
+        const paymentRef = doc(firestore, `members/${user.uid}/payments`, paymentResult.razorpay_payment_id);
+
+        transaction.set(memberRef, memberData);
+        transaction.set(paymentRef, {
+            amount: formData.membershipAmount,
+            transactionId: paymentResult.razorpay_payment_id,
+            orderId: paymentResult.razorpay_order_id,
+            signature: paymentResult.razorpay_signature,
+            status: 'approved', // Auto-approved
+            createdAt: serverTimestamp(),
+            approvedAt: serverTimestamp()
+        });
       });
 
       setStep('confirm');
