@@ -66,7 +66,7 @@ export function PolicyLeaders() {
       <div className="container">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-            {t('principle_leaders_title') || 'Principle Leaders'}
+            {t('policy_leaders_title') || 'Policy Leaders'}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {t('policy_leaders_subtitle') || 'Guided by the vision of our great national leaders'}
