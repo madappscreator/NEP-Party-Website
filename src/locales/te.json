@@ -290,7 +290,6 @@
   "manifesto_quality_roads_desc": "Quality roads will be built throughout the country, preventing spinal problems, neck pain, vehicle accidents, deaths, and vehicle repair issues for all taxpaying citizens.",
   "manifesto_our_promise_title": "Our Promise",
   "manifesto_our_promise_desc": "No more attractive advertisements - only employment based on need and all necessary assistance for those unable to work. Government jobs will be given purely on merit basis without bribery or recommendations.",
-
   "gallery_album_celebration_with_people_name": "Celebration with people",
   "gallery_album_celebration_with_people_desc": "Photos from community celebrations and events.",
 
@@ -349,9 +348,13 @@
   "wings_it_wing_name": "IT Wing",
   "wings_it_wing_description": "Drives digital transformation and technology-led governance. Supports cybersecurity, innovation, and digital inclusion.",
   
+  "wings_motor_vehicle_drivers_wing_name": "Motor Vehicle Drivers Wing"
+}
+>>>>>>> 56f02b1ca95e59906ff5671c327b21bf4f60dd38
+=======
   "wings_workers_wing_name": "Workers Wing",
   "wings_workers_wing_description": "Represents workers across sectors and industries. Focuses on fair wages, safety, and labor rights.",
-  
+
   "wings_motor_vehicle_drivers_wing_name": "Motor Vehicle Drivers Wing",
   "wings_motor_vehicle_drivers_wing_description": "బస్సులు, లారీలు, టాక్సీలు మరియు రవాణా సేవల డ్రైవర్లకు మద్దతు ఇస్తుంది. రోడ్ సేఫ్టీ, వెల్ఫేర్ స్కీమ్స్ మరియు రెగ్యులేటరీ కన్సర్న్స్ ను పరిష్కరిస్తుంది.",
   "wings_paramilitary_wing_name": "Paramilitary Wing",

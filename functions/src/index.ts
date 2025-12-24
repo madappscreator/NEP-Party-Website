@@ -13,39 +13,38 @@ export const generateMembershipId = functions.https.onCall(
     if (!context.auth) {
       throw new functions.https.HttpsError(
         'unauthenticated',
-        'User must be authenticated'
+        'User must be authenticated to generate a membership ID.'
       );
     }
 
-    const uid = context.auth.uid;
-    const memberRef = db.doc(`members/${uid}`);
     const counterRef = db.doc('counters/members');
     const year = new Date().getFullYear();
 
-    return await db.runTransaction(async (tx: FirebaseFirestore.Transaction) => {
-      const memberSnap = await tx.get(memberRef);
+    // Use a transaction to ensure atomic increment
+    return await db.runTransaction(async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+      
+      let nextSequence = 100001; // Starting sequence number
 
-      // 🔒 Prevent double ID generation
-      if (memberSnap.exists && memberSnap.data()?.membershipId) {
-        return { membershipId: memberSnap.data()!.membershipId };
-      }
-
-      const counterSnap = await tx.get(counterRef);
-
-      let next = 100001;
-
-      if (counterSnap.exists) {
-        next = (counterSnap.data()?.last || 100000) + 1;
-        tx.update(counterRef, { last: next, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      if (counterDoc.exists) {
+        // If counter exists, increment the last sequence number
+        const lastSequence = counterDoc.data()?.last || 100000;
+        nextSequence = lastSequence + 1;
+        transaction.update(counterRef, { 
+            last: nextSequence, 
+            updatedAt: admin.firestore.FieldValue.serverTimestamp() 
+        });
       } else {
-        tx.set(counterRef, { last: next, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+        // If counter does not exist, create it with the starting number
+        transaction.set(counterRef, { 
+            last: nextSequence, 
+            createdAt: admin.firestore.FieldValue.serverTimestamp() 
+        });
       }
 
-      const membershipId = `NEP-${year}-${String(next).padStart(6, '0')}`;
-
-      // 🔐 Save membershipId to user
-      tx.set(memberRef, { membershipId, membershipIdGeneratedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
-
+      // Format the membership ID
+      const membershipId = `NEP-${year}-${String(nextSequence).padStart(6, '0')}`;
+      
       return { membershipId };
     });
   }
