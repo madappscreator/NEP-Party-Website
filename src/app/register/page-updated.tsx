@@ -205,173 +205,295 @@ export default function RegisterPage() {
     }
   }
 
-  // ... existing code ...
+  const handleSendOtp = async () => {
+    setIsOtpSending(true);
+    try {
+      if (!recaptchaVerifierRef.current) {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+        });
+      }
+      const confirmationResult = await signInWithPhoneNumber(auth, `+91${mobileNumber}`, recaptchaVerifierRef.current);
+      setConfirmationResult(confirmationResult);
+      setStep('otp');
+      toast({
+        title: 'OTP Sent',
+        description: 'Please check your mobile for the OTP.',
+      });
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send OTP. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsOtpSending(false);
+    }
+  };
 
-  case 'details':
-    return (
-      <>
-        <CardHeader>
-          <CardTitle>Membership Form</CardTitle>
-          <CardDescription>Please fill in your information. Fields marked with * are required.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-             <div className="flex flex-col items-center gap-4">
-                <Avatar className="h-24 w-24 border-2 border-dashed">
-                    <AvatarImage src={photoPreview || undefined} alt="Member photo" />
-                    <AvatarFallback className="bg-muted">
-                        <UserPlus className="h-8 w-8 text-muted-foreground" />
-                    </AvatarFallback>
-                </Avatar>
-                <Button asChild variant="outline" size="sm">
-                    <Label htmlFor="photo" className="cursor-pointer">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Photo
-                        <Input id="photo" type="file" className="sr-only" accept="image/*" onChange={(e) => handleFileChange(e, 'photo')}/>
-                    </Label>
-                </Button>
-            </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input id="name" value={formData.name} onChange={handleInputChange} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="fatherName">Father Name *</Label>
-                <Input id="fatherName" value={formData.fatherName} onChange={handleInputChange} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="gender">Gender *</Label>
-                 <Select onValueChange={(value) => handleSelectChange('gender', value)} value={formData.gender}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select Gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                <Input id="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleInputChange} />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="occupation">Occupation</Label>
-                <Input id="occupation" value={formData.occupation} onChange={handleInputChange} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="wing">Wing (Optional)</Label>
-                 <Select onValueChange={(value) => handleSelectChange('wing', value)} value={formData.wing}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select Wing" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {WINGS_DATA.map(w => (
-                            <SelectItem key={w.name} value={w.name}>{w.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="mobileNumber">Contact Number</Label>
-                <Input id="mobileNumber" value={formData.mobileNumber || `+91${mobileNumber}`} readOnly disabled />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="educationalQualification">Educational Qualification</Label>
-                <Input id="educationalQualification" value={formData.educationalQualification} onChange={handleInputChange} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={formData.email} onChange={handleInputChange} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="aadharNumber">Aadhar Number</Label>
-                <Input id="aadharNumber" placeholder="12-digit Aadhar number" value={formData.aadharNumber} onChange={handleInputChange} />
-            </div>
-          </div>
+  const handleVerifyOtp = async () => {
+    setIsOtpVerifying(true);
+    try {
+      if (confirmationResult) {
+        await confirmationResult.confirm(otp);
+        setFormData(prev => ({ ...prev, mobileNumber: `+91${mobileNumber}` }));
+        setStep('details');
+        toast({
+          title: 'OTP Verified',
+          description: 'Your mobile number has been verified.',
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      toast({
+        title: 'Error',
+        description: 'Invalid OTP. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsOtpVerifying(false);
+    }
+  };
 
-          {/* Ex-Serviceman Checkbox */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isExServiceman"
-                checked={formData.isExServiceman}
-                onCheckedChange={(checked) => setFormData(prev => ({...prev, isExServiceman: !!checked}))}
-              />
-              <label htmlFor="isExServiceman" className="text-sm font-medium">
-                Are you an Ex-Serviceman?
-              </label>
-            </div>
+  const handleNextStep = () => {
+    // Implement next step logic
+    setStep('declaration');
+  };
 
-            {formData.isExServiceman && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-6">
+  const renderStep = () => {
+    let content;
+    switch (step) {
+      case 'mobile':
+        content = (
+          <>
+            <CardHeader>
+              <CardTitle>Register for Membership</CardTitle>
+              <CardDescription>Enter your mobile number to get started.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="mobile">Mobile Number</Label>
+                <Input
+                  id="mobile"
+                  type="tel"
+                  placeholder="Enter 10-digit mobile number"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  maxLength={10}
+                />
+              </div>
+              <Button onClick={handleSendOtp} disabled={mobileNumber.length !== 10 || isOtpSending} className="w-full">
+                {isOtpSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                Send OTP
+              </Button>
+              <div id="recaptcha-container"></div>
+            </CardContent>
+          </>
+        );
+        break;
+      case 'otp':
+        content = (
+          <>
+            <CardHeader>
+              <CardTitle>Verify OTP</CardTitle>
+              <CardDescription>Enter the 6-digit OTP sent to your mobile number.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp">OTP</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
+                />
+              </div>
+              <Button onClick={handleVerifyOtp} disabled={otp.length !== 6 || isOtpVerifying} className="w-full">
+                {isOtpVerifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                Verify OTP
+              </Button>
+            </CardContent>
+          </>
+        );
+        break;
+      case 'details':
+        content = (
+          <>
+            <CardHeader>
+              <CardTitle>Membership Form</CardTitle>
+              <CardDescription>Please fill in your information. Fields marked with * are required.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                 <div className="flex flex-col items-center gap-4">
+                    <Avatar className="h-24 w-24 border-2 border-dashed">
+                        <AvatarImage src={photoPreview || undefined} alt="Member photo" />
+                        <AvatarFallback className="bg-muted">
+                            <UserPlus className="h-8 w-8 text-muted-foreground" />
+                        </AvatarFallback>
+                    </Avatar>
+                    <Button asChild variant="outline" size="sm">
+                        <Label htmlFor="photo" className="cursor-pointer">
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload Photo
+                            <Input id="photo" type="file" className="sr-only" accept="image/*" onChange={(e) => handleFileChange(e, 'photo')}/>
+                        </Label>
+                    </Button>
+                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="rank">Rank</Label>
-                  <Input id="rank" value={formData.rank} onChange={handleInputChange} placeholder="e.g. Captain, Major" />
+                    <Label htmlFor="name">Name *</Label>
+                    <Input id="name" value={formData.name} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="grade">Grade</Label>
-                  <Input id="grade" value={formData.grade} onChange={handleInputChange} placeholder="e.g. Officer, JCO, OR" />
+                    <Label htmlFor="fatherName">Father Name *</Label>
+                    <Input id="fatherName" value={formData.fatherName} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="batchNumber">Batch Number</Label>
-                  <Input id="batchNumber" value={formData.batchNumber} onChange={handleInputChange} placeholder="e.g. 2020-05" />
+                    <Label htmlFor="gender">Gender *</Label>
+                     <Select onValueChange={(value) => handleSelectChange('gender', value)} value={formData.gender}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                    <Input id="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleInputChange} />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="occupation">Occupation</Label>
+                    <Input id="occupation" value={formData.occupation} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="wing">Wing (Optional)</Label>
+                     <Select onValueChange={(value) => handleSelectChange('wing', value)} value={formData.wing}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Wing" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {WINGS_DATA.map(w => (
+                                <SelectItem key={w.name} value={w.name}>{w.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="mobileNumber">Contact Number</Label>
+                    <Input id="mobileNumber" value={formData.mobileNumber || `+91${mobileNumber}`} readOnly disabled />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="educationalQualification">Educational Qualification</Label>
+                    <Input id="educationalQualification" value={formData.educationalQualification} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" value={formData.email} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="aadharNumber">Aadhar Number</Label>
+                    <Input id="aadharNumber" placeholder="12-digit Aadhar number" value={formData.aadharNumber} onChange={handleInputChange} />
                 </div>
               </div>
-            )}
-          </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="residentialAddress">Residential Address *</Label>
-                <Input id="residentialAddress" value={formData.residentialAddress} onChange={handleInputChange} />
-            </div>
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 <div className="space-y-2">
-                    <Label htmlFor="state">State *</Label>
-                     <Select onValueChange={(value) => handleSelectChange('state', value)} value={formData.state}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select State" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {indianGeography.map(state => (
-                                <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+              {/* Ex-Serviceman Checkbox */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isExServiceman"
+                    checked={formData.isExServiceman}
+                    onCheckedChange={(checked) => setFormData(prev => ({...prev, isExServiceman: !!checked}))}
+                  />
+                  <label htmlFor="isExServiceman" className="text-sm font-medium">
+                    Are you an Ex-Serviceman?
+                  </label>
                 </div>
+
+                {formData.isExServiceman && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="rank">Rank</Label>
+                      <Input id="rank" value={formData.rank} onChange={handleInputChange} placeholder="e.g. Captain, Major" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="grade">Grade</Label>
+                      <Input id="grade" value={formData.grade} onChange={handleInputChange} placeholder="e.g. Officer, JCO, OR" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="batchNumber">Batch Number</Label>
+                      <Input id="batchNumber" value={formData.batchNumber} onChange={handleInputChange} placeholder="e.g. 2020-05" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
                 <div className="space-y-2">
-                    <Label htmlFor="district">District *</Label>
-                    <Select onValueChange={(value) => handleSelectChange('district', value)} value={formData.district} disabled={!formData.state}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select District" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {districts.map(district => (
-                                <SelectItem key={district.name} value={district.name}>{district.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <Label htmlFor="residentialAddress">Residential Address *</Label>
+                    <Input id="residentialAddress" value={formData.residentialAddress} onChange={handleInputChange} />
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="constituency">Constituency *</Label>
-                    <Select onValueChange={(value) => handleSelectChange('constituency', value)} value={formData.constituency} disabled={!formData.district}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select Constituency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {constituencies.map(c => (
-                                <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-             </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="state">State *</Label>
+                         <Select onValueChange={(value) => handleSelectChange('state', value)} value={formData.state}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select State" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {indianGeography.map(state => (
+                                    <SelectItem key={state.name} value={state.name}>{state.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="district">District *</Label>
+                        <Select onValueChange={(value) => handleSelectChange('district', value)} value={formData.district} disabled={!formData.state}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select District" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {districts.map(district => (
+                                    <SelectItem key={district.name} value={district.name}>{district.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="constituency">Constituency *</Label>
+                        <Select onValueChange={(value) => handleSelectChange('constituency', value)} value={formData.constituency} disabled={!formData.district}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Constituency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {constituencies.map(c => (
+                                    <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                 </div>
 
-          <Button onClick={handleNextStep} className="w-full">Proceed to Declaration</Button>
-        </CardContent>
-      </>
-    );
+              <Button onClick={handleNextStep} className="w-full">Proceed to Declaration</Button>
+            </CardContent>
+          </>
+        );
+        break;
+      default:
+        content = null;
+    }
+    return content;
+  };
 
-  // ... existing code ...
+  return (
+    <Card className="w-full max-w-4xl mx-auto">
+      {renderStep()}
+    </Card>
+  );
 }
