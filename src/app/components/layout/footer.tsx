@@ -40,7 +40,7 @@ export function Footer() {
               <li><Link href="/manifesto" className="text-sm hover:text-primary transition-colors">{t('nav_manifesto')}</Link></li>
               <li><Link href="/wings" className="text-sm hover:text-primary transition-colors">{t('nav_our_wings')}</Link></li>
               <li><Link href="/news" className="text-sm hover:text-primary transition-colors">{t('nav_news')}</Link></li>
-              <li><Link href="/design-card" className="text-sm hover:text-primary transition-colors">{t('nav_member_card')}</Link></li>
+              <li><Link href="/login" className="text-sm hover:text-primary transition-colors">{t('nav_member_card')}</Link></li>
             </ul>
           </div>
           <div>
