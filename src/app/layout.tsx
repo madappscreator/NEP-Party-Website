@@ -42,6 +42,7 @@ export default function RootLayout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="facebook-domain-verification" content="8dxprjogex601opk3samk0xo2qg506" />
         <link rel="icon" href="/NEP Flag.jpg" sizes="any" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
