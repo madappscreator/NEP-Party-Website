@@ -49,7 +49,7 @@ export function MobileNav() {
           <div className="mt-auto flex flex-col gap-4 py-4">
              <Button asChild className="w-full" variant="outline">
                 <Link href="/login" onClick={() => setIsOpen(false)}>
-                    <User className="mr-2 h-4 w-4" />Member Login
+                    <User className="mr-2 h-4 w-4" />{t('Member Login')}
                 </Link>
             </Button>
              <Button asChild className="w-full" variant="outline" >

@@ -12,14 +12,14 @@ import { LANGUAGES } from '@/lib/constants';
 import { useLanguage } from '@/context/language-context';
 
 export function LanguageSwitcher() {
-  const { setLanguage } = useLanguage();
+  const { t, setLanguage } = useLanguage();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
           <Globe className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Toggle language</span>
+          <span className="sr-only">{t('Toggle language')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

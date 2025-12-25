@@ -15,7 +15,7 @@ export function Header() {
     <>
       <div className="fixed top-0 left-0 right-0 z-50">
         <div className="w-full bg-blue-600 text-white text-center py-2 text-sm font-semibold">
-          सेवा • अनुशासन • राष्ट्र प्रथम | Service • Discipline • Nation First
+          Party of the People • Service to All • Integrity in Service • Discipline • Nation First
         </div>
         <header className="w-full border-b border-secondary/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container flex h-20 items-center">
@@ -36,7 +36,7 @@ export function Header() {
               <div className="hidden md:flex items-center gap-2">
                 <LanguageSwitcher />
                 <Button asChild variant="outline">
-                  <Link href="/login"><User className="mr-2 h-4 w-4" /> Member Login</Link>
+                  <Link href="/login"><User className="mr-2 h-4 w-4" /> {t('Member Login')}</Link>
                 </Button>
                 <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/5 hover:text-primary">
                   <Link href="/donate"><Heart className="mr-2 h-4 w-4 fill-primary" /> {t('nav_donate')}</Link>
