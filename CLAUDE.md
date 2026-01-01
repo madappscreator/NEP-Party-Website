@@ -1,5 +1,56 @@
 # Recent Fixes and Updates
 
+## WhatsApp Integration (Jan 1, 2026)
+
+### Meta Business WhatsApp API Integration
+
+**Feature**: Send membership card to WhatsApp after registration/approval
+
+**Files Added/Modified**:
+- `src/app/api/whatsapp/send-card/route.ts` - New API route for sending card to WhatsApp
+- `src/app/profile/page.tsx` - Added "Send to WhatsApp" button
+- `src/app/api/admin/approve-member/route.ts` - Auto-send card after admin approval
+
+**Features**:
+- ✅ Send membership card notification to member's WhatsApp after approval
+- ✅ "Send to WhatsApp" button on profile page for existing members
+- ✅ Loading/success states with visual feedback
+- ✅ Multi-language support (English, Tamil, Hindi)
+- ✅ Fallback from image → template → text message
+
+**Environment Variables Required**:
+```
+WHATSAPP_TOKEN=your_meta_whatsapp_api_token
+WHATSAPP_PHONE_ID=your_whatsapp_business_phone_id
+```
+
+**Meta Business Manager Setup**:
+1. Create a Meta Business account at business.facebook.com
+2. Set up WhatsApp Business API
+3. Create message templates:
+   - `membership_card_notification` - For card notifications
+   - Template must have 3 body parameters: {member_name}, {membership_id}, {membership_type}
+4. Get the Phone ID and Access Token from WhatsApp Settings
+5. Add environment variables to Vercel/hosting
+
+**Template Message Format**:
+```
+🎉 Welcome to NEP!
+
+Dear {{1}},
+
+Your membership is confirmed!
+
+📋 Membership ID: {{2}}
+🏷️ Type: {{3}}
+
+Visit our website to download your digital membership card.
+
+Jai Hind! 🇮🇳
+```
+
+---
+
 ## Critical Bug Fixes (Dec 17, 2025 - Evening Session)
 
 ### 3 Major Bugs Fixed

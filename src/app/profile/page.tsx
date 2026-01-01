@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFirebase, useDoc } from '@/firebase';
 import { doc, Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { User, ShieldCheck, Hourglass, AlertTriangle, Edit, FileImage, FileText } from 'lucide-react';
+import { User, ShieldCheck, Hourglass, AlertTriangle, Edit, FileImage, FileText, MessageCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import NEPCard from '@/components/NEPCard';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useToast } from '@/hooks/use-toast';
 
 // This interface matches the component's expectations
 interface MemberProfile {
@@ -48,9 +49,12 @@ export default function ProfilePage() {
   const { auth, user, firestore } = useFirebase();
   const router = useRouter();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const cardRef = useRef<HTMLDivElement>(null);
+  const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
+  const [whatsAppSent, setWhatsAppSent] = useState(false);
 
-  const memberRef = useMemo(() => 
+  const memberRef = useMemo(() =>
     user ? doc(firestore, 'members', user.uid) : null
   , [user, firestore]);
 
@@ -111,6 +115,49 @@ export default function ProfilePage() {
       pdf.save(`NEP-Membership-Card-${member?.membershipId || 'card'}.pdf`);
     } catch (err) {
       console.error("Error downloading card as PDF:", err);
+    }
+  };
+
+  const sendCardToWhatsApp = async () => {
+    if (!member || sendingWhatsApp) return;
+
+    setSendingWhatsApp(true);
+    setWhatsAppSent(false);
+
+    try {
+      const response = await fetch('/api/whatsapp/send-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: member.phone,
+          memberName: member.name,
+          membershipId: member.membershipId,
+          membershipType: member.membershipType
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setWhatsAppSent(true);
+        toast({
+          title: t('profile_whatsappSuccess') || "Card Sent!",
+          description: t('profile_whatsappSuccessDesc') || "Your membership card has been sent to your WhatsApp.",
+        });
+        // Reset after 5 seconds
+        setTimeout(() => setWhatsAppSent(false), 5000);
+      } else {
+        throw new Error(result.error || 'Failed to send');
+      }
+    } catch (err: any) {
+      console.error("Error sending card to WhatsApp:", err);
+      toast({
+        title: t('profile_whatsappError') || "Failed to Send",
+        description: err.message || "Could not send card to WhatsApp. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingWhatsApp(false);
     }
   };
 
@@ -199,19 +246,45 @@ export default function ProfilePage() {
               <NEPCard member={member} />
             </div>
             <div className="flex justify-center gap-4 flex-wrap">
-              <button 
-                onClick={downloadCardAsImage} 
+              <button
+                onClick={downloadCardAsImage}
                 className="bg-primary hover:bg-primary/90 text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-lg transition shadow-md"
               >
                 <FileImage size={20} />
                 {t('profile_downloadImage')}
               </button>
-              <button 
-                onClick={downloadCardAsPDF} 
+              <button
+                onClick={downloadCardAsPDF}
                 className="bg-accent hover:bg-accent/90 text-white font-semibold flex items-center gap-2 px-6 py-3 rounded-lg transition shadow-md"
               >
                 <FileText size={20} />
                 {t('profile_downloadPDF')}
+              </button>
+              <button
+                onClick={sendCardToWhatsApp}
+                disabled={sendingWhatsApp}
+                className={`font-semibold flex items-center gap-2 px-6 py-3 rounded-lg transition shadow-md ${
+                  whatsAppSent
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-[#25D366] hover:bg-[#128C7E] text-white'
+                } disabled:opacity-70 disabled:cursor-not-allowed`}
+              >
+                {sendingWhatsApp ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    {t('profile_sendingWhatsapp') || 'Sending...'}
+                  </>
+                ) : whatsAppSent ? (
+                  <>
+                    <CheckCircle2 size={20} />
+                    {t('profile_whatsappSent') || 'Sent!'}
+                  </>
+                ) : (
+                  <>
+                    <MessageCircle size={20} />
+                    {t('profile_sendToWhatsapp') || 'Send to WhatsApp'}
+                  </>
+                )}
               </button>
             </div>
           </div>

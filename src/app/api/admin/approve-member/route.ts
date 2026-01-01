@@ -111,6 +111,33 @@ export async function POST(req: NextRequest) {
       approvedBy: 'admin', // In production, get actual admin user ID
     });
 
+    // Send membership card to WhatsApp after approval
+    try {
+      const memberPhone = memberData?.mobileNumber || memberData?.phone || memberData?.mobile;
+      const memberName = memberData?.name;
+
+      if (memberPhone && memberName) {
+        // Get base URL from request
+        const baseUrl = req.nextUrl.origin;
+
+        await fetch(`${baseUrl}/api/whatsapp/send-card`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: memberPhone,
+            memberName: memberName,
+            membershipId: membershipId,
+            membershipType: membershipType
+          })
+        });
+
+        console.log(`WhatsApp card notification sent to ${memberPhone}`);
+      }
+    } catch (whatsappError) {
+      // Don't fail the approval if WhatsApp fails
+      console.error('WhatsApp notification failed (non-critical):', whatsappError);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Member approved successfully',
