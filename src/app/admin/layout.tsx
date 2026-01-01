@@ -16,7 +16,9 @@ import {
   Home,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Newspaper,
+  Image as ImageIcon
 } from 'lucide-react';
 
 const navigation = [
@@ -39,6 +41,16 @@ const navigation = [
     name: 'Payments',
     href: '/admin/dashboard/payments',
     icon: CreditCard,
+  },
+  {
+    name: 'News',
+    href: '/admin/dashboard/news',
+    icon: Newspaper,
+  },
+  {
+    name: 'Gallery',
+    href: '/admin/dashboard/gallery',
+    icon: ImageIcon,
   },
 ];
 

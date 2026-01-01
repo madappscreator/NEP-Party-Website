@@ -152,6 +152,12 @@ export default function DashboardLayout({
             </SidebarMenuItem>
 
             <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isLinkActive('/admin/dashboard/news', false)}>
+                  <Link href="/admin/dashboard/news"><Icons.Newspaper/><span>News</span></Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
                 <SidebarMenuButton><Icons.FileText/><span>Reports</span></SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>

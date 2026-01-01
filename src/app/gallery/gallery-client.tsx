@@ -42,20 +42,31 @@ export default function GalleryClient({ albums }: { albums: Album[] }) {
             const translationKey = `gallery_album_${album.id.replace(/-/g, '_')}_name`;
             const translatedName = t(translationKey);
             const albumName = translatedName !== translationKey ? translatedName : album.name;
+            // Get a valid cover image - use album.coverImage, first media, or placeholder
+            const coverImageSrc = album.coverImage ||
+              (album.media && album.media.length > 0 ? album.media[0].url : null) ||
+              '/placeholder-album.jpg';
+
             return (
-              <Card 
-                key={album.id} 
+              <Card
+                key={album.id}
                 className="group cursor-pointer overflow-hidden transition-all hover:shadow-xl"
                 onClick={() => setSelectedAlbum(album)}
               >
                 <CardContent className="p-0 aspect-video relative">
-                  <Image
-                    src={album.coverImage}
-                    alt={albumName}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    data-ai-hint={album.coverImageHint}
-                  />
+                  {coverImageSrc ? (
+                    <Image
+                      src={coverImageSrc}
+                      alt={albumName}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      data-ai-hint={album.coverImageHint}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <ImageIcon className="w-12 h-12 text-gray-400" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors" />
                   <div className="absolute bottom-4 left-4">
                     <h3 className="text-xl font-bold text-white">{albumName}</h3>
@@ -108,7 +119,7 @@ function AlbumViewer({ album, isOpen, onClose }: { album: Album; isOpen: boolean
             className="w-full"
           >
             <CarouselContent>
-              {album.media.map((media, index) => {
+              {album.media.filter(media => media.url).map((media, index) => {
                 // Use media.alt from Firestore, fall back to translation if available
                 const altKey = `gallery_album_${album.id.replace(/-/g, '_')}_media_${index}_alt`;
                 const translatedAlt = t(altKey);
