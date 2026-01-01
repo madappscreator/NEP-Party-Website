@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/carousel"
 import Image from 'next/image';
 import Autoplay from "embla-carousel-autoplay"
+import { useLanguage } from '@/context/language-context';
 
 const journeyImages = [
     {id: 'caravan-1', alt: 'NEP Caravan', hint: 'political campaign vehicle', url: '/caravan/caravan1.jpg'},
@@ -18,6 +19,7 @@ const journeyImages = [
 ];
 
 export function Journey() {
+    const { t } = useLanguage();
     const plugin = React.useRef(
         Autoplay({ delay: 3000, stopOnInteraction: true })
     )
@@ -26,7 +28,7 @@ export function Journey() {
     <section id="journey" className="bg-muted py-12 md:py-24">
        <div className="container mx-auto flex max-w-5xl flex-col items-center gap-2 text-center mb-12">
             <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Our Journey
+                {t('journey_title')}
             </h2>
       </div>
 

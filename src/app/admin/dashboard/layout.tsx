@@ -146,6 +146,12 @@ export default function DashboardLayout({
             </Collapsible>
 
             <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isLinkActive('/admin/dashboard/gallery', false)}>
+                  <Link href="/admin/dashboard/gallery"><Icons.Image/><span>Gallery</span></Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
                 <SidebarMenuButton><Icons.FileText/><span>Reports</span></SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>

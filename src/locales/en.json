@@ -19,6 +19,7 @@
     "recent_news": "Recent News",
     "view_all_news": "View All News"
   },
+  "journey_title": "Our Journey",
   "hero_badge": "Serving Those Who Served",
   "hero_title": "National Ex Servicemen Party",
   "hero_subtitle": "This party is not only for ex-servicemen but entirely for the general public. We welcome everyone who wishes to serve the nation.",
@@ -315,13 +316,12 @@
   "gallery_album_protests_name": "Protests",
   "gallery_album_protests_desc": "Documentation of peaceful protests and rallies.",
 
-  "wings_title": "Our Wings",
-  "wings_subtitle": "Unite with our specialized wings focused on different sectors and communities",
-  "wings_join_this_wing": "Join This Wing",
-  "wings_cta_title": "Join Our Wings",
-  "wings_cta_subtitle": "Find the wing that matches your interests and expertise. Together, we can make a difference.",
-  "wings_cta_button": "View All Wings",
-  
+  "gallery_album_meeting_with_naam_tamilar_katchi_name": "Meeting with Naam Tamilar Katchi",
+  "gallery_album_meeting_with_naam_tamilar_katchi_desc": "Alliance discussions with Naam Tamilar Katchi leadership.",
+
+  "gallery_album_other_party_contributions_name": "Other Party Contributions",
+  "gallery_album_other_party_contributions_desc": "Collaborative events and contributions with allied parties.",
+
   "wings_lawyers_wing_name": "Lawyers Wing",
   "wings_lawyers_wing_description": "Supports legal awareness, justice delivery, and constitutional rights. Works towards legal reforms and free legal guidance for citizens.",
   
@@ -340,9 +340,8 @@
   "wings_doctors_wing_name": "Doctors Wing",
   "wings_doctors_wing_description": "Supports healthcare reforms and public health awareness. Encourages accessible and ethical medical services for all.",
   
-  "wings_ex_servicemen_wing_name": "Ex-Servicemen Wing",
   "wings_ex_servicemen_wing_description": "Represents veterans of the armed forces and their families. Focuses on welfare, re-employment, and dignity for retired personnel.",
-  
+
   "wings_sanitation_workers_wing_name": "Sanitation Workers Wing",
   "wings_sanitation_workers_wing_description": "Advocates dignity, safety, and rights of sanitation workers. Supports improved working conditions and social recognition.",
   
@@ -353,8 +352,8 @@
   "wings_workers_wing_description": "Represents workers across sectors and industries. Focuses on fair wages, safety, and labor rights.",
   
   "wings_motor_vehicle_drivers_wing_name": "Motor Vehicle Drivers Wing",
+  "wings_motor_vehicle_drivers_wing_description": "Supports livelihood, safety, and rights of drivers. Advocates for better infrastructure and fair regulations.",
   "wings_women_wing_description": "Empowers women in leadership, governance, and society. Works towards safety, equality, and economic independence.",
-  "wings_youth_wing_name": "Youth Wing",
   "wings_youth_wing_description": "Engages young citizens in politics and public service. Focuses on leadership, employment, and nation-building initiatives.",
   "card": {
     "partyName": "National Ex Servicemen Party",

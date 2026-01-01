@@ -18,13 +18,24 @@ service cloud.firestore {
 
     /**
      * Checks if the authenticated user has administrative privileges.
+     * Uses email-based check first (no Firestore read needed), then falls back to admins collection.
      */
     function isAdmin() {
-      // Allow hardcoded super admin and users in the 'admins' collection
       return isSignedIn() && (
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        request.auth.uid == 'Bb7jPb8p6sW8EfP0MxXce3s8qSs2'
+        // Primary check: email-based admin (no Firestore read required)
+        request.auth.token.email == 'allindianep@gmail.com' ||
+        // Hardcoded super admin UID
+        request.auth.uid == 'Bb7jPb8p6sW8EfP0MxXce3s8qSs2' ||
+        // Fallback: check admins collection
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
+    }
+
+    /**
+     * Simplified admin check that only uses email (for bootstrap scenarios)
+     */
+    function isAdminByEmail() {
+      return isSignedIn() && request.auth.token.email == 'allindianep@gmail.com';
     }
 
     /**
@@ -64,7 +75,9 @@ service cloud.firestore {
     }
 
     match /admins/{adminId} {
-      allow read, list, create, update, delete: if isAdmin();
+      // Allow email-based admin to bootstrap the admins collection
+      allow read, list: if isAdminByEmail() || isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     match /news_articles/{newsArticleId} {
@@ -76,9 +89,15 @@ service cloud.firestore {
     match /counters/{counterId} {
       allow read, write: if isAdmin();
     }
-    
+
     match /membershipCounters/{counterId} {
         allow read, write: if isAdmin();
+    }
+
+    // Gallery collection - public read, admin write
+    match /gallery/{albumId} {
+      allow read: if true;  // Public can view gallery albums
+      allow create, update, delete: if isAdmin();
     }
   }
 }

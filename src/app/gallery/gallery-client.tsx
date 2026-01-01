@@ -38,7 +38,10 @@ export default function GalleryClient({ albums }: { albums: Album[] }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {albums.map((album) => {
             const { imageCount } = getMediaCounts(album);
-            const albumName = t(`gallery_album_${album.id.replace(/-/g, '_')}_name`) || album.name;
+            // Try translation first, but use album.name from Firestore if translation key is returned
+            const translationKey = `gallery_album_${album.id.replace(/-/g, '_')}_name`;
+            const translatedName = t(translationKey);
+            const albumName = translatedName !== translationKey ? translatedName : album.name;
             return (
               <Card 
                 key={album.id} 
@@ -80,8 +83,14 @@ export default function GalleryClient({ albums }: { albums: Album[] }) {
 
 function AlbumViewer({ album, isOpen, onClose }: { album: Album; isOpen: boolean; onClose: () => void; }) {
   const { t } = useLanguage();
-  const albumName = t(`gallery_album_${album.id.replace(/-/g, '_')}_name`) || album.name;
-  const albumDescription = t(`gallery_album_${album.id.replace(/-/g, '_')}_desc`) || '';
+
+  // Use Firestore album name/description, fall back to translation only if available
+  const nameKey = `gallery_album_${album.id.replace(/-/g, '_')}_name`;
+  const descKey = `gallery_album_${album.id.replace(/-/g, '_')}_desc`;
+  const translatedName = t(nameKey);
+  const translatedDesc = t(descKey);
+  const albumName = translatedName !== nameKey ? translatedName : album.name;
+  const albumDescription = translatedDesc !== descKey ? translatedDesc : (album.description || '');
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -100,14 +109,17 @@ function AlbumViewer({ album, isOpen, onClose }: { album: Album; isOpen: boolean
           >
             <CarouselContent>
               {album.media.map((media, index) => {
-                const mediaAlt = t(`gallery_album_${album.id.replace(/-/g, '_')}_media_${index}_alt`) || '';
+                // Use media.alt from Firestore, fall back to translation if available
+                const altKey = `gallery_album_${album.id.replace(/-/g, '_')}_media_${index}_alt`;
+                const translatedAlt = t(altKey);
+                const mediaAlt = translatedAlt !== altKey ? translatedAlt : (media.alt || `Image ${index + 1}`);
                 return (
                   <CarouselItem key={index}>
                     <div className="aspect-video relative bg-black rounded-lg">
-                      <Image 
-                        src={media.url} 
+                      <Image
+                        src={media.url}
                         alt={mediaAlt}
-                        fill 
+                        fill
                         className="object-contain"
                         data-ai-hint={media.hint}
                       />
