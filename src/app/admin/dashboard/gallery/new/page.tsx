@@ -17,6 +17,9 @@ export default function NewAlbumPage() {
     setIsLoading(true);
     setError(null);
     try {
+      // Use custom date if provided
+      const customDate = formData.albumDate ? new Date(formData.albumDate) : undefined;
+
       // Create the album first
       const newAlbumId = await createGalleryAlbum({
         name: formData.name,
@@ -24,7 +27,7 @@ export default function NewAlbumPage() {
         coverImage: '',
         coverImageHint: formData.name,
         media: []
-      });
+      }, customDate);
 
       // Redirect to edit page where user can upload images
       router.push(`/admin/dashboard/gallery/${newAlbumId}`);

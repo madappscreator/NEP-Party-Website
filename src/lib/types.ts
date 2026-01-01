@@ -81,6 +81,8 @@ export type Album = {
   coverImage: string;
   coverImageHint: string;
   media: AlbumMedia[];
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type Wing = {

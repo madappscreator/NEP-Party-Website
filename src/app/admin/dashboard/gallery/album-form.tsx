@@ -5,8 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { uploadGalleryImage } from '@/lib/gallery-service';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, CalendarIcon } from 'lucide-react';
+
+// Helper to format date for input
+const formatDateForInput = (date: Date | string | null | undefined): string => {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toISOString().split('T')[0];
+};
 
 interface AlbumFormProps {
   initialData?: {
@@ -14,6 +22,7 @@ interface AlbumFormProps {
     description: string;
     coverImage: string;
     media: Array<{ url: string; alt: string; hint: string; type: 'image' | 'video' }>;
+    createdAt?: Date | string;
   };
   onSubmit: (data: any) => Promise<void>;
   isLoading?: boolean;
@@ -25,7 +34,8 @@ export function AlbumForm({ initialData, onSubmit, isLoading = false, albumId }:
     name: initialData?.name || '',
     description: initialData?.description || '',
     coverImage: initialData?.coverImage || '',
-    media: initialData?.media || []
+    media: initialData?.media || [],
+    albumDate: formatDateForInput(initialData?.createdAt)
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +82,12 @@ export function AlbumForm({ initialData, onSubmit, isLoading = false, albumId }:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await onSubmit(formData);
+      // Convert date string to Date object for submission
+      const submitData = {
+        ...formData,
+        albumDate: formData.albumDate ? new Date(formData.albumDate) : undefined
+      };
+      await onSubmit(submitData);
     } catch (err) {
       setError('Failed to save album');
       console.error(err);
@@ -111,6 +126,23 @@ export function AlbumForm({ initialData, onSubmit, isLoading = false, albumId }:
               placeholder="Describe this album..."
               rows={3}
             />
+          </div>
+          <div>
+            <Label htmlFor="albumDate" className="flex items-center gap-2 mb-2">
+              <CalendarIcon className="w-4 h-4" />
+              Album Date
+            </Label>
+            <Input
+              id="albumDate"
+              name="albumDate"
+              type="date"
+              value={formData.albumDate}
+              onChange={handleInputChange}
+              className="max-w-xs"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Set the date for this album (useful for old photos/events)
+            </p>
           </div>
         </CardContent>
       </Card>

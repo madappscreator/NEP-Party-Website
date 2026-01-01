@@ -65,7 +65,21 @@ export async function getGalleryAlbum(albumId: string): Promise<Album | null> {
     const docRef = doc(db, GALLERY_COLLECTION, albumId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as Album;
+      const data = docSnap.data();
+      // Convert Firestore timestamp to Date if needed
+      const createdAt = data.createdAt instanceof Date
+        ? data.createdAt
+        : data.createdAt?.toDate?.() || (data.createdAt?.seconds ? new Date(data.createdAt.seconds * 1000) : undefined);
+      const updatedAt = data.updatedAt instanceof Date
+        ? data.updatedAt
+        : data.updatedAt?.toDate?.() || (data.updatedAt?.seconds ? new Date(data.updatedAt.seconds * 1000) : undefined);
+
+      return {
+        id: docSnap.id,
+        ...data,
+        createdAt,
+        updatedAt
+      } as Album;
     }
     return null;
   } catch (error) {
@@ -78,12 +92,16 @@ export async function getGalleryAlbum(albumId: string): Promise<Album | null> {
  * Create a new gallery album
  */
 export async function createGalleryAlbum(
-  album: Omit<GalleryAlbum, 'id' | 'createdAt' | 'updatedAt'>
+  album: Omit<GalleryAlbum, 'id' | 'createdAt' | 'updatedAt'>,
+  customDate?: Date
 ): Promise<string> {
   try {
+    // Use custom date if provided, otherwise use current date
+    const albumDate = customDate || new Date();
+
     const docRef = await addDoc(collection(db, GALLERY_COLLECTION), {
       ...album,
-      createdAt: new Date(),
+      createdAt: albumDate,
       updatedAt: new Date()
     });
     return docRef.id;
@@ -98,14 +116,22 @@ export async function createGalleryAlbum(
  */
 export async function updateGalleryAlbum(
   albumId: string,
-  data: Partial<Omit<GalleryAlbum, 'id' | 'createdAt'>>
+  data: Partial<Omit<GalleryAlbum, 'id' | 'createdAt'>>,
+  customDate?: Date
 ): Promise<void> {
   try {
     const docRef = doc(db, GALLERY_COLLECTION, albumId);
-    await updateDoc(docRef, {
+    const updateData: any = {
       ...data,
       updatedAt: new Date()
-    });
+    };
+
+    // Update createdAt if custom date is provided
+    if (customDate) {
+      updateData.createdAt = customDate;
+    }
+
+    await updateDoc(docRef, updateData);
   } catch (error) {
     console.error('Error updating gallery album:', error);
     throw error;

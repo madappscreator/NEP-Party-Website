@@ -44,13 +44,16 @@ export default function EditAlbumPage({ params }: EditAlbumPageProps) {
   const handleSubmit = async (data: any) => {
     setSaving(true);
     try {
+      // Use custom date if provided
+      const customDate = data.albumDate ? new Date(data.albumDate) : undefined;
+
       await updateGalleryAlbum(albumId, {
         name: data.name,
         description: data.description,
         coverImage: data.media[0]?.url || data.coverImage || '',
         coverImageHint: data.name,
         media: data.media
-      });
+      }, customDate);
       router.push('/admin/dashboard/gallery');
     } catch (err) {
       setError('Failed to update album');
@@ -112,7 +115,8 @@ export default function EditAlbumPage({ params }: EditAlbumPageProps) {
             name: album.name,
             description: album.description || '',
             coverImage: album.coverImage || '',
-            media: album.media || []
+            media: album.media || [],
+            createdAt: album.createdAt
           }}
           onSubmit={handleSubmit}
           isLoading={saving}
