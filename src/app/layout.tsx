@@ -1,6 +1,7 @@
 
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Header } from '@/app/components/layout/header';
@@ -71,6 +72,7 @@ export default function RootLayout({
             <Toaster />
           </LanguageProvider>
         </FirebaseClientProvider>
+        <SpeedInsights />
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="afterInteractive"
