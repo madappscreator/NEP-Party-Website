@@ -1,4 +1,4 @@
-
+﻿
 
 import type { NavItem, Language, ManifestoPoint, Member, Donation, Album, Wing, PendingPayment } from './types';
 
@@ -130,7 +130,7 @@ export const OUR_PROMISE_POINTS: ManifestoPoint[] = [
   export const OUR_WINGS_PREVIEW = [
     'Ex-Servicemen Wing',
     'Youth Wing',
-    'Women’s Wing',
+    'Womens Wing',
     'Farmers Wing',
     'Students Wing',
     'Teachers Wing',
@@ -237,12 +237,12 @@ export const WINGS_DATA: Wing[] = [
   },
   {
     name: 'Farmers Wing',
-    description: 'Represents farmers’ welfare, fair pricing, and agricultural sustainability. Focuses on rural development and food security.',
+    description: 'Represents farmer welfare, fair pricing, and agricultural sustainability. Focuses on rural development and food security.',
     icon: 'Tractor',
   },
   {
     name: 'Auto Drivers Wing',
-    description: 'Advocates for auto drivers’ rights, safety, and economic stability. Addresses licensing, welfare schemes, and daily operational challenges.',
+    description: 'Advocates for auto driver rights, safety, and economic stability. Addresses licensing, welfare schemes, and daily operational challenges.',
     icon: 'Car',
   },
   {
@@ -341,3 +341,4 @@ export const WINGS_DATA: Wing[] = [
     icon: 'Users',
   },
 ];
+
