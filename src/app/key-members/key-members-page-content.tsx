@@ -38,9 +38,6 @@ export function KeyMembersPageContent() {
             <p className="mt-4 text-lg text-muted-foreground">
               {t('key_members.under_construction')}
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t('key_members.placeholder_deprecated')}
-            </p>
           </div>
         </div>
       </section>
