@@ -1,0 +1,68 @@
+
+'use client';
+
+import * as React from 'react';
+import Link from 'next/link';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Heart, Menu, User } from 'lucide-react';
+import { NAV_LINKS } from '@/lib/constants';
+import { Logo } from './logo';
+import { useLanguage } from '@/context/language-context';
+import { LanguageSwitcher } from '../shared/language-switcher';
+
+export function MobileNav() {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { t } = useLanguage();
+
+  return (
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          className="px-2 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+        >
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Toggle Menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="pr-0">
+        <SheetHeader className="p-6 pb-0 flex flex-row justify-between items-center">
+            <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
+            <SheetDescription className="sr-only">Main menu for mobile devices</SheetDescription>
+            <Logo />
+            <LanguageSwitcher />
+        </SheetHeader>
+        <div className="flex flex-col h-full mt-8 px-6">
+          <div className="flex flex-col space-y-3">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className="text-lg font-medium"
+              >
+                {t(`nav_${link.label.toLowerCase().replace(/ /g, '_')}`)}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-auto flex flex-col gap-4 py-4">
+             <Button asChild className="w-full" variant="outline">
+                <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <User className="mr-2 h-4 w-4" />{t('Member Login')}
+                </Link>
+            </Button>
+             <Button asChild className="w-full" variant="outline" >
+                <Link href="/donate" onClick={() => setIsOpen(false)} className="border-primary text-primary hover:bg-primary/5 hover:text-primary">
+                    <Heart className="mr-2 h-4 w-4 fill-primary" />{t('nav_donate')}
+                </Link>
+            </Button>
+            <Button asChild className="w-full" style={{backgroundColor: '#FF7A00'}}>
+                <Link href="/register" onClick={() => setIsOpen(false)}>{t('join_party')}</Link>
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

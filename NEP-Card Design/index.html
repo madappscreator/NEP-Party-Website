@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NESP Official ID Card</title>
+    <!-- Importing a font that supports Tamil, Hindi, and other Indian languages -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="lang-picker">
+        <label for="lang-select">Language:</label>
+        <select id="lang-select">
+            <option value="en">English</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ml">മലയാളം (Malayalam)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        </select>
+    </div>
+
+    <!-- FRONT SIDE -->
+    <div class="id-card front">
+        <div class="top-row">
+            <img src="netaji.png" class="top-icon-left" alt="Netaji">
+            <div class="party-title-container">
+                <p class="slogan-top" data-i18n="slogan_top">பாரத எல்லையைக் காத்தோம், இனி மக்களை காப்போம்.</p>
+                <h1 class="party-name" data-i18n="party_name">தேசிய முன்னாள் இராணுவ வீரர்கள் கட்சி NATIONAL EX SERVICEMEN PARTY (NEP)</h1>
+                <h2 class="card-type" data-i18n="card_type">உறுப்பினர் அட்டை / MEMBERSHIP CARD</h2>
+            </div>
+        </div>
+
+        <div class="middle-row">
+            <div class="info-fields">
+                <div class="field">
+                    <span class="label" data-i18n="label_name">பெயர் / Name</span>
+                    <span class="value">: JOHN DOE</span>
+                </div>
+                <div class="field">
+                    <span class="label" data-i18n="label_father">த/க பெயர் / Father's Name</span>
+                    <span class="value">: MICHAEL DOE</span>
+                </div>
+                <div class="field">
+                    <span class="label" data-i18n="label_id">எண் / ID No</span>
+                    <span class="value">: NEP-2025-100001</span>
+                </div>
+            </div>
+            <div class="member-photo-box">
+                <img src="member.jpeg" class="member-photo" alt="Member">
+            </div>
+        </div>
+
+        <div class="bottom-banner">
+            <img src="logo.jpg" class="bottom-logo" alt="Logo">
+            <p class="bottom-slogan" data-i18n="bottom_slogan">பிறப்பொக்கும் எல்லா உயிர்க்கும் - Discipline, Integrity, Service</p>
+        </div>
+    </div>
+
+    <!-- BACK SIDE -->
+    <div class="id-card back">
+        <div class="back-top-text">
+            <p data-i18n="back_top_text">இலக்கு ஒன்றுதான் இனத்தின் விடுதலை!</p>
+        </div>
+
+        <div class="back-details">
+            <div class="qr-section">
+                <img src="qr_code.png" class="qr-code">
+            </div>
+            <div class="address-fields">
+                <p><strong data-i18n="label_district">জেলা / District:</strong> <span data-i18n="district">Chennai</span></p>
+                <p><strong data-i18n="label_state">রাজ্য / State:</strong> <span data-i18n="state">Tamil Nadu</span></p>
+                <p><strong data-i18n="label_constitution">সংবিধান / Constitution:</strong> <span data-i18n="constitution">Indian Constitution</span></p>
+                <p><strong data-i18n="label_address">முகவரி / Address:</strong></p>
+                <div class="address-text" data-i18n="office_address">National Ex-Servicemen Party<br>A4, Vishwaa Pride Apartment, Nookampalayam Main Road,<br>Perumbakkam, Chennai - 600100, Tamil Nadu, India</div>
+            </div>
+        </div>
+
+        <div class="signature-section">
+            <div class="sig-container">
+                <img src="signature.png" class="signature-img">
+                <p class="sig-label" data-i18n="sig_label">தலைமை ஒருங்கிணைப்பாளர் / President</p>
+            </div>
+        </div>
+
+        <div class="footer-contact">
+            <div class="contact-grid">
+                <div class="contact-item"><strong data-i18n="label_phone">Phone</strong>: <span data-i18n="phone">+91 91761 01115, +91 91761 02229</span></div>
+                <div class="contact-item"><strong data-i18n="label_email">Email</strong>: <span data-i18n="email">allindianep@gmail.com</span></div>
+                <div class="contact-item"><strong data-i18n="label_website">Website</strong>: <span data-i18n="website">www.allindianep.com</span></div>
+            </div>
+            <p class="office-address-small" data-i18n="office_address_short">National Ex-Servicemen Party — A4, Vishwaa Pride Apartment, Nookampalayam Main Road, Perumbakkam, Chennai - 600100</p>
+            <div class="social-links" aria-label="social links">
+                <a href="https://facebook.com/NationalExServicemenParty" target="_blank" rel="noopener" aria-label="Facebook">
+                    <!-- Facebook SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M22 12C22 6.48 17.52 2 12 2S2 6.48 2 12c0 5 3.66 9.12 8.44 9.88v-6.99H7.9v-2.89h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.45h-1.25c-1.23 0-1.61.77-1.61 1.56v1.87h2.74l-.44 2.89h-2.3V21.9C18.34 21.12 22 17 22 12z"/></svg>
+                </a>
+                <a href="https://twitter.com/NationalExServ" target="_blank" rel="noopener" aria-label="Twitter">
+                    <!-- Twitter SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.26 4.26 0 0 0 1.88-2.36 8.5 8.5 0 0 1-2.7 1.03 4.24 4.24 0 0 0-7.22 3.86A12.02 12.02 0 0 1 3.15 4.6a4.24 4.24 0 0 0 1.31 5.66 4.2 4.2 0 0 1-1.92-.53v.05a4.24 4.24 0 0 0 3.4 4.16c-.45.12-.92.18-1.4.18-.34 0-.68-.03-1.01-.1a4.25 4.25 0 0 0 3.96 2.95A8.5 8.5 0 0 1 2 19.54a12 12 0 0 0 6.5 1.9c7.79 0 12.06-6.45 12.06-12.05l-.01-.55A8.6 8.6 0 0 0 22.46 6z"/></svg>
+                </a>
+                <a href="https://instagram.com/NationalExServicemenParty" target="_blank" rel="noopener" aria-label="Instagram">
+                    <!-- Instagram SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 11.37 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>
+                </a>
+            </div>
+            <p class="social-icons"> @NationalExServicemenParty</p>
+        </div>
+        <img src="president.png" class="president-portrait" alt="President">
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                slogan_top: 'Once a Soldier, Always a Servant of the Nation',
+                party_name: 'NATIONAL EX SERVICEMEN PARTY',
+                card_type: 'Membership Card',
+                label_name: 'Name',
+                label_father: "Father's Name",
+                label_id: 'ID No',
+                bottom_slogan: 'Discipline, Integrity, Service',
+                back_top_text: 'One goal: Freedom and Service to the Nation!',
+                label_district: 'District:',
+                district: 'Chennai',
+                label_state: 'State:',
+                state: 'Tamil Nadu',
+                label_constitution: 'Constitution:',
+                constitution: 'Indian Constitution',
+                label_address: 'Address:',
+                office_address: 'National Ex-Servicemen Party\nA4, Vishwaa Pride Apartment, Nookampalayam Main Road,\nPerumbakkam, Chennai - 600100, Tamil Nadu, India',
+                sig_label: 'President',
+                label_phone: 'Phone',
+                phone: '+91 91761 01115, +91 91761 02229',
+                label_email: 'Email',
+                email: 'allindianep@gmail.com',
+                label_website: 'Website',
+                website: 'www.allindianep.com',
+                office_address_short: 'National Ex-Servicemen Party — A4, Vishwaa Pride Apartment, Nookampalayam Main Road, Perumbakkam, Chennai - 600100'
+            },
+            ta: {
+                slogan_top: 'பாரத எல்லையைக் காத்தோம், இனி மக்களை காப்போம்.',
+                party_name: 'தேசிய முன்னாள் இராணுவ வீரர்கள் கட்சி NATIONAL EX SERVICEMEN PARTY (NEP)',
+                card_type: 'உறுப்பினர் அட்டை',
+                label_name: 'பெயர்',
+                label_father: 'தந்தையின் பெயர்',
+                label_id: 'அடையாள எண்',
+                bottom_slogan: 'அரும்பு, நேர்மை, சேவை',
+                back_top_text: 'ஒரே இலக்கு: விடுதலை மற்றும் நாட்டிற்கான சேவை!',
+                label_district: 'மாவட்டம்:',
+                district: 'சென்னை',
+                label_state: 'மாநிலம்:',
+                state: 'தமிழ்நாடு',
+                label_constitution: 'அரசியல் சாசனம்:',
+                constitution: 'இந்திய அரசியல் சாசனம்',
+                label_address: 'முகவரி:',
+                office_address: 'நேஷனல் எக்ஸ்-சேவிஸ்மென் பார்டி\nA4, விஷ்வா பிரைட் அபார்ட்மெண்ட், நூகம்பாளையம் மென் ரோடு,\nபெரும்பாக்கம், சென்னை - 600100, தமிழ்நாடு, இந்தியா',
+                sig_label: 'தலைவர்',
+                label_phone: 'தொலைபேசி',
+                phone: '+91 91761 01115, +91 91761 02229',
+                label_email: 'மின்னஞ்சல்',
+                email: 'allindianep@gmail.com',
+                label_website: 'இணையதளம்',
+                website: 'www.allindianep.com',
+                office_address_short: 'நேஷனல் எக்ஸ்-சேவிஸ்மென் பார்டி — A4, விஷ்வா பிரைட் அபார்ட்மெண்ட், பெரும்பாக்கம், சென்னை - 600100'
+            },
+            hi: {
+                slogan_top: 'एक सैनिक, हमेशा राष्ट्र का सेवक',
+                party_name: 'नेशनल एक्स-सर्विसमेन पार्टी',
+                card_type: 'सदस्यता पत्र',
+                label_name: 'नाम',
+                label_father: 'पिता का नाम',
+                label_id: 'आईडी नंबर',
+                bottom_slogan: 'अनुशासन, ईमानदारी, सेवा',
+                back_top_text: 'एक लक्ष्य: राष्ट्र की आज़ादी और सेवा!',
+                label_district: 'ज़िला:',
+                district: 'चेन्नई',
+                label_state: 'राज्य:',
+                state: 'तमिलनाडु',
+                label_constitution: 'संविधान:',
+                constitution: 'भारतीय संविधान',
+                label_address: 'पता:',
+                office_address: 'नेशनल एक्स-सर्विसमेन पार्टी\nA4, Vishwaa Pride Apartment, Nookampalayam Main Road,\nPerumbakkam, Chennai - 600100, Tamil Nadu, India',
+                sig_label: 'अध्यक्ष',
+                label_phone: 'फोन',
+                phone: '+91 91761 01115, +91 91761 02229',
+                label_email: 'ईमेल',
+                email: 'allindianep@gmail.com',
+                label_website: 'वेबसाइट',
+                website: 'www.allindianep.com',
+                office_address_short: 'नेशनल एक्स-सर्विसमेन पार्टी — A4, Vishwaa Pride Apartment, Perumbakkam, Chennai - 600100'
+            },
+            te: {
+                slogan_top: 'ఒక సైనికుడైతే, ఎప్పుడూ దేశ సేవకుడు',
+                party_name: 'నేషనల్ ఎక్స్-సర్వీస్మెన్ పార్టీ',
+                card_type: 'సభ్యత్వ కార్డు',
+                label_name: 'పేరు',
+                label_father: 'తండ్రి పేరు',
+                label_id: 'ఐడి నం',
+                bottom_slogan: 'శ్రద్ధ, నిజాయితీ, సేవ',
+                back_top_text: 'ఒక లక్ష్యం: స్వాతంత్ర్యం మరియు దేశ సేవ!',
+                label_district: 'జిల్లా:',
+                district: 'చెన్నై',
+                label_state: 'రాష్ట్రం:',
+                state: 'తమిళనాడు',
+                label_constitution: 'రూపాయ్యచే:',
+                constitution: 'భారత రూపాయ్య',
+                label_address: 'చిరునామా:',
+                office_address: 'నేషనల్ ఎక్స్-సర్వీస్మెన్ పార్టీ\nA4, Vishwaa Pride Apartment, Nookampalayam Main Road,\nPerumbakkam, Chennai - 600100, Tamil Nadu, India',
+                sig_label: ' అధ్యక్షుడు',
+                label_phone: 'ఫోన్',
+                phone: '+91 91761 01115, +91 91761 02229',
+                label_email: 'ఇమెయిల్',
+                email: 'allindianep@gmail.com',
+                label_website: 'వెబ్‌సైట్',
+                website: 'www.allindianep.com',
+                office_address_short: 'నేషనల్ ఎక్స్-సర్వీస్మెన్ పార్టీ — A4, Vishwaa Pride Apartment, Perumbakkam, Chennai - 600100'
+            },
+            ml: {
+                slogan_top: 'ഒരു സൈനികൻ ആണെങ്കിൽ, എല്ലായ്പ്പോഴും ദേശത്തിന്റെ സേവകൻ',
+                party_name: 'നാഷണൽ എക്‌സ്-സെർവീസ്മെൻ പാർട്ടി',
+                card_type: 'എല്ലാം മെമ്പർഷിപ്പ് കാർഡ്',
+                label_name: 'പേര്',
+                label_father: 'പിതാവിന്റെ പേര്',
+                label_id: 'ഐഡി നമ്പർ',
+                bottom_slogan: 'ശിഷ്യത്വം, നൈതികത, സേവനം',
+                back_top_text: 'ഒറ്റ ലക്ഷ്യം: സ്വാതന്ത്ര്യവും രാജ്യസേവനവും!',
+                label_district: 'ജില്ല:',
+                district: 'ചെന്നൈ',
+                label_state: 'സംസ്ഥാനം:',
+                state: 'തമിഴ്നാട്',
+                label_constitution: 'ഭരണഘടന:',
+                constitution: 'ഇന്ത്യൻ ഭരണഘടന',
+                label_address: 'വിലാസം:',
+                office_address: 'നാഷണൽ എക്‌സ്-സെർവീസ്മെൻ പാർട്ടി\nA4, Vishwaa Pride Apartment, Nookampalayam Main Road,\nPerumbakkam, Chennai - 600100, Tamil Nadu, India',
+                sig_label: 'പ്രസ Ident',
+                label_phone: 'ഫോൺ',
+                phone: '+91 91761 01115, +91 91761 02229',
+                label_email: 'ഇമെയിൽ',
+                email: 'allindianep@gmail.com',
+                label_website: 'വെബ്‌സൈറ്റ്',
+                website: 'www.allindianep.com',
+                office_address_short: 'നാഷണൽ എക്‌സ്-സെർവീസ്മെൻ പാർട്ടി — A4, Vishwaa Pride Apartment, Perumbakkam, Chennai - 600100'
+            },
+            kn: {
+                slogan_top: 'ಒಬ್ಬ ಉಭಯ, ಯಾವಾಗಲೂ ರಾಷ್ಟ್ರದ ಸೇವಕ',
+                party_name: 'ನ್ಯಾಷನಲ್ ಎಕ್ಸ್-ಸರ್ವೀಸ್‌ಮನ್ ಪಕ್ಷ',
+                card_type: 'ಸದಸ್ಯತಾ ಕಾರ್ಡು',
+                label_name: 'ಹೆಸರು',
+                label_father: 'ತಂದೆ ಹೆಸರು',
+                label_id: 'ಐಡಿ ಸಂಖ್ಯೆ',
+                bottom_slogan: 'ಶಿಸ್ತಿನತೆ, ಪ್ರಾಮಾಣಿಕತೆ, ಸೇವೆ',
+                back_top_text: 'ಒಂದು ಗುರಿ: ಸ್ವಾತಂತ್ರ್ಯ ಮತ್ತು ರಾಷ್ಟ್ರ ಸೇವೆ!',
+                label_district: 'ಜಿಲ್ಲೆ:',
+                district: 'ಚೆನ್ನೈ',
+                label_state: 'ರಾಜ್ಯ:',
+                state: 'ತಮಿಳುನಾಡು',
+                label_constitution: 'ಸಂವಿಧಾನ:',
+                constitution: 'ಭಾರತೀಯ ಸಂವಿಧಾನ',
+                label_address: 'ವಿಳಾಸ:',
+                office_address: 'ನ್ಯಾಷನಲ್ ಎಕ್ಸ್-ಸರ್ವೀಸ್‌ಮನ್ ಪಕ್ಷ\nA4, Vishwaa Pride Apartment, Nookampalayam Main Road,\nPerumbakkam, Chennai - 600100, Tamil Nadu, India',
+                sig_label: 'ಪ್ರೆಸಿಡೆಂಟ್',
+                label_phone: 'ಫೋನ್',
+                phone: '+91 91761 01115, +91 91761 02229',
+                label_email: 'ಇಮೇಲ್',
+                email: 'allindianep@gmail.com',
+                label_website: 'ವೆಬ್‌ಸೈಟ್',
+                website: 'www.allindianep.com',
+                office_address_short: 'ನ್ಯಾಷನಲ್ ಎಕ್ಸ್-ಸರ್ವೀಸ್‌ಮನ್ ಪಕ್ಷ — A4, Vishwaa Pride Apartment, Perumbakkam, Chennai - 600100'
+            }
+        };
+
+        function applyLanguage(lang) {
+            const map = translations[lang] || translations.en;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (!key) return;
+                const value = map[key];
+                if (value === undefined) return;
+                if (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea') {
+                    el.value = value;
+                } else {
+                    // preserve line breaks for addresses
+                    if (key.includes('address')) {
+                        el.innerHTML = value.replace(/\n/g, '<br>');
+                    } else {
+                        el.textContent = value;
+                    }
+                }
+            });
+        }
+
+        const select = document.getElementById('lang-select');
+        select.addEventListener('change', (e) => applyLanguage(e.target.value));
+        // Set default language to English
+        applyLanguage('en');
+    </script>
+</body>
+</html>

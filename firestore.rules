@@ -1,0 +1,103 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the authenticated user has administrative privileges.
+     * Uses email-based check first (no Firestore read needed), then falls back to admins collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && (
+        // Primary check: email-based admin (no Firestore read required)
+        request.auth.token.email == 'allindianep@gmail.com' ||
+        // Hardcoded super admin UID
+        request.auth.uid == 'Bb7jPb8p6sW8EfP0MxXce3s8qSs2' ||
+        // Fallback: check admins collection
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    /**
+     * Simplified admin check that only uses email (for bootstrap scenarios)
+     */
+    function isAdminByEmail() {
+      return isSignedIn() && request.auth.token.email == 'allindianep@gmail.com';
+    }
+
+    /**
+     * Validates that the incoming data for a member document is being created by the owner.
+     */
+    function isCreatingOwnMemberDocument(userId) {
+      let isOwner = request.auth.uid == userId;
+      let isNewDoc = !exists(/databases/$(database)/documents/members/$(userId));
+      return isOwner && isNewDoc;
+    }
+
+    // --------------------------------------------------------------------------
+    // Collection Rules
+    // --------------------------------------------------------------------------
+
+    match /members/{memberId} {
+      allow get: if isOwner(memberId) || isAdmin();
+      allow list: if isAdmin();
+      // Allow creation only if the user is creating their own document.
+      allow create: if isCreatingOwnMemberDocument(memberId);
+      // Allow user to update their own data, and admins to update any.
+      allow update: if isOwner(memberId) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /payments/{paymentId} {
+        allow get: if isOwner(memberId) || isAdmin();
+        allow list: if isOwner(memberId) || isAdmin();
+        // Allow a user to create a payment document for themselves.
+        allow create: if isOwner(memberId);
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /donations/{donationId} {
+      allow read, write: if isSignedIn() || isAdmin();
+    }
+
+    match /admins/{adminId} {
+      // Allow email-based admin to bootstrap the admins collection
+      allow read, list: if isAdminByEmail() || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /news_articles/{newsArticleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Counters can only be read/written by admin (or via Cloud Functions with admin context)
+    match /counters/{counterId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /membershipCounters/{counterId} {
+        allow read, write: if isAdmin();
+    }
+
+    // Gallery collection - public read, admin write
+    match /gallery/{albumId} {
+      allow read: if true;  // Public can view gallery albums
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
