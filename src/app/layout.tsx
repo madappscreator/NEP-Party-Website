@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TopBar } from './components/layout/top-bar';
 import { LanguageProvider } from '@/context/language-context';
 import { FirebaseClientProvider } from '@/firebase';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'National Ex Servicemen Party',
@@ -71,6 +72,7 @@ export default function RootLayout({
             <Toaster />
           </LanguageProvider>
         </FirebaseClientProvider>
+        <SpeedInsights />
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="afterInteractive"
